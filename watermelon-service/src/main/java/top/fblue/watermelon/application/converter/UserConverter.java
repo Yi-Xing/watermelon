@@ -1,9 +1,8 @@
-package top.fblue.watermelon.infrastructure.converter;
+package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.vo.UserVO;
-import top.fblue.watermelon.domain.user.entity.Email;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
@@ -22,8 +21,11 @@ public class UserConverter {
         User user = new User();
         user.setId(po.getId());
         user.setUsername(po.getName());
-        user.setEmail(new Email(po.getEmail()));
+        user.setEmail(po.getEmail());
         user.setPassword(po.getPassword());
+        user.setPhone(po.getPhone());
+        user.setState(po.getState());
+        user.setRemark(po.getRemark());
         user.setActive(po.getState() == 1);
         return user;
     }
@@ -39,7 +41,9 @@ public class UserConverter {
         po.setName(domain.getUsername());
         po.setEmail(domain.getEmail());
         po.setPassword(domain.getPassword());
-        po.setState(domain.isActive() ? 1 : 2);
+        po.setPhone(domain.getPhone());
+        po.setState(domain.getState());
+        po.setRemark(domain.getRemark());
         return po;
     }
     
@@ -53,45 +57,23 @@ public class UserConverter {
         vo.setId(domain.getId());
         vo.setName(domain.getUsername());
         vo.setEmail(domain.getEmail());
-        vo.setState(domain.isActive() ? 1 : 2);
+        vo.setPhone(domain.getPhone());
+        vo.setState(domain.getState());
         vo.setStateDesc(domain.isActive() ? "启用" : "禁用");
+        vo.setRemark(domain.getRemark());
         return vo;
     }
     
     /**
-     * PO转VO
+     * DTO转Domain
      */
-    public UserVO toVO(UserPO po) {
-        if (po == null) return null;
-        
-        UserVO vo = new UserVO();
-        vo.setId(po.getId());
-        vo.setName(po.getName());
-        vo.setEmail(po.getEmail());
-        vo.setPhone(po.getPhone());
-        vo.setState(po.getState());
-        vo.setStateDesc(po.getState() == 1 ? "启用" : "禁用");
-        vo.setRemark(po.getRemark());
-        vo.setCreatedBy(po.getCreatedBy());
-        vo.setCreatedTime(po.getCreatedTime());
-        vo.setUpdatedBy(po.getUpdatedBy());
-        vo.setUpdatedTime(po.getUpdatedTime());
-        return vo;
-    }
-    
-    /**
-     * DTO转PO
-     */
-    public UserPO toPO(CreateUserDTO dto) {
+    public User toDomain(CreateUserDTO dto) {
         if (dto == null) return null;
         
-        UserPO po = new UserPO();
-        po.setName(dto.getName());
-        po.setEmail(dto.getEmail());
-        po.setPhone(dto.getPhone());
-        po.setPassword(dto.getPassword());
-        po.setState(dto.getState());
-        po.setRemark(dto.getRemark());
-        return po;
+        User user = new User(dto.getName(), dto.getEmail(), dto.getPassword());
+        user.setPhone(dto.getPhone());
+        user.setState(dto.getState());
+        user.setRemark(dto.getRemark());
+        return user;
     }
-}
+} 
