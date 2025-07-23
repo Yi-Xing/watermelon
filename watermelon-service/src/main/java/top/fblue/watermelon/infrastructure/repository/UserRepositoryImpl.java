@@ -1,10 +1,10 @@
 package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.Email;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 import top.fblue.watermelon.infrastructure.converter.UserConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserMapper;
@@ -19,15 +19,19 @@ import java.util.Optional;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
     
-    private final UserMapper userMapper;
-    private final UserConverter userConverter;
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private UserConverter userConverter;
     
     @Override
     public User save(User user) {
         UserPO po = userConverter.toPO(user);
         if (po.getId() == null) {
+            // 插入新用户
             userMapper.insert(po);
         } else {
+            // 更新现有用户
             userMapper.updateById(po);
         }
         return userConverter.toDomain(po);
@@ -40,9 +44,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
     
     @Override
-    public Optional<User> findByEmail(Email email) {
+    public Optional<User> findByEmail(String email) {
         QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email.toString());
+        queryWrapper.eq("email", email);
         UserPO po = userMapper.selectOne(queryWrapper);
         return Optional.ofNullable(userConverter.toDomain(po));
     }
@@ -69,9 +73,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
     
     @Override
-    public boolean existsByEmail(Email email) {
+    public boolean existsByEmail(String email) {
         QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email.toString());
+        queryWrapper.eq("email", email);
         return userMapper.selectCount(queryWrapper) > 0;
     }
     

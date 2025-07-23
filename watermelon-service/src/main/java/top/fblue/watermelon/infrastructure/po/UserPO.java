@@ -2,6 +2,9 @@ package top.fblue.watermelon.infrastructure.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
@@ -9,6 +12,9 @@ import java.time.LocalDateTime;
  * 对应数据库表 user
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @TableName("user")
 public class UserPO {
     

@@ -1,9 +1,6 @@
 package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
-import top.fblue.watermelon.application.dto.CreateUserDTO;
-import top.fblue.watermelon.application.vo.UserVO;
-import top.fblue.watermelon.domain.user.entity.Email;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
@@ -18,14 +15,15 @@ public class UserConverter {
      */
     public User toDomain(UserPO po) {
         if (po == null) return null;
-        
-        User user = new User();
-        user.setId(po.getId());
-        user.setUsername(po.getName());
-        user.setEmail(new Email(po.getEmail()));
-        user.setPassword(po.getPassword());
-        user.setActive(po.getState() == 1);
-        return user;
+        return User.builder()
+                .id(po.getId())
+                .username(po.getName())
+                .email(po.getEmail())
+                .phone(po.getPhone())
+                .password(po.getPassword())
+                .state(po.getState())
+                .remark(po.getRemark())
+                .build();
     }
 
     /**
@@ -33,65 +31,14 @@ public class UserConverter {
      */
     public UserPO toPO(User domain) {
         if (domain == null) return null;
-        
-        UserPO po = new UserPO();
-        po.setId(domain.getId());
-        po.setName(domain.getUsername());
-        po.setEmail(domain.getEmail());
-        po.setPassword(domain.getPassword());
-        po.setState(domain.isActive() ? 1 : 2);
-        return po;
-    }
-    
-    /**
-     * Domain转VO
-     */
-    public UserVO toVO(User domain) {
-        if (domain == null) return null;
-        
-        UserVO vo = new UserVO();
-        vo.setId(domain.getId());
-        vo.setName(domain.getUsername());
-        vo.setEmail(domain.getEmail());
-        vo.setState(domain.isActive() ? 1 : 2);
-        vo.setStateDesc(domain.isActive() ? "启用" : "禁用");
-        return vo;
-    }
-    
-    /**
-     * PO转VO
-     */
-    public UserVO toVO(UserPO po) {
-        if (po == null) return null;
-        
-        UserVO vo = new UserVO();
-        vo.setId(po.getId());
-        vo.setName(po.getName());
-        vo.setEmail(po.getEmail());
-        vo.setPhone(po.getPhone());
-        vo.setState(po.getState());
-        vo.setStateDesc(po.getState() == 1 ? "启用" : "禁用");
-        vo.setRemark(po.getRemark());
-        vo.setCreatedBy(po.getCreatedBy());
-        vo.setCreatedTime(po.getCreatedTime());
-        vo.setUpdatedBy(po.getUpdatedBy());
-        vo.setUpdatedTime(po.getUpdatedTime());
-        return vo;
-    }
-    
-    /**
-     * DTO转PO
-     */
-    public UserPO toPO(CreateUserDTO dto) {
-        if (dto == null) return null;
-        
-        UserPO po = new UserPO();
-        po.setName(dto.getName());
-        po.setEmail(dto.getEmail());
-        po.setPhone(dto.getPhone());
-        po.setPassword(dto.getPassword());
-        po.setState(dto.getState());
-        po.setRemark(dto.getRemark());
-        return po;
+        return UserPO.builder()
+                .id(domain.getId())
+                .name(domain.getUsername())
+                .email(domain.getEmail())
+                .phone(domain.getPhone())
+                .password(domain.getPassword())
+                .state(domain.getState())
+                .remark(domain.getRemark())
+                .build();
     }
 }

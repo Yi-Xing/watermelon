@@ -1,5 +1,6 @@
 package top.fblue.watermelon.application.impl;
 
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.application.converter.UserConverterInterface;
 import top.fblue.watermelon.domain.user.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.common.utils.StringUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,22 +19,30 @@ import java.util.stream.Collectors;
  * 用户应用服务实现
  */
 @Service
-@Transactional
 public class UserApplicationServiceImpl implements UserApplicationService {
-    
-    private final UserDomainService userDomainService; // 只依赖领域服务
-    private final UserConverterInterface userConverter;
+
+    @Resource
+    private  UserDomainService userDomainService; // 只依赖领域服务
+    @Resource
+    private  UserConverterInterface userConverter;
     
     @Override
+    @Transactional
     public UserVO createUser(CreateUserDTO createUserDTO) {
+        // 设置默认值，避免数据库存储null
+        String phone = StringUtil.getNonEmptyString(createUserDTO.getPhone());
+        String email = StringUtil.getNonEmptyString(createUserDTO.getEmail());
+        String password = StringUtil.getNonEmptyString(createUserDTO.getPassword());
+        String remark = StringUtil.getNonEmptyString(createUserDTO.getRemark());
+        
         // 调用领域服务创建用户
         User user = userDomainService.createUser(
                 createUserDTO.getName(),
-                createUserDTO.getEmail(),
-                createUserDTO.getPhone(),
-                createUserDTO.getPassword(),
+                email,
+                phone,
+                password,
                 createUserDTO.getState(),
-                createUserDTO.getRemark()
+                remark
         );
         
         // 返回VO
@@ -40,7 +50,6 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public UserVO getUserById(Long id) {
         User user = userDomainService.getUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
