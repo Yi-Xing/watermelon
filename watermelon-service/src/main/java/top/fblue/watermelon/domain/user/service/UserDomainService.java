@@ -1,7 +1,6 @@
 package top.fblue.watermelon.domain.user.service;
 
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserWithRelatedInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +19,9 @@ public interface UserDomainService {
     User createUser(String name, String email, String phone, String password, Integer state, String remark);
     
     /**
-     * 根据ID获取用户（包含关联用户信息）
+     * 根据ID获取用户详细信息（包含创建人和更新人的用户信息）
      */
-    UserWithRelatedInfo getUserWithRelatedInfoById(Long id);
+    User getUserDetailById(Long id);
 
     /**
      * 删除用户

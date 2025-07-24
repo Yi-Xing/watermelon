@@ -6,7 +6,6 @@ import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.application.vo.UserInfoVO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserWithRelatedInfo;
 import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
 
@@ -18,25 +17,25 @@ import top.fblue.watermelon.common.utils.DateTimeUtil;
 public class UserConverter {
 
     /**
-     * UserWithRelatedInfo转换为UserVO（完整版本，包含关联用户信息）
+     * User转换为UserVO（包含关联用户信息）
      */
-    public UserVO toVO(UserWithRelatedInfo domainWithInfo) {
-        if (domainWithInfo == null || domainWithInfo.getUser() == null) {
+    public UserVO toVO(User user) {
+        if (user == null) {
             return null;
         }
 
-        User user = domainWithInfo.getUser();
         return UserVO.builder()
                 .id(user.getId())
-                .name(user.getUsername()).email(user.getEmail())
+                .name(user.getUsername())
+                .email(user.getEmail())
                 .phone(user.getPhone())
                 .state(user.getState())
                 .stateDesc(StateEnum.fromCode(user.getState()).getDesc())
                 .remark(user.getRemark())
                 .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
                 .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
-                .createdBy(convertToUserInfoVO(domainWithInfo.getCreatedByUser()))
-                .updatedBy(convertToUserInfoVO(domainWithInfo.getUpdatedByUser()))
+                .createdBy(convertToUserInfoVO(user.getCreatedByUser()))
+                .updatedBy(convertToUserInfoVO(user.getUpdatedByUser()))
                 .build();
     }
 

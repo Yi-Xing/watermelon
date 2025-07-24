@@ -9,7 +9,6 @@ import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserWithRelatedInfo;
 import top.fblue.watermelon.common.utils.StringUtil;
 
 import java.util.List;
@@ -47,19 +46,19 @@ public class UserApplicationServiceImpl implements UserApplicationService {
                 remark
         );
         
-        // 创建完成后，获取包含关联信息的完整用户数据
-        UserWithRelatedInfo userWithInfo = userDomainService.getUserWithRelatedInfoById(user.getId());
+        // 创建完成后，获取包含详细信息的用户数据
+        User userDetail = userDomainService.getUserDetailById(user.getId());
         
         // 直接转换并返回
-        return userConverter.toVO(userWithInfo);
+        return userConverter.toVO(userDetail);
     }
     
     @Override
     public UserVO getUserById(Long id) {
-        // 直接获取包含关联信息的用户数据
-        UserWithRelatedInfo userWithInfo = userDomainService.getUserWithRelatedInfoById(id);
+        // 直接获取包含详细信息的用户数据
+        User userDetail = userDomainService.getUserDetailById(id);
         
-        return userConverter.toVO(userWithInfo);
+        return userConverter.toVO(userDetail);
     }
 
 

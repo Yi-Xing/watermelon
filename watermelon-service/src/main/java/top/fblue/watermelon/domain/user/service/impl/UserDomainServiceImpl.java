@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserWithRelatedInfo;
 import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 
@@ -68,8 +67,8 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
     
     @Override
-    public UserWithRelatedInfo getUserWithRelatedInfoById(Long id) {
-        return assembleUserWithRelatedInfo(this.getUserById(id));
+    public User getUserDetailById(Long id) {
+        return enrichUserWithRelatedInfo(this.getUserById(id));
     }
 
     private Map<Long, User> getBatchUsersByIds(Set<Long> userIds) {
@@ -93,10 +92,10 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
     
     /**
-     * 组装单个用户的关联信息
-     * Domain层的聚合组装逻辑
+     * 丰富用户的关联信息
+     * 填充创建人和更新人的详细用户信息
      */
-    private UserWithRelatedInfo assembleUserWithRelatedInfo(User user) {
+    private User enrichUserWithRelatedInfo(User user) {
         if (user == null) {
             return null;
         }
@@ -113,9 +112,8 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 批量查询关联用户信息
         Map<Long, User> relatedUsersMap = getBatchUsersByIds(relatedUserIds);
 
-        // 组装完整的聚合对象
-        return UserWithRelatedInfo.builder()
-                .user(user)
+        // 使用toBuilder创建包含关联信息的用户副本
+        return user.toBuilder()
                 .createdByUser(convertToUserBasicInfo(
                     user.getCreatedBy() != null ? relatedUsersMap.get(user.getCreatedBy()) : null
                 ))
@@ -123,43 +121,6 @@ public class UserDomainServiceImpl implements UserDomainService {
                     user.getUpdatedBy() != null ? relatedUsersMap.get(user.getUpdatedBy()) : null
                 ))
                 .build();
-    }
-    
-    /**
-     * 批量组装用户的关联信息
-     * 优化性能，避免N+1问题
-     */
-    private List<UserWithRelatedInfo> assembleUsersWithRelatedInfo(List<User> users) {
-        if (users == null || users.isEmpty()) {
-            return new java.util.ArrayList<>();
-        }
-        
-        // 收集所有需要查询的关联用户ID
-        Set<Long> allRelatedUserIds = new HashSet<>();
-        for (User user : users) {
-            if (user.getCreatedBy() != null) {
-                allRelatedUserIds.add(user.getCreatedBy());
-            }
-            if (user.getUpdatedBy() != null) {
-                allRelatedUserIds.add(user.getUpdatedBy());
-            }
-        }
-        
-        // 一次性批量查询所有关联用户
-        Map<Long, User> relatedUsersMap = getBatchUsersByIds(allRelatedUserIds);
-        
-        // 批量组装
-        return users.stream()
-                .map(user -> UserWithRelatedInfo.builder()
-                        .user(user)
-                        .createdByUser(convertToUserBasicInfo(
-                            user.getCreatedBy() != null ? relatedUsersMap.get(user.getCreatedBy()) : null
-                        ))
-                        .updatedByUser(convertToUserBasicInfo(
-                            user.getUpdatedBy() != null ? relatedUsersMap.get(user.getUpdatedBy()) : null
-                        ))
-                        .build())
-                .collect(Collectors.toList());
     }
     
     /**
