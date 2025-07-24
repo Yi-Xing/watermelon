@@ -61,28 +61,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         
         return userConverter.toVO(userWithInfo);
     }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public UserVO getUserByPhone(String phone) {
-        // 直接获取包含关联信息的用户数据
-        UserWithRelatedInfo userWithInfo = userDomainService.getUserWithRelatedInfoByPhone(phone);
-        
-        // 简单转换并返回
-        return userConverter.toVO(userWithInfo);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<UserVO> getAllUsers() {
-        // 直接获取包含关联信息的用户列表
-        List<UserWithRelatedInfo> usersWithInfo = userDomainService.getAllUsersWithRelatedInfo();
-        
-        // 批量转换并返回
-        return usersWithInfo.stream()
-                .map(userConverter::toVO)
-                .collect(Collectors.toList());
-    }
+
 
     @Override
     @Transactional

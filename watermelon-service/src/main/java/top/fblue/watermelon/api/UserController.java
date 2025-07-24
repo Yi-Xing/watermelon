@@ -39,24 +39,6 @@ public class UserController {
         UserVO user = userApplicationService.getUserById(id);
         return ResponseEntity.ok(user);
     }
-    
-    /**
-     * 根据手机号获取用户
-     */
-    @GetMapping("/phone/{phone}")
-    public ResponseEntity<UserVO> getUserByPhone(@PathVariable String phone) {
-        UserVO user = userApplicationService.getUserByPhone(phone);
-        return ResponseEntity.ok(user);
-    }
-    
-    /**
-     * 获取所有用户
-     */
-    @GetMapping
-    public ResponseEntity<List<UserVO>> getAllUsers() {
-        List<UserVO> users = userApplicationService.getAllUsers();
-        return ResponseEntity.ok(users);
-    }
 
     /**
      * 删除用户

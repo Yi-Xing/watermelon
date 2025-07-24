@@ -1,5 +1,6 @@
 package top.fblue.watermelon.application.vo;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -7,6 +8,7 @@ import lombok.Data;
  * 用于表示创建人、更新人等用户信息
  */
 @Data
+@Builder
 public class UserInfoVO {
     
     /**

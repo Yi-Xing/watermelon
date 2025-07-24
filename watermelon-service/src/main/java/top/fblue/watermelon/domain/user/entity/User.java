@@ -20,7 +20,7 @@ public class User {
     private String email;
     private String phone;
     private String password;
-    private Integer state;  // 状态：1 启用 2 禁用
+    private Integer state;
     private String remark;
     private Long createdBy;
     private LocalDateTime createdTime;

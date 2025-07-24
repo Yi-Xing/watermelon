@@ -27,7 +27,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     }
 
     private Integer getCurrentUserId() {
-        // 从SecurityContext获取当前用户ID
+        // 从SecurityContext获取当前用户ID mi:RequestContext.getRequestContext().getUserName()
         // 这里需要根据你的认证方式来实现
         return 1; // 临时返回1，实际应该从认证上下文获取
     }

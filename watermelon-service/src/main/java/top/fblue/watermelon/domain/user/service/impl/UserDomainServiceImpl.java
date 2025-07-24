@@ -62,7 +62,7 @@ public class UserDomainServiceImpl implements UserDomainService {
         return userRepository.save(user);
     }
     
-    public User getUserById(Long id) {
+    private User getUserById(Long id) {
        return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
     }
@@ -71,32 +71,8 @@ public class UserDomainServiceImpl implements UserDomainService {
     public UserWithRelatedInfo getUserWithRelatedInfoById(Long id) {
         return assembleUserWithRelatedInfo(this.getUserById(id));
     }
-    
-    @Override
-    public User getUserByPhone(String phone) {
-        return userRepository.findByPhone(phone)
-                .orElseThrow(() -> new IllegalArgumentException("手机号对应的用户不存在"));
-    }
-    
-    @Override
-    public UserWithRelatedInfo getUserWithRelatedInfoByPhone(String phone) {
-        User user = getUserByPhone(phone);
-        return assembleUserWithRelatedInfo(user);
-    }
-    
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-    
-    @Override
-    public List<UserWithRelatedInfo> getAllUsersWithRelatedInfo() {
-        List<User> users = userRepository.findAll();
-        return assembleUsersWithRelatedInfo(users);
-    }
-    
-    @Override
-    public Map<Long, User> getBatchUsersByIds(Set<Long> userIds) {
+
+    private Map<Long, User> getBatchUsersByIds(Set<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return new HashMap<>();
         }

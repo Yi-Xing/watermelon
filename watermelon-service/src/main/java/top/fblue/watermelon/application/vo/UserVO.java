@@ -1,11 +1,13 @@
 package top.fblue.watermelon.application.vo;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
  * 用户视图对象
  */
 @Data
+@Builder
 public class UserVO {
     
     /**

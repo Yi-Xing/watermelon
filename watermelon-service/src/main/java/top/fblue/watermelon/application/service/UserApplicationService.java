@@ -22,16 +22,6 @@ public interface UserApplicationService {
     UserVO getUserById(Long id);
     
     /**
-     * 根据手机号获取用户
-     */
-    UserVO getUserByPhone(String phone);
-    
-    /**
-     * 获取所有用户
-     */
-    List<UserVO> getAllUsers();
-    
-    /**
      * 删除用户
      */
     boolean deleteUser(Long userId);
