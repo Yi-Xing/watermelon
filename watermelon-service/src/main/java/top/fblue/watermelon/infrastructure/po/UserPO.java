@@ -58,7 +58,7 @@ public class UserPO {
      * 创建人
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createdBy;
+    private Long createdBy;
     
     /**
      * 创建时间
@@ -70,7 +70,7 @@ public class UserPO {
      * 更新人
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer updatedBy;
+    private Long updatedBy;
     
     /**
      * 更新时间

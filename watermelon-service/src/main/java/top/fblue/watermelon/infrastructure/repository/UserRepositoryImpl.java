@@ -12,6 +12,8 @@ import top.fblue.watermelon.infrastructure.po.UserPO;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 用户仓储实现
@@ -28,13 +30,13 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) {
         UserPO po = userConverter.toPO(user);
         if (po.getId() == null) {
-            // 插入新用户
             userMapper.insert(po);
         } else {
-            // 更新现有用户
             userMapper.updateById(po);
         }
-        return userConverter.toDomain(po);
+        // 重新查询以获取完整的审计信息
+        UserPO savedPO = userMapper.selectById(po.getId());
+        return userConverter.toDomain(savedPO);
     }
     
     @Override
@@ -52,6 +54,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
     
     @Override
+    public Optional<User> findByPhone(String phone) {
+        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", phone);
+        UserPO po = userMapper.selectOne(queryWrapper);
+        return Optional.ofNullable(userConverter.toDomain(po));
+    }
+    
+    @Override
     public Optional<User> findByUsername(String username) {
         QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("name", username);
@@ -64,7 +74,22 @@ public class UserRepositoryImpl implements UserRepository {
         List<UserPO> pos = userMapper.selectList(null);
         return pos.stream()
                 .map(userConverter::toDomain)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<User> findByIds(Set<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+        
+        // 使用MyBatis-Plus的selectBatchIds方法进行批量查询
+        // 这会生成 SELECT * FROM user WHERE id IN (?, ?, ?) 的SQL
+        List<UserPO> pos = userMapper.selectBatchIds(userIds);
+        
+        return pos.stream()
+                .map(userConverter::toDomain)
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -76,6 +101,13 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean existsByEmail(String email) {
         QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("email", email);
+        return userMapper.selectCount(queryWrapper) > 0;
+    }
+    
+    @Override
+    public boolean existsByPhone(String phone) {
+        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", phone);
         return userMapper.selectCount(queryWrapper) > 0;
     }
     

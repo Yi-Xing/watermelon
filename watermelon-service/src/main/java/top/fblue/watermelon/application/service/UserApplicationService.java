@@ -1,4 +1,4 @@
-package top.fblue.watermelon.application;
+package top.fblue.watermelon.application.service;
 
 import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.vo.UserVO;
@@ -22,24 +22,14 @@ public interface UserApplicationService {
     UserVO getUserById(Long id);
     
     /**
+     * 根据手机号获取用户
+     */
+    UserVO getUserByPhone(String phone);
+    
+    /**
      * 获取所有用户
      */
     List<UserVO> getAllUsers();
-    
-    /**
-     * 更新用户邮箱
-     */
-    UserVO updateUserEmail(Long userId, String newEmail);
-    
-    /**
-     * 激活用户
-     */
-    UserVO activateUser(Long userId);
-    
-    /**
-     * 停用用户
-     */
-    UserVO deactivateUser(Long userId);
     
     /**
      * 删除用户

@@ -2,19 +2,22 @@ package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
 /**
- * 用户数据转换器
+ * 用户转换器
+ * 负责Domain和Infrastructure层之间的数据转换
  */
 @Component
 public class UserConverter {
 
     /**
-     * PO转Domain
+     * PO转换为Domain实体
      */
     public User toDomain(UserPO po) {
         if (po == null) return null;
+        
         return User.builder()
                 .id(po.getId())
                 .username(po.getName())
@@ -23,11 +26,15 @@ public class UserConverter {
                 .password(po.getPassword())
                 .state(po.getState())
                 .remark(po.getRemark())
+                .createdBy(po.getCreatedBy())
+                .createdTime(po.getCreatedTime())
+                .updatedBy(po.getUpdatedBy())
+                .updatedTime(po.getUpdatedTime())
                 .build();
     }
 
     /**
-     * Domain转PO
+     * Domain实体转换为PO
      */
     public UserPO toPO(User domain) {
         if (domain == null) return null;

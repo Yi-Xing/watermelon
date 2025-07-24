@@ -1,7 +1,6 @@
 package top.fblue.watermelon.application.vo;
 
 import lombok.Data;
-import java.time.LocalDateTime;
 
 /**
  * 用户视图对象
@@ -45,22 +44,22 @@ public class UserVO {
     private String remark;
     
     /**
-     * 创建人
+     * 创建人信息
      */
-    private Integer createdBy;
+    private UserInfoVO createdBy;
     
     /**
-     * 创建时间
+     * 创建时间（格式：yyyy-MM-dd HH:mm:ss）
      */
-    private LocalDateTime createdTime;
+    private String createdTime;
     
     /**
-     * 更新人
+     * 更新人信息
      */
-    private Integer updatedBy;
+    private UserInfoVO updatedBy;
     
     /**
-     * 更新时间
+     * 更新时间（格式：yyyy-MM-dd HH:mm:ss）
      */
-    private LocalDateTime updatedTime;
+    private String updatedTime;
 }
