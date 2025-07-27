@@ -3,6 +3,7 @@ package top.fblue.watermelon.infrastructure.repository;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 import top.fblue.watermelon.infrastructure.converter.UserPOConverter;
@@ -37,9 +38,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findById(Long id) {
+    public User findById(Long id) {
         UserPO po = userMapper.selectById(id);
-        return Optional.ofNullable(userPOConverter.toDomain(po));
+        return userPOConverter.toDomain(po);
     }
 
     @Override
@@ -48,9 +49,9 @@ public class UserRepositoryImpl implements UserRepository {
             return new ArrayList<>();
         }
 
-        // 使用MyBatis-Plus的selectBatchIds方法进行批量查询
+        // 使用MyBatis-Plus的selectByIds方法进行批量查询
         // 这会生成 SELECT * FROM user WHERE id IN (?, ?, ?) 的SQL
-        List<UserPO> pos = userMapper.selectBatchIds(userIds);
+        List<UserPO> pos = userMapper.selectByIds(userIds);
 
         return pos.stream()
                 .map(userPOConverter::toDomain)
@@ -81,5 +82,55 @@ public class UserRepositoryImpl implements UserRepository {
         QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("name", username);
         return userMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public List<User> findByCondition(String keyword, Integer state, int offset, int limit) {
+        QueryWrapper<UserPO> queryWrapper = buildQueryWrapper(keyword, state);
+        queryWrapper.orderByDesc("updated_time");
+        
+        // 手动分页：先查询所有数据，然后手动截取
+        List<UserPO> allRecords = userMapper.selectList(queryWrapper);
+        
+        // 手动分页处理
+        int startIndex = Math.min(offset, allRecords.size());
+        int endIndex = Math.min(offset + limit, allRecords.size());
+        
+        List<UserPO> pageRecords = allRecords.subList(startIndex, endIndex);
+        
+        return pageRecords.stream()
+                .map(userPOConverter::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countByCondition(String keyword, Integer state) {
+        QueryWrapper<UserPO> queryWrapper = buildQueryWrapper(keyword, state);
+        return userMapper.selectCount(queryWrapper);
+    }
+    
+    /**
+     * 构建查询条件
+     */
+    private QueryWrapper<UserPO> buildQueryWrapper(String keyword, Integer state) {
+        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
+        
+        // 关键词模糊查询（用户名、邮箱、手机号）
+        if (StringUtils.hasText(keyword)) {
+            queryWrapper.and(wrapper -> wrapper
+                    .like("name", keyword)
+                    .or()
+                    .like("email", keyword)
+                    .or()
+                    .like("phone", keyword)
+            );
+        }
+        
+        // 状态筛选
+        if (state != null) {
+            queryWrapper.eq("state", state);
+        }
+        
+        return queryWrapper;
     }
 } 

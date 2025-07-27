@@ -16,7 +16,7 @@ public interface UserRepository {
     /**
      * 根据ID查找用户
      */
-    Optional<User> findById(Long id);
+    User findById(Long id);
     
     /**
      * 批量根据ID查找用户
@@ -45,4 +45,24 @@ public interface UserRepository {
      * 删除用户
      */
     boolean delete(long id);
+    
+    /**
+     * 根据条件分页查询用户列表
+     * 
+     * @param keyword 搜索关键词（用户名、邮箱、手机号模糊匹配）
+     * @param state 用户状态
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 用户列表
+     */
+    List<User> findByCondition(String keyword, Integer state, int offset, int limit);
+    
+    /**
+     * 根据条件统计用户总数
+     * 
+     * @param keyword 搜索关键词（用户名、邮箱、手机号模糊匹配）
+     * @param state 用户状态
+     * @return 用户总数
+     */
+    Long countByCondition(String keyword, Integer state);
 }

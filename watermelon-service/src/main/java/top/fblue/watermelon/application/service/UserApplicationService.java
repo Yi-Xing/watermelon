@@ -1,13 +1,12 @@
 package top.fblue.watermelon.application.service;
 
 import top.fblue.watermelon.application.dto.CreateUserDTO;
+import top.fblue.watermelon.application.dto.UserQueryDTO;
+import top.fblue.watermelon.application.vo.PageVO;
 import top.fblue.watermelon.application.vo.UserVO;
-
-import java.util.List;
 
 /**
  * 用户应用服务接口
- * 编排领域服务，处理事务边界
  */
 public interface UserApplicationService {
     
@@ -24,5 +23,10 @@ public interface UserApplicationService {
     /**
      * 删除用户
      */
-    boolean deleteUser(Long userId);
+    boolean deleteUser(Long id);
+    
+    /**
+     * 分页查询用户列表
+     */
+    PageVO<UserVO> getUserList(UserQueryDTO queryDTO);
 }

@@ -62,8 +62,7 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
     
     private User getUserById(Long id) {
-       return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+       return userRepository.findById(id);
     }
     
     @Override
@@ -89,6 +88,16 @@ public class UserDomainServiceImpl implements UserDomainService {
     @Override
     public boolean deleteUser(Long userId) {
         return userRepository.delete(userId);
+    }
+    
+    @Override
+    public List<User> getUserList(String keyword, Integer state, int offset, int limit) {
+        return userRepository.findByCondition(keyword, state, offset, limit);
+    }
+    
+    @Override
+    public Long countUsers(String keyword, Integer state) {
+        return userRepository.countByCondition(keyword, state);
     }
     
     /**

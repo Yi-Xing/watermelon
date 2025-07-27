@@ -9,5 +9,5 @@ import top.fblue.watermelon.infrastructure.po.UserPO;
  */
 @Mapper
 public interface UserMapper extends BaseMapper<UserPO> {
-    // 可以添加自定义的查询方法
+    // 使用MyBatis Plus的BaseMapper提供的方法
 } 
