@@ -1,6 +1,8 @@
 package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -85,20 +87,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findByCondition(String keyword, Integer state, int offset, int limit) {
+    public List<User> findByCondition(String keyword, Integer state, int pageNum, int pageSize) {
         QueryWrapper<UserPO> queryWrapper = buildQueryWrapper(keyword, state);
         queryWrapper.orderByDesc("updated_time");
         
-        // 手动分页：先查询所有数据，然后手动截取
-        List<UserPO> allRecords = userMapper.selectList(queryWrapper);
+        // 使用MyBatis Plus的分页查询
+        Page<UserPO> page = new Page<>(pageNum, pageSize);
+        IPage<UserPO> pageResult = userMapper.selectPage(page, queryWrapper);
         
-        // 手动分页处理
-        int startIndex = Math.min(offset, allRecords.size());
-        int endIndex = Math.min(offset + limit, allRecords.size());
-        
-        List<UserPO> pageRecords = allRecords.subList(startIndex, endIndex);
-        
-        return pageRecords.stream()
+        return pageResult.getRecords().stream()
                 .map(userPOConverter::toDomain)
                 .collect(Collectors.toList());
     }

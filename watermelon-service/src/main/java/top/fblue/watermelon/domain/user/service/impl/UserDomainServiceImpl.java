@@ -91,8 +91,8 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
     
     @Override
-    public List<User> getUserList(String keyword, Integer state, int offset, int limit) {
-        return userRepository.findByCondition(keyword, state, offset, limit);
+    public List<User> getUserList(String keyword, Integer state, int pageNum, int pageSize) {
+        return userRepository.findByCondition(keyword, state, pageNum, pageSize);
     }
     
     @Override

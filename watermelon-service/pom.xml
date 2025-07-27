@@ -35,6 +35,11 @@
 			<version>3.0.3</version>
 		</dependency>
 		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-jsqlparser</artifactId>
+			<version>3.5.12</version>
+		</dependency>
+		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid-spring-boot-starter</artifactId>
 			<version>1.2.20</version>
@@ -94,10 +99,6 @@
 						<path>
 							<groupId>org.springframework.boot</groupId>
 							<artifactId>spring-boot-configuration-processor</artifactId>
-						</path>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

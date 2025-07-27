@@ -23,7 +23,7 @@ public interface UserDomainService {
     /**
      * 分页查询用户列表
      */
-    List<User> getUserList(String keyword, Integer state, int offset, int limit);
+    List<User> getUserList(String keyword, Integer state, int pageNum, int pageSize);
     
     /**
      * 统计用户总数

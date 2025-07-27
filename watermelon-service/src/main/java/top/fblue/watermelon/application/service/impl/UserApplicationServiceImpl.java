@@ -73,18 +73,16 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Override
     public PageVO<UserVO> getUserList(UserQueryDTO queryDTO) {
-        // 计算偏移量
-        int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
 
-        // 查询用户列表，固定状态为启用状态
+        // 查询用户列表
         List<User> users = userDomainService.getUserList(
                 queryDTO.getKeyword(),
                 queryDTO.getState(),
-                offset,
+                queryDTO.getPageNum(),
                 queryDTO.getPageSize()
         );
 
-        // 统计总数，固定状态为启用状态
+        // 统计总数
         Long total = userDomainService.countUsers(
                 queryDTO.getKeyword(),
                 queryDTO.getState()

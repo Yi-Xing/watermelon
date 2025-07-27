@@ -11,56 +11,56 @@ public interface UserRepository {
      * 保存用户
      */
     User save(User user);
-    
+
     /**
      * 根据ID查找用户
      */
     User findById(Long id);
-    
+
     /**
      * 批量根据ID查找用户
-     * 
+     *
      * @param userIds 用户ID集合
      * @return 用户列表
      */
     List<User> findByIds(Set<Long> userIds);
-    
+
     /**
      * 检查用户名是否存在
      */
     boolean existsByUsername(String username);
-    
+
     /**
      * 检查邮箱是否存在
      */
     boolean existsByEmail(String email);
-    
+
     /**
      * 检查手机号是否存在
      */
     boolean existsByPhone(String phone);
-    
+
     /**
      * 删除用户
      */
     boolean delete(long id);
-    
+
     /**
      * 根据条件分页查询用户列表
-     * 
-     * @param keyword 搜索关键词（用户名、邮箱、手机号模糊匹配）
-     * @param state 用户状态
-     * @param offset 偏移量
-     * @param limit 限制数量
+     *
+     * @param keyword  搜索关键词（用户名、邮箱、手机号模糊匹配）
+     * @param state    用户状态
+     * @param pageNum  页码
+     * @param pageSize 每页大小
      * @return 用户列表
      */
-    List<User> findByCondition(String keyword, Integer state, int offset, int limit);
-    
+    List<User> findByCondition(String keyword, Integer state, int pageNum, int pageSize);
+
     /**
      * 根据条件统计用户总数
-     * 
+     *
      * @param keyword 搜索关键词（用户名、邮箱、手机号模糊匹配）
-     * @param state 用户状态
+     * @param state   用户状态
      * @return 用户总数
      */
     Long countByCondition(String keyword, Integer state);
