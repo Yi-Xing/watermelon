@@ -16,19 +16,19 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         this.strictInsertFill(metaObject, "createdTime", LocalDateTime.class, LocalDateTime.now());
         this.strictInsertFill(metaObject, "updatedTime", LocalDateTime.class, LocalDateTime.now());
         // 这里可以从SecurityContext获取当前用户ID
-        this.strictInsertFill(metaObject, "createdBy", Integer.class, getCurrentUserId());
-        this.strictInsertFill(metaObject, "updatedBy", Integer.class, getCurrentUserId());
+        this.strictInsertFill(metaObject, "createdBy", Long.class, getCurrentUserId());
+        this.strictInsertFill(metaObject, "updatedBy", Long.class, getCurrentUserId());
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updatedTime", LocalDateTime.class, LocalDateTime.now());
-        this.strictUpdateFill(metaObject, "updatedBy", Integer.class, getCurrentUserId());
+        this.strictUpdateFill(metaObject, "updatedBy", Long.class, getCurrentUserId());
     }
 
-    private Integer getCurrentUserId() {
+    private Long getCurrentUserId() {
         // 从SecurityContext获取当前用户ID mi:RequestContext.getRequestContext().getUserName()
         // 这里需要根据你的认证方式来实现
-        return 1; // 临时返回1，实际应该从认证上下文获取
+        return 1L; // 临时返回1L，实际应该从认证上下文获取
     }
 }
