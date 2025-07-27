@@ -50,7 +50,7 @@ public class UserController {
         if (result) {
             return ApiResponse.success(true, "用户删除成功");
         } else {
-            return ApiResponse.error(400, "用户删除失败", false);
+            return ApiResponse.error("用户删除失败", false);
         }
     }
     

@@ -79,4 +79,16 @@ public class ApiResponse<T> {
         response.setData(data);
         return response;
     }
+
+    /**
+     * 失败响应（带数据）
+     */
+    public static <T> ApiResponse<T> error(String message, T data) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setCode(400);
+        response.setSuccess(false);
+        response.setMessage(message);
+        response.setData(data);
+        return response;
+    }
 } 
