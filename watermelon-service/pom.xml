@@ -20,12 +20,24 @@
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-boot-starter</artifactId>
-			<version>3.5.3.1</version>
+			<version>3.5.12</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>mybatis-spring</artifactId>
+					<groupId>org.mybatis</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Spring Boot 升级 3.2 报错 Invalid value type for attribute ‘factoryBeanObjectType‘: java.lang.String https://developer.aliyun.com/article/1395691-->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>3.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid-spring-boot-starter</artifactId>
-			<version>1.2.18</version>
+			<version>1.2.20</version>
 		</dependency>
 
 

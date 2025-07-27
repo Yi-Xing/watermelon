@@ -2,7 +2,6 @@ package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
 /**
@@ -10,7 +9,7 @@ import top.fblue.watermelon.infrastructure.po.UserPO;
  * 负责Domain和Infrastructure层之间的数据转换
  */
 @Component
-public class UserConverter {
+public class UserPOConverter {
 
     /**
      * PO转换为Domain实体

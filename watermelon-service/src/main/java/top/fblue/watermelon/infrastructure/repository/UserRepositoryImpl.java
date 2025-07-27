@@ -5,7 +5,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
-import top.fblue.watermelon.infrastructure.converter.UserConverter;
+import top.fblue.watermelon.infrastructure.converter.UserPOConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserMapper;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
@@ -21,11 +21,11 @@ public class UserRepositoryImpl implements UserRepository {
     @Resource
     private UserMapper userMapper;
     @Resource
-    private UserConverter userConverter;
+    private UserPOConverter userPOConverter;
 
     @Override
     public User save(User user) {
-        UserPO po = userConverter.toPO(user);
+        UserPO po = userPOConverter.toPO(user);
         if (po.getId() == null) {
             userMapper.insert(po);
         } else {
@@ -33,13 +33,13 @@ public class UserRepositoryImpl implements UserRepository {
         }
         // 重新查询以获取完整的审计信息
         UserPO savedPO = userMapper.selectById(po.getId());
-        return userConverter.toDomain(savedPO);
+        return userPOConverter.toDomain(savedPO);
     }
 
     @Override
     public Optional<User> findById(Long id) {
         UserPO po = userMapper.selectById(id);
-        return Optional.ofNullable(userConverter.toDomain(po));
+        return Optional.ofNullable(userPOConverter.toDomain(po));
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UserRepositoryImpl implements UserRepository {
         List<UserPO> pos = userMapper.selectBatchIds(userIds);
 
         return pos.stream()
-                .map(userConverter::toDomain)
+                .map(userPOConverter::toDomain)
                 .collect(Collectors.toList());
     }
 
