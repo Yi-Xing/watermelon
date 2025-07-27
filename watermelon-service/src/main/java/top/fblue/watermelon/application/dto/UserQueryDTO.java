@@ -16,6 +16,11 @@ public class UserQueryDTO {
     private String keyword;
 
     /**
+     * 用户状态
+     */
+    private Integer state;
+
+    /**
      * 页码（从1开始）
      */
     @Min(value = 1, message = "页码必须大于0")

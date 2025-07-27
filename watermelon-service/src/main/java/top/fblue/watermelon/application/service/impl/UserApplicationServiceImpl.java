@@ -79,7 +79,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         // 查询用户列表，固定状态为启用状态
         List<User> users = userDomainService.getUserList(
                 queryDTO.getKeyword(),
-                StateEnum.ENABLE.getCode(),
+                queryDTO.getState(),
                 offset,
                 queryDTO.getPageSize()
         );
@@ -87,7 +87,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         // 统计总数，固定状态为启用状态
         Long total = userDomainService.countUsers(
                 queryDTO.getKeyword(),
-                StateEnum.ENABLE.getCode()
+                queryDTO.getState()
         );
 
         // 转换为VO
