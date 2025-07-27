@@ -3,9 +3,6 @@ package top.fblue.watermelon.domain.user.service;
 import top.fblue.watermelon.domain.user.entity.User;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * 用户领域服务接口

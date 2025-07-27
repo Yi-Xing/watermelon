@@ -11,7 +11,6 @@ import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 /**
  * 用户控制器

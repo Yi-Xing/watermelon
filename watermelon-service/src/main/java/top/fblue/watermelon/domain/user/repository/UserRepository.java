@@ -3,7 +3,6 @@ package top.fblue.watermelon.domain.user.repository;
 import top.fblue.watermelon.domain.user.entity.User;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public interface UserRepository {
