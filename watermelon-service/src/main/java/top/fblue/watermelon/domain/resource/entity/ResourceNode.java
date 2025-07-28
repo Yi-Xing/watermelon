@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
+import top.fblue.watermelon.domain.resource.entity.UserBasicInfo;
 
 import java.time.LocalDateTime;
 

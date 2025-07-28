@@ -1,4 +1,4 @@
-package top.fblue.watermelon.infrastructure.converter;
+package top.fblue.watermelon.infrastructure.repository.user.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.domain.user.entity.User;

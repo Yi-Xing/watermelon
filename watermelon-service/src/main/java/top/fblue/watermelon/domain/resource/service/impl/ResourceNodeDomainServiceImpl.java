@@ -5,10 +5,9 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceNodeRepository;
-import top.fblue.watermelon.domain.resource.repository.ResourceUserRepository;
+import top.fblue.watermelon.domain.resource.repository.UserRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceNodeDomainService;
-import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
+import top.fblue.watermelon.domain.resource.entity.UserBasicInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,15 +20,15 @@ public class ResourceNodeDomainServiceImpl implements ResourceNodeDomainService 
 
     @Resource
     private ResourceNodeRepository resourceNodeRepository;
-    
+
     @Resource
-    private ResourceUserRepository userRepository;
+    private UserRepository userRepository;
 
     @Override
     public ResourceNode createResourceNode(ResourceNode resourceNode) {
         // 校验业务规则
         validateResourceNodeCreation(resourceNode);
-        
+
         // 保存资源节点
         return resourceNodeRepository.save(resourceNode);
     }
@@ -38,7 +37,7 @@ public class ResourceNodeDomainServiceImpl implements ResourceNodeDomainService 
     public ResourceNode findById(Long id) {
         return resourceNodeRepository.findById(id);
     }
-    
+
     @Override
     public ResourceNode findByIdWithAssociations(Long id) {
         // 1. 获取资源节点基本信息
@@ -46,48 +45,38 @@ public class ResourceNodeDomainServiceImpl implements ResourceNodeDomainService 
         if (resourceNode == null) {
             return null;
         }
-        
+
         // 2. 填充创建人信息
         if (resourceNode.getCreatedBy() != null) {
-            User createdByUser = userRepository.findById(resourceNode.getCreatedBy());
-            if (createdByUser != null) {
-                resourceNode.setCreatedByUser(UserBasicInfo.builder()
-                        .id(createdByUser.getId())
-                        .username(createdByUser.getUsername())
-                        .build());
-            }
+            UserBasicInfo createdByUser = userRepository.findById(resourceNode.getCreatedBy());
+            resourceNode.setCreatedByUser(createdByUser);
         }
-        
+
         // 3. 填充更新人信息
         if (resourceNode.getUpdatedBy() != null) {
-            User updatedByUser = userRepository.findById(resourceNode.getUpdatedBy());
-            if (updatedByUser != null) {
-                resourceNode.setUpdatedByUser(UserBasicInfo.builder()
-                        .id(updatedByUser.getId())
-                        .username(updatedByUser.getUsername())
-                        .build());
-            }
+            UserBasicInfo updatedByUser = userRepository.findById(resourceNode.getUpdatedBy());
+            resourceNode.setUpdatedByUser(updatedByUser);
         }
-        
+
         // 4. 填充父级节点信息
         if (resourceNode.getParentId() != null) {
             ResourceNode parentNode = findById(resourceNode.getParentId());
             resourceNode.setParentNode(parentNode);
         }
-        
+
         return resourceNode;
     }
 
     private void validateResourceNodeCreation(ResourceNode resourceNode) {
         // 1. 校验父级资源
         validateParentResource(resourceNode.getParentId());
-        
+
         // 2. 校验环形引用
         validateCircularReference(resourceNode.getParentId());
-        
+
         // 3. 校验资源名称唯一性
         validateResourceNameUnique(resourceNode.getName(), resourceNode.getParentId());
-        
+
         // 4. 校验资源code唯一性
         validateResourceCodeUnique(resourceNode.getCode());
     }
@@ -96,28 +85,28 @@ public class ResourceNodeDomainServiceImpl implements ResourceNodeDomainService 
         if (parentId == null) {
             return;
         }
-        
+
         // 使用Set记录已访问的节点，检测环形引用
         Set<Long> visitedNodes = new HashSet<>();
         Long currentParentId = parentId;
-        
+
         while (currentParentId != null) {
             // 如果当前节点已经访问过，说明存在环形引用
             if (visitedNodes.contains(currentParentId)) {
                 throw new IllegalArgumentException("检测到环形引用，无法创建资源");
             }
-            
+
             // 将当前节点加入已访问集合
             visitedNodes.add(currentParentId);
-            
+
             // 查询当前节点的父节点
             ResourceNode currentResource = resourceNodeRepository.findById(currentParentId);
             if (currentResource == null) {
                 break; // 父节点不存在，结束检查
             }
-            
+
             currentParentId = currentResource.getParentId();
-            
+
             // 防止无限循环，设置最大深度限制
             if (visitedNodes.size() > 100) {
                 throw new IllegalArgumentException("资源层级过深，可能存在环形引用");

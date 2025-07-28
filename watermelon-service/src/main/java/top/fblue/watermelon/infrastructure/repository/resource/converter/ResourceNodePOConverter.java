@@ -1,4 +1,4 @@
-package top.fblue.watermelon.infrastructure.converter;
+package top.fblue.watermelon.infrastructure.repository.resource.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;

@@ -1,4 +1,4 @@
-package top.fblue.watermelon.infrastructure.repository;
+package top.fblue.watermelon.infrastructure.repository.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -6,10 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import top.fblue.watermelon.domain.resource.repository.ResourceUserRepository;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
-import top.fblue.watermelon.infrastructure.converter.UserPOConverter;
+import top.fblue.watermelon.infrastructure.repository.user.converter.UserPOConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserMapper;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
  * 用户仓储实现
  */
 @Repository
-public class UserRepositoryImpl implements UserRepository, ResourceUserRepository {
+public class UserRepositoryImpl implements UserRepository {
 
     @Resource
     private UserMapper userMapper;
