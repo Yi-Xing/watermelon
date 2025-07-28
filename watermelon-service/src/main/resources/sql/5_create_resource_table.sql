@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS resource(
     `name` VARCHAR(20) NOT NULL COMMENT '资源名称',
     `type` TINYINT NOT NULL COMMENT '资源类型;1页面 2按钮 3接口',
     `code` VARCHAR(255) NOT NULL COMMENT '资源code',
-    `order` INT NOT NULL DEFAULT 0 COMMENT '显示顺序',
+    `order_num` INT NOT NULL DEFAULT 0 COMMENT '显示顺序',
     `parent_id` INT NOT NULL DEFAULT 0 COMMENT '父级ID',
     `state` TINYINT NOT NULL DEFAULT 1 COMMENT '状态;1 启用 2 禁用',
     `remark` VARCHAR(500) DEFAULT '' COMMENT '备注',
