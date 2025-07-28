@@ -3,7 +3,7 @@ package top.fblue.watermelon.infrastructure.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-import top.fblue.watermelon.infrastructure.po.RoleResourcePO;
+import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * 角色资源关系Mapper接口
  */
 @Mapper
-public interface RoleResourceMapper extends BaseMapper<RoleResourcePO> {
+public interface RoleResourceNodeMapper extends BaseMapper<RoleResourceNodePO> {
     
     /**
      * 根据角色ID查询资源ID列表

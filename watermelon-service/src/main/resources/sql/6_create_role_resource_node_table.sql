@@ -1,7 +1,7 @@
-CREATE TABLE IF NOT EXISTS role_resource(
+CREATE TABLE IF NOT EXISTS role_resource_node(
     `id` INT AUTO_INCREMENT COMMENT 'ID',
     `role_id` INT NOT NULL COMMENT '角色ID',
-    `resource_id` INT NOT NULL COMMENT '资源ID',
+    `resource_node_id` INT NOT NULL COMMENT '资源ID',
     `created_by` INT NOT NULL COMMENT '创建人',
     `created_time` DATETIME NOT NULL COMMENT '创建时间',
     `updated_by` INT NOT NULL COMMENT '更新人',

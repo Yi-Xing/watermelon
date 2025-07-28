@@ -1,14 +1,13 @@
 package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
-import top.fblue.watermelon.infrastructure.po.RoleResourcePO;
 
 /**
  * 角色资源关系转换器
  * 负责Domain和Infrastructure层之间的数据转换
  */
 @Component
-public class RoleResourcePOConverter {
+public class RoleResourceNodePOConverter {
 
     /**
      * PO转换为Domain实体

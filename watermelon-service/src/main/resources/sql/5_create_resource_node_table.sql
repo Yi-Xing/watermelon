@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS resource(
+CREATE TABLE IF NOT EXISTS resource_node(
     `id` INT AUTO_INCREMENT COMMENT '资源ID',
     `name` VARCHAR(20) NOT NULL COMMENT '资源名称',
     `type` TINYINT NOT NULL COMMENT '资源类型;1页面 2按钮 3接口',

@@ -8,31 +8,56 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 角色资源关系持久化对象
- * 对应数据库表 role_resource
+ * 资源持久化对象
+ * 对应数据库表 resource
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("role_resource")
-public class RoleResourcePO {
+@TableName("resource_node")
+public class ResourceNodePO {
     
     /**
-     * ID
+     * 资源ID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     
     /**
-     * 角色ID
+     * 资源名称
      */
-    private Long roleId;
+    private String name;
     
     /**
-     * 资源ID
+     * 资源类型：1页面 2按钮 3接口
      */
-    private Long resourceId;
+    private Integer type;
+    
+    /**
+     * 资源code
+     */
+    private String code;
+    
+    /**
+     * 显示顺序
+     */
+    private Integer orderNum;
+    
+    /**
+     * 父级ID
+     */
+    private Long parentId;
+    
+    /**
+     * 状态：1 启用 2 禁用
+     */
+    private Integer state;
+    
+    /**
+     * 备注
+     */
+    private String remark;
     
     /**
      * 创建人

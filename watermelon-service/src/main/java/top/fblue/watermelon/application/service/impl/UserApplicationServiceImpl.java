@@ -38,7 +38,6 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         String phone = StringUtil.getNonEmptyString(createUserDTO.getPhone());
         String email = StringUtil.getNonEmptyString(createUserDTO.getEmail());
         String password = StringUtil.getNonEmptyString(createUserDTO.getPassword());
-        String remark = StringUtil.getNonEmptyString(createUserDTO.getRemark());
 
         // 调用领域服务创建用户
         User user = userDomainService.createUser(
@@ -47,7 +46,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
                 phone,
                 password,
                 createUserDTO.getState(),
-                remark
+                createUserDTO.getRemark()
         );
 
         // 创建完成后，获取包含详细信息的用户数据

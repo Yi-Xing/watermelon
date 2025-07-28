@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+import top.fblue.watermelon.domain.resource.repository.ResourceUserRepository;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 import top.fblue.watermelon.infrastructure.converter.UserPOConverter;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  * 用户仓储实现
  */
 @Repository
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl implements UserRepository, ResourceUserRepository {
 
     @Resource
     private UserMapper userMapper;
