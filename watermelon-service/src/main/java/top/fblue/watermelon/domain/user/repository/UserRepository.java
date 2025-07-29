@@ -66,4 +66,14 @@ public interface UserRepository {
      * @return 用户总数
      */
     Long countByCondition(String keyword, Integer state);
+    
+    /**
+     * 更新用户
+     */
+    boolean update(User user);
+    
+    /**
+     * 重设密码
+     */
+    boolean resetPassword(Long userId, String password);
 }

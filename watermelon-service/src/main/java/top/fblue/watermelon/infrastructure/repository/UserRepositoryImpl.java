@@ -102,6 +102,20 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public boolean update(User user) {
+        UserPO po = userPOConverter.toPO(user);
+        return userMapper.updateById(po) > 0;
+    }
+
+    @Override
+    public boolean resetPassword(Long userId, String password) {
+        UserPO po = new UserPO();
+        po.setId(userId);
+        po.setPassword(password);
+        return userMapper.updateById(po) > 0;
+    }
+
+    @Override
     public Long countByCondition(String keyword, Integer state) {
         QueryWrapper<UserPO> queryWrapper = buildQueryWrapper(keyword, state);
         return userMapper.selectCount(queryWrapper);

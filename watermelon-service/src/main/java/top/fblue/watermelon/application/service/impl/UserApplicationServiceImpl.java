@@ -5,12 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.fblue.watermelon.application.converter.UserConverter;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
+import top.fblue.watermelon.application.dto.UpdateUserDTO;
+import top.fblue.watermelon.application.dto.ResetPasswordDTO;
 import top.fblue.watermelon.application.dto.UserQueryDTO;
 import top.fblue.watermelon.application.service.UserApplicationService;
 import top.fblue.watermelon.application.vo.PageVO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 
@@ -36,26 +39,29 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     @Transactional
     public UserVO createUser(CreateUserDTO createUserDTO) {
-        // 设置默认值，避免数据库存储null
-        String phone = StringUtil.getNonEmptyString(createUserDTO.getPhone());
-        String email = StringUtil.getNonEmptyString(createUserDTO.getEmail());
-        String password = StringUtil.getNonEmptyString(createUserDTO.getPassword());
+        // 转换DTO为Domain实体
+        User user = userConverter.toUser(createUserDTO);
 
         // 调用领域服务创建用户
-        User user = userDomainService.createUser(
-                createUserDTO.getName(),
-                email,
-                phone,
-                password,
-                createUserDTO.getState(),
-                createUserDTO.getRemark()
-        );
-
-        // 创建完成后，获取包含详细信息的用户数据
-        User userDetail = userDomainService.getUserById(user.getId());
+        User createUser = userDomainService.createUser(user);
 
         // 直接转换并返回
-        return userConverter.toVO(userDetail);
+        return userConverter.toVO(createUser);
+    }
+
+    @Override
+    public UserVO getUserDetailById(Long id) {
+        // 获取基础用户数据
+        User user = userDomainService.getUserById(id);
+
+        // 组装详细信息（包含关联角色）
+        List<Long> userIdList = new ArrayList<>();
+        userIdList.add(user.getCreatedBy());
+        userIdList.add(user.getUpdatedBy());
+
+        Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIdList);
+
+        return userConverter.toVO(user, userIDMap);
     }
 
     @Override
@@ -64,13 +70,30 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         User user = userDomainService.getUserById(id);
 
         // 组装详细信息
-        List<Long> userIdList  = new ArrayList<>();
+        List<Long> userIdList = new ArrayList<>();
         userIdList.add(user.getCreatedBy());
         userIdList.add(user.getUpdatedBy());
 
         Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIdList);
 
-        return userConverter.toVO(user,userIDMap);
+        return userConverter.toVO(user, userIDMap);
+    }
+
+    @Override
+    @Transactional
+    public boolean updateUser(UpdateUserDTO updateUserDTO) {
+        // 转换DTO为Domain实体
+        User user = userConverter.toUser(updateUserDTO);
+        
+        // 调用领域服务更新用户
+        return userDomainService.updateUser(user);
+    }
+
+    @Override
+    @Transactional
+    public boolean resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        // 调用领域服务重设密码
+        return userDomainService.resetPassword(resetPasswordDTO.getId(), resetPasswordDTO.getPassword());
     }
 
     @Override

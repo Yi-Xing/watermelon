@@ -15,7 +15,7 @@ public interface UserDomainService {
     /**
      * 创建用户
      */
-    User createUser(String name, String email, String phone, String password, Integer state, String remark);
+    User createUser(User user);
 
     /**
      * 根据ID获取用户
@@ -41,6 +41,16 @@ public interface UserDomainService {
      */
     Long countUsers(String keyword, Integer state);
 
+    /**
+     * 更新用户
+     */
+    boolean updateUser(User user);
+    
+    /**
+     * 重设密码
+     */
+    boolean resetPassword(Long userId, String password);
+    
     /**
      * 删除用户
      */

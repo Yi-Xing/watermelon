@@ -14,12 +14,18 @@ import java.util.List;
 public interface ResourceApplicationService {
 
     /**
+     * 根据ID获取资源详情（包含父资源名称）
+     */
+    ResourceNodeTreeVO getResourceDetailById(Long id);
+    
+    /**
      * 创建资源
      *
      * @param createResourceNodeDTO 创建资源DTO
      * @return 资源视图对象
      */
     ResourceNodeVO createResource(CreateResourceNodeDTO createResourceNodeDTO);
+    
     /**
      * 查询资源树
      */
@@ -29,4 +35,9 @@ public interface ResourceApplicationService {
      * 更新资源
      */
     boolean updateResource(UpdateResourceDTO updateResourceDTO);
+    
+    /**
+     * 删除资源
+     */
+    boolean deleteResource(Long id);
 }

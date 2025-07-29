@@ -18,6 +18,11 @@ public interface RoleApplicationService {
     RoleVO createRole(CreateRoleDTO createRoleDTO);
     
     /**
+     * 根据ID获取角色详情（包含关联资源）
+     */
+    RoleVO getRoleDetailById(Long id);
+    
+    /**
      * 分页查询角色列表
      */
     PageVO<RoleVO> getRoleList(RoleQueryDTO queryDTO);

@@ -52,6 +52,15 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     }
 
     @Override
+    public RoleVO getRoleDetailById(Long id) {
+        // 1. 获取角色基本信息
+        Role role = roleDomainService.getRoleById(id);
+        
+        // 2. 组装关联信息并返回
+        return buildRoleVO(role);
+    }
+
+    @Override
     public PageVO<RoleVO> getRoleList(RoleQueryDTO queryDTO) {
         // 1. 查询角色列表
         List<Role> roles = roleDomainService.getRoleList(

@@ -47,6 +47,15 @@ public class ResourceController {
     }
     
     /**
+     * 根据ID获取资源详情（包含父资源名称）
+     */
+    @GetMapping("/{id}")
+    public ApiResponse<ResourceNodeTreeVO> getResourceById(@PathVariable Long id) {
+        ResourceNodeTreeVO resource = resourceApplicationService.getResourceDetailById(id);
+        return ApiResponse.success(resource, "获取资源详情成功");
+    }
+    
+    /**
      * 更新资源
      */
     @PutMapping
@@ -56,6 +65,19 @@ public class ResourceController {
             return ApiResponse.success(true, "资源更新成功");
         } else {
             return ApiResponse.error("资源更新失败", false);
+        }
+    }
+    
+    /**
+     * 删除资源
+     */
+    @DeleteMapping("/{id}")
+    public ApiResponse<Boolean> deleteResource(@PathVariable Long id) {
+        boolean result = resourceApplicationService.deleteResource(id);
+        if (result) {
+            return ApiResponse.success(true, "资源删除成功");
+        } else {
+            return ApiResponse.error("资源删除失败", false);
         }
     }
 } 

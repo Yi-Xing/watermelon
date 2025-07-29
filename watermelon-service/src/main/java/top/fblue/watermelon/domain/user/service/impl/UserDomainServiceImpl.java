@@ -3,6 +3,7 @@ package top.fblue.watermelon.domain.user.service.impl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.utils.StringUtil;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
@@ -22,35 +23,9 @@ public class UserDomainServiceImpl implements UserDomainService {
     private UserRepository userRepository;
 
     @Override
-    public User createUser(String name, String email, String phone, String password, Integer state, String remark) {
-        // 检查用户名是否已存在
-        if (userRepository.existsByUsername(name)) {
-            throw new IllegalArgumentException("用户名已存在");
-        }
-
-        // 检查邮箱是否已存在（如果邮箱不为空）
-        if (StringUtil.isNotEmpty(email)) {
-            if (userRepository.existsByEmail(email)) {
-                throw new IllegalArgumentException("邮箱已存在");
-            }
-        }
-
-        // 检查手机号是否已存在（如果手机号不为空）
-        if (StringUtil.isNotEmpty(phone)) {
-            if (userRepository.existsByPhone(phone)) {
-                throw new IllegalArgumentException("手机号已存在");
-            }
-        }
-
-        // 使用Builder创建用户实体
-        User user = User.builder()
-                .username(name)
-                .email(email)
-                .phone(phone)
-                .password(password)
-                .state(state)
-                .remark(remark)
-                .build();
+    public User createUser(User user) {
+        // 校验业务规则
+        validateUser(user);
 
         // 保存用户
         return userRepository.save(user);
@@ -96,7 +71,78 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
 
     @Override
+    public boolean updateUser(User user) {
+        // 校验业务规则
+        validateUserUpdate(user);
+        
+        // 更新用户
+        return userRepository.update(user);
+    }
+
+    @Override
+    public boolean resetPassword(Long userId, String password) {
+        // 检查用户是否存在
+        getUserById(userId);
+        
+        // 重设密码
+        return userRepository.resetPassword(userId, password);
+    }
+
+    @Override
     public Long countUsers(String keyword, Integer state) {
         return userRepository.countByCondition(keyword, state);
+    }
+
+    /**
+     * 校验用户的业务规则
+     */
+    private void validateUser(User user) {
+        // 检查用户名是否已存在
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new IllegalArgumentException("用户名已存在");
+        }
+
+        // 检查邮箱是否已存在（如果邮箱不为空）
+        if (StringUtil.isNotEmpty(user.getEmail())) {
+            if (userRepository.existsByEmail(user.getEmail())) {
+                throw new IllegalArgumentException("邮箱已存在");
+            }
+        }
+
+        // 检查手机号是否已存在（如果手机号不为空）
+        if (StringUtil.isNotEmpty(user.getPhone())) {
+            if (userRepository.existsByPhone(user.getPhone())) {
+                throw new IllegalArgumentException("手机号已存在");
+            }
+        }
+    }
+    
+    /**
+     * 校验用户更新的业务规则
+     */
+    private void validateUserUpdate(User user) {
+        // 检查用户是否存在
+        User existingUser = getUserById(user.getId());
+        
+        // 检查用户名是否已存在（如果修改了用户名）
+        if (!existingUser.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(user.getUsername())) {
+                throw new IllegalArgumentException("用户名已存在");
+            }
+        }
+
+        // 检查邮箱是否已存在（如果修改了邮箱且不为空）
+        if (StringUtil.isNotEmpty(user.getEmail()) && !user.getEmail().equals(existingUser.getEmail())) {
+            if (userRepository.existsByEmail(user.getEmail())) {
+                throw new IllegalArgumentException("邮箱已存在");
+            }
+        }
+
+        // 检查手机号是否已存在（如果修改了手机号且不为空）
+        if (StringUtil.isNotEmpty(user.getPhone()) && !user.getPhone().equals(existingUser.getPhone())) {
+            if (userRepository.existsByPhone(user.getPhone())) {
+                throw new IllegalArgumentException("手机号已存在");
+            }
+        }
     }
 }

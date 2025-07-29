@@ -1,9 +1,14 @@
 package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
+import top.fblue.watermelon.application.dto.CreateUserDTO;
+import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.application.vo.UserInfoVO;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.utils.StringUtil;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
 
@@ -59,6 +64,46 @@ public class UserConverter {
                 .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
                 .build();
     }
+
+    public User toUser(CreateUserDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        // 设置默认值，避免数据库存储null
+        String phone = StringUtil.getNonEmptyString(dto.getPhone());
+        String email = StringUtil.getNonEmptyString(dto.getEmail());
+        String password = StringUtil.getNonEmptyString(dto.getPassword());
+
+        return User.builder()
+                .username(dto.getName())
+                .email(email)
+                .phone(phone)
+                .password(password)
+                .state(dto.getState())
+                .remark(dto.getRemark())
+                .build();
+    }
+    
+    public User toUser(UpdateUserDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        // 设置默认值，避免数据库存储null
+        String phone = StringUtil.getNonEmptyString(dto.getPhone());
+        String email = StringUtil.getNonEmptyString(dto.getEmail());
+
+        return User.builder()
+                .id(dto.getId())
+                .username(dto.getName())
+                .email(email)
+                .phone(phone)
+                .state(dto.getState())
+                .remark(dto.getRemark())
+                .build();
+    }
+
     /**
      * User转换为UserInfoVO
      */

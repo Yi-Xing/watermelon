@@ -5,6 +5,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.service.UserApplicationService;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
+import top.fblue.watermelon.application.dto.UpdateUserDTO;
+import top.fblue.watermelon.application.dto.ResetPasswordDTO;
 import top.fblue.watermelon.application.dto.UserQueryDTO;
 import top.fblue.watermelon.application.vo.PageVO;
 import top.fblue.watermelon.application.vo.UserVO;
@@ -33,12 +35,12 @@ public class UserController {
     }
     
     /**
-     * 根据ID获取用户
+     * 根据ID获取用户详情（包含关联角色）
      */
     @GetMapping("/{id}")
     public ApiResponse<UserVO> getUserById(@PathVariable Long id) {
-        UserVO user = userApplicationService.getUserById(id);
-        return ApiResponse.success(user, "获取用户信息成功");
+        UserVO user = userApplicationService.getUserDetailById(id);
+        return ApiResponse.success(user, "获取用户详情成功");
     }
 
     /**
@@ -51,6 +53,32 @@ public class UserController {
             return ApiResponse.success(true, "用户删除成功");
         } else {
             return ApiResponse.error("用户删除失败", false);
+        }
+    }
+    
+    /**
+     * 更新用户
+     */
+    @PutMapping
+    public ApiResponse<Boolean> updateUser(@Valid @RequestBody UpdateUserDTO updateUserDTO) {
+        boolean result = userApplicationService.updateUser(updateUserDTO);
+        if (result) {
+            return ApiResponse.success(true, "用户更新成功");
+        } else {
+            return ApiResponse.error("用户更新失败", false);
+        }
+    }
+    
+    /**
+     * 重设密码
+     */
+    @PutMapping("/password")
+    public ApiResponse<Boolean> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        boolean result = userApplicationService.resetPassword(resetPasswordDTO);
+        if (result) {
+            return ApiResponse.success(true, "密码重设成功");
+        } else {
+            return ApiResponse.error("密码重设失败", false);
         }
     }
     

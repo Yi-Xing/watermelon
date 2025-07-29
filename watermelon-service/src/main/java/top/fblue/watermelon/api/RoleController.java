@@ -70,6 +70,15 @@ public class RoleController {
     }
     
     /**
+     * 根据ID获取角色详情（包含关联资源）
+     */
+    @GetMapping("/{id}")
+    public ApiResponse<RoleVO> getRoleById(@PathVariable Long id) {
+        RoleVO role = roleApplicationService.getRoleDetailById(id);
+        return ApiResponse.success(role, "获取角色详情成功");
+    }
+    
+    /**
      * 删除角色
      */
     @DeleteMapping("/{id}")

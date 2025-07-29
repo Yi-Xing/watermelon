@@ -49,6 +49,19 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
+    public ResourceNodeTreeVO getResourceDetailById(Long id) {
+        // 1. 获取资源基本信息
+        ResourceNode resource = resourceDomainService.getResourceById(id);
+        
+        // 2. 获取关联的用户信息
+        List<Long> userIds = List.of(resource.getCreatedBy(), resource.getUpdatedBy());
+        Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
+        
+        // 3. 转换为VO
+        return resourceConverter.toTreeVO(resource, userMap);
+    }
+
+    @Override
     public List<ResourceNodeTreeVO> getResourceTree(ResourceQueryDTO queryDTO) {
         // 1. 查询所有资源
         List<ResourceNode> resources = resourceDomainService.getResourceList(
@@ -75,6 +88,13 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
         
         // 2. 通过领域服务更新资源
         return resourceDomainService.updateResource(resource);
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteResource(Long id) {
+        // 通过领域服务删除资源
+        return resourceDomainService.deleteResource(id);
     }
     
     /**
