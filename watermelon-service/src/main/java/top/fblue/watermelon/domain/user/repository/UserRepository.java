@@ -2,6 +2,8 @@ package top.fblue.watermelon.domain.user.repository;
 
 import top.fblue.watermelon.domain.user.entity.User;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +25,7 @@ public interface UserRepository {
      * @param userIds 用户ID集合
      * @return 用户列表
      */
-    List<User> findByIds(Set<Long> userIds);
+    List<User> findByIds(Collection<Long> userIds);
 
     /**
      * 检查用户名是否存在

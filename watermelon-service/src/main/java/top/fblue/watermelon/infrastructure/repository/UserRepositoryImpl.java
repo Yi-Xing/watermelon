@@ -12,6 +12,7 @@ import top.fblue.watermelon.infrastructure.converter.UserPOConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserMapper;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findByIds(Set<Long> userIds) {
+    public List<User> findByIds(Collection<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return new ArrayList<>();
         }

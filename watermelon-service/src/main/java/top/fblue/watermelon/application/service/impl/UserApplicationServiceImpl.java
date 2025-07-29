@@ -14,7 +14,9 @@ import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +52,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         );
 
         // 创建完成后，获取包含详细信息的用户数据
-        User userDetail = userDomainService.getUserDetailById(user.getId());
+        User userDetail = userDomainService.getUserById(user.getId());
 
         // 直接转换并返回
         return userConverter.toVO(userDetail);
@@ -58,10 +60,17 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Override
     public UserVO getUserById(Long id) {
-        // 直接获取包含详细信息的用户数据
-        User userDetail = userDomainService.getUserDetailById(id);
+        // 获取基础用户数据
+        User user = userDomainService.getUserById(id);
 
-        return userConverter.toVO(userDetail);
+        // 组装详细信息
+        List<Long> userIdList  = new ArrayList<>();
+        userIdList.add(user.getCreatedBy());
+        userIdList.add(user.getUpdatedBy());
+
+        Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIdList);
+
+        return userConverter.toVO(user,userIDMap);
     }
 
     @Override

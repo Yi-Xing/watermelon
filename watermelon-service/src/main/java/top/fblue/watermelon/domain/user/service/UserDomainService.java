@@ -3,6 +3,8 @@ package top.fblue.watermelon.domain.user.service;
 import top.fblue.watermelon.domain.user.entity.User;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 用户领域服务接口
@@ -14,12 +16,21 @@ public interface UserDomainService {
      * 创建用户
      */
     User createUser(String name, String email, String phone, String password, Integer state, String remark);
-    
+
     /**
-     * 根据ID获取用户详情
+     * 根据ID获取用户
      */
-    User getUserDetailById(Long id);
-    
+    User getUserById(Long id);
+
+    /**
+     * 批量根据ID获取用户
+     */
+    List<User> getUsersByIds(List<Long> userIds);
+
+    /**
+     * 批量根据ID获取用户
+     */
+     Map<Long, User> getUserMapByIds(List<Long> userIdSet);
     /**
      * 分页查询用户列表
      */
