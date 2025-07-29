@@ -2,6 +2,7 @@ package top.fblue.watermelon.domain.resource.repository;
 
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 资源仓储接口
@@ -26,18 +27,18 @@ public interface ResourceRepository {
     /**
      * 根据条件查询资源列表
      */
-    List<ResourceNode> findByCondition(String name, Integer state);
+    List<ResourceNode> findByCondition(String name, String code, Integer state);
+    
+    /**
+     * 根据ID列表查询资源列表
+     */
+    List<ResourceNode> findByIds(List<Long> ids);
     
     /**
      * 根据父级ID查找子资源
      */
     List<ResourceNode> findByParentId(Long parentId);
-    
-    /**
-     * 根据类型查找资源
-     */
-    List<ResourceNode> findByType(Integer type);
-    
+
     /**
      * 查询所有启用的资源
      */
@@ -67,4 +68,10 @@ public interface ResourceRepository {
      * 检查同级资源名称是否存在
      */
     boolean existsByNameAndParentId(String name, Long parentId);
+    
+    
+    /**
+     * 根据code列表批量获取资源ID映射
+     */
+    Map<String, Long> findIdMapByCodes(List<String> codes);
 } 

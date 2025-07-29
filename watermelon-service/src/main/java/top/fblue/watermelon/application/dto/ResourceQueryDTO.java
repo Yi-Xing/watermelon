@@ -15,6 +15,11 @@ public class ResourceQueryDTO {
     private String name;
     
     /**
+     * 资源代码（模糊查询）
+     */
+    private String code;
+    
+    /**
      * 状态：1 启用 2 禁用
      */
     @Min(value = 1, message = "状态值不正确")

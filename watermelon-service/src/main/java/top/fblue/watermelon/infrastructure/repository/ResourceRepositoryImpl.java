@@ -12,9 +12,12 @@ import top.fblue.watermelon.infrastructure.converter.ResourceNodePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.ResourceNodeMapper;
 import top.fblue.watermelon.infrastructure.po.ResourceNodePO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 资源仓储实现
@@ -30,11 +33,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     @Override
     public ResourceNode save(ResourceNode resourceNode) {
         ResourceNodePO po = resourceNodePOConverter.toPO(resourceNode);
-        if (po.getId() == null) {
-            resourceNodeMapper.insert(po);
-        } else {
-            resourceNodeMapper.updateById(po);
-        }
+        resourceNodeMapper.insert(po);
         ResourceNodePO savedPO = resourceNodeMapper.selectById(po.getId());
         return resourceNodePOConverter.toDomain(savedPO);
     }
@@ -72,19 +71,6 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     public List<ResourceNode> findByParentId(Long parentId) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("parent_id", parentId);
-        queryWrapper.eq("state", 1); // 只查询启用的资源
-        queryWrapper.orderByAsc("order_num");
-        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
-        return poList.stream()
-                .map(resourceNodePOConverter::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ResourceNode> findByType(Integer type) {
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("type", type);
-        queryWrapper.eq("state", 1); // 只查询启用的资源
         queryWrapper.orderByAsc("order_num");
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
         return poList.stream()
@@ -113,24 +99,41 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         ResourceNodePO po = resourceNodePOConverter.toPO(resource);
         return resourceNodeMapper.updateById(po) > 0;
     }
-    
+
     @Override
     public boolean existsById(Long id) {
         return resourceNodeMapper.selectById(id) != null;
     }
-    
+
     @Override
-    public List<ResourceNode> findByCondition(String name, Integer state) {
+    public List<ResourceNode> findByCondition(String name, String code, Integer state) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        
+
         if (StringUtils.hasText(name)) {
             queryWrapper.like("name", name);
         }
-        
+
+        if (StringUtils.hasText(code)) {
+            queryWrapper.like("code", code);
+        }
+
         if (state != null) {
             queryWrapper.eq("state", state);
         }
-        
+
+        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
+        return poList.stream()
+                .map(resourceNodePOConverter::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ResourceNode> findByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", ids);
         queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
         return poList.stream()
@@ -138,57 +141,18 @@ public class ResourceRepositoryImpl implements ResourceRepository {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 根据条件分页查询资源列表
-     */
-    public List<ResourceNodePO> findByCondition(String keyword, Integer type, Integer state, Long parentId, int pageNum, int pageSize) {
-        QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(keyword, type, state, parentId);
-        queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
+    @Override
+    public Map<String, Long> findIdMapByCodes(List<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return new HashMap<>();
+        }
         
-        Page<ResourceNodePO> page = new Page<>(pageNum, pageSize);
-        IPage<ResourceNodePO> pageResult = resourceNodeMapper.selectPage(page, queryWrapper);
-        
-        return pageResult.getRecords();
-    }
-
-    /**
-     * 根据条件统计资源总数
-     */
-    public Long countByCondition(String keyword, Integer type, Integer state, Long parentId) {
-        QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(keyword, type, state, parentId);
-        return resourceNodeMapper.selectCount(queryWrapper);
-    }
-
-    /**
-     * 构建查询条件
-     */
-    private QueryWrapper<ResourceNodePO> buildQueryWrapper(String keyword, Integer type, Integer state, Long parentId) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("code", codes);
+        queryWrapper.select("code", "id");
         
-        // 关键词模糊查询（资源名、资源代码）
-        if (StringUtils.hasText(keyword)) {
-            queryWrapper.and(wrapper -> wrapper
-                    .like("name", keyword)
-                    .or()
-                    .like("code", keyword)
-            );
-        }
-        
-        // 类型筛选
-        if (type != null) {
-            queryWrapper.eq("type", type);
-        }
-        
-        // 状态筛选
-        if (state != null) {
-            queryWrapper.eq("state", state);
-        }
-        
-        // 父级ID筛选
-        if (parentId != null) {
-            queryWrapper.eq("parent_id", parentId);
-        }
-        
-        return queryWrapper;
+        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
+        return poList.stream()
+                .collect(Collectors.toMap(ResourceNodePO::getCode, ResourceNodePO::getId));
     }
-} 
+}

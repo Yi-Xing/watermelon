@@ -47,10 +47,6 @@ public class ResourceNodePOConverter {
                 .parentId(domain.getParentId())
                 .state(domain.getState())
                 .remark(domain.getRemark())
-                .createdBy(domain.getCreatedBy())
-                .createdTime(domain.getCreatedTime())
-                .updatedBy(domain.getUpdatedBy())
-                .updatedTime(domain.getUpdatedTime())
                 .build();
     }
 } 

@@ -30,11 +30,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User save(User user) {
         UserPO po = userPOConverter.toPO(user);
-        if (po.getId() == null) {
-            userMapper.insert(po);
-        } else {
-            userMapper.updateById(po);
-        }
+        userMapper.insert(po);
         // 重新查询以获取完整的审计信息
         UserPO savedPO = userMapper.selectById(po.getId());
         return userPOConverter.toDomain(savedPO);
@@ -47,7 +43,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findByIds(Collection<Long> userIds) {
+    public List<User> findByIds(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return new ArrayList<>();
         }

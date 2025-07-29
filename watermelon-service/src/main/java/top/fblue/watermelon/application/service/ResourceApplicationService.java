@@ -1,16 +1,16 @@
 package top.fblue.watermelon.application.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
-import top.fblue.watermelon.application.vo.ResourceExcelVO;
+import top.fblue.watermelon.application.vo.ResourceImportResultVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 资源应用服务接口
@@ -20,7 +20,7 @@ public interface ResourceApplicationService {
     /**
      * 根据ID获取资源详情（包含父资源名称）
      */
-    ResourceNodeTreeVO getResourceDetailById(Long id);
+    ResourceNodeVO getResourceDetailById(Long id);
     
     /**
      * 创建资源
@@ -46,22 +46,22 @@ public interface ResourceApplicationService {
     boolean deleteResource(Long id);
     
     /**
-     * 根据code获取资源ID
-     */
-    Long getResourceIdByCode(String code);
-    
-    /**
-     * 导入资源
-     */
-    void importResource(ResourceNode resourceNode);
-    
-    /**
      * 导出Excel
      */
-    byte[] exportExcel() throws IOException;
+    byte[] exportExcel();
     
     /**
      * 导入Excel
      */
-    String importExcel(MultipartFile file);
+    ResourceImportResultVO importExcel(MultipartFile file);
+    
+    /**
+     * 批量导入资源
+     */
+    ResourceImportResultVO batchImportResources(List<ResourceNode> resourceNodes);
+    
+    /**
+     * 根据code列表批量获取资源ID映射
+     */
+    Map<String, Long> getResourceIdMapByCodes(List<String> codes);
 }

@@ -1,19 +1,17 @@
 package top.fblue.watermelon.application.service.impl;
 
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.fblue.watermelon.application.converter.ResourceConverter;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.write.metadata.WriteSheet;
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
-import top.fblue.watermelon.application.dto.ResourceExcelDTO;
-import top.fblue.watermelon.application.listener.ResourceExcelListener;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.service.ResourceApplicationService;
+import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
@@ -23,15 +21,18 @@ import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import top.fblue.watermelon.application.vo.ResourceImportResultVO;
 
 /**
  * 资源应用服务实现
  */
+@Slf4j
 @Service
 public class ResourceApplicationServiceImpl implements ResourceApplicationService {
 
@@ -43,6 +44,9 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     
     @Resource
     private ResourceConverter resourceConverter;
+    
+    @Resource
+    private ResourceExcelService resourceExcelService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -58,16 +62,22 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
-    public ResourceNodeTreeVO getResourceDetailById(Long id) {
+    public ResourceNodeVO getResourceDetailById(Long id) {
         // 1. 获取资源基本信息
         ResourceNode resource = resourceDomainService.getResourceById(id);
+
+        // 2. 获取父节点信息
+        ResourceNode parebtResourceNode = null;
+        if (resource.getParentId() != null && resource.getParentId() != 0) {
+            parebtResourceNode = resourceDomainService.getResourceById(resource.getParentId());
+        }
         
-        // 2. 获取关联的用户信息
+        // 3. 获取关联的用户信息
         List<Long> userIds = List.of(resource.getCreatedBy(), resource.getUpdatedBy());
         Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
         
-        // 3. 转换为VO
-        return resourceConverter.toTreeVO(resource, userMap);
+        // 4. 转换为VO
+        return resourceConverter.toVO(resource, parebtResourceNode, userMap);
     }
 
     @Override
@@ -75,18 +85,25 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
         // 1. 查询所有资源
         List<ResourceNode> resources = resourceDomainService.getResourceList(
                 queryDTO.getName(),
+                queryDTO.getCode(),
                 queryDTO.getState()
         );
         
-        // 2. 获取所有关联的用户信息
+        // 2. 如果有搜索条件，需要包含父节点
+        if (StringUtils.hasText(queryDTO.getName()) || StringUtils.hasText(queryDTO.getCode()) || queryDTO.getState() != null) {
+            resources = resourceDomainService.buildFullPathNodes(resources);
+        }
+        
+        // 3. 获取所有关联的用户信息
         Set<Long> userIds = resources.stream()
                 .flatMap(resource -> Stream.of(resource.getCreatedBy(), resource.getUpdatedBy()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+
         Map<Long, User> userMap = userDomainService.getUserMapByIds(new ArrayList<>(userIds));
         
-        // 3. 转换为树形结构
-        return buildResourceTree(resources, userMap);
+        // 4. 转换为树形结构
+        return resourceConverter.buildResourceTree(resources, userMap);
     }
 
     @Override
@@ -107,133 +124,246 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
-    public Long getResourceIdByCode(String code) {
-        // 通过领域服务根据code获取资源ID
-        return resourceDomainService.getResourceIdByCode(code);
+    public ResourceImportResultVO importExcel(MultipartFile file) {
+        try {
+            // 1. 读取Excel数据
+            List<ResourceExcelVO> excelDataList = resourceExcelService.readExcel(file);
+            
+            // 2. 数据校验
+            List<String> validationErrors = resourceExcelService.validateExcelData(excelDataList);
+            if (!validationErrors.isEmpty()) {
+                return ResourceImportResultVO.builder()
+                        .success(false)
+                        .errors(validationErrors)
+                        .build();
+            }
+            
+            // 3. 批量转换数据
+            List<ResourceNode> resourceNodes = convertExcelToResourceNodes(excelDataList);
+            
+            // 4. 批量导入
+            return batchImportResources(resourceNodes);
+            
+        } catch (Exception e) {
+            log.error("导入Excel失败", e);
+            return ResourceImportResultVO.builder()
+                    .success(false)
+                    .errors(List.of("导入Excel失败: " + e.getMessage()))
+                    .build();
+        }
     }
-
+    
     @Override
-    @Transactional
-    public void importResource(ResourceNode resourceNode) {
-        // 通过领域服务导入资源
-        resourceDomainService.importResource(resourceNode);
-    }
-
-    @Override
-    public byte[] exportExcel() throws IOException {
+    public byte[] exportExcel() {
         // 1. 获取所有资源
-        List<ResourceNode> resources = resourceDomainService.getResourceList(null, null);
+        List<ResourceNode> resources = resourceDomainService.getResourceList(null, null, null);
         
-        // 2. 转换为Excel VO
-        List<ResourceExcelVO> excelData = resources.stream()
-                .map(this::convertToExcelVO)
-                .collect(Collectors.toList());
+        // 2. 构建层级Excel数据
+        List<ResourceExcelVO> excelData = resourceConverter.buildHierarchicalExcelData(resources);
         
         // 3. 生成Excel文件
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        EasyExcel.write(outputStream, ResourceExcelVO.class)
-                .sheet("资源列表")
-                .doWrite(excelData);
-        
-        return outputStream.toByteArray();
+        return resourceExcelService.writeExcel(excelData);
     }
-
+    
     @Override
-    public String importExcel(MultipartFile file) {
+    public ResourceImportResultVO batchImportResources(List<ResourceNode> resourceNodes) {
+        int totalRows = resourceNodes.size();
+        int insertedRows = 0;
+        int updatedRows = 0;
+        int deletedRows = 0;
+        
         try {
-            // 使用EasyExcel读取文件
-            EasyExcel.read(file.getInputStream(), ResourceExcelDTO.class, new ResourceExcelListener(this))
-                    .sheet()
-                    .doRead();
-            
-            return "导入成功";
-        } catch (Exception e) {
-            throw new RuntimeException("导入Excel失败: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * 转换资源为Excel VO
-     */
-    private ResourceExcelVO convertToExcelVO(ResourceNode resource) {
-        // 获取父资源code
-        String parentCode = null;
-        if (resource.getParentId() != null) {
-            ResourceNode parentResource = resourceDomainService.getResourceById(resource.getParentId());
-            if (parentResource != null) {
-                parentCode = parentResource.getCode();
+            // 1. 业务校验
+            List<String> businessErrors = validateBusinessRules(resourceNodes);
+            if (!businessErrors.isEmpty()) {
+                return ResourceImportResultVO.error(businessErrors);
             }
+            
+            // 2. 分离新增和更新操作
+            List<ResourceNode> toInsert = new ArrayList<>();
+            List<ResourceNode> toUpdate = new ArrayList<>();
+            
+            for (ResourceNode resourceNode : resourceNodes) {
+                // 检查资源是否已存在
+                ResourceNode existingResource = resourceDomainService.findByCode(resourceNode.getCode());
+                
+                if (existingResource != null) {
+                    // 更新现有资源
+                    resourceNode.setId(existingResource.getId());
+                    toUpdate.add(resourceNode);
+                } else {
+                    // 创建新资源
+                    toInsert.add(resourceNode);
+                }
+            }
+            
+            // 3. 批量新增
+            if (!toInsert.isEmpty()) {
+                for (ResourceNode resourceNode : toInsert) {
+                    resourceDomainService.createResourceNode(resourceNode);
+                    insertedRows++;
+                }
+            }
+            
+            // 4. 批量更新
+            if (!toUpdate.isEmpty()) {
+                for (ResourceNode resourceNode : toUpdate) {
+                    resourceDomainService.updateResource(resourceNode);
+                    updatedRows++;
+                }
+            }
+            
+            return new ResourceImportResultVO(totalRows, insertedRows, updatedRows, deletedRows);
+            
+        } catch (Exception e) {
+            log.error("批量导入资源失败", e);
+            return ResourceImportResultVO.error(List.of("批量导入失败: " + e.getMessage()));
         }
-        
-        ResourceExcelVO excelVO = new ResourceExcelVO();
-        excelVO.setParentCode(parentCode);
-        excelVO.setName(resource.getName());
-        excelVO.setCode(resource.getCode());
-        excelVO.setType(ResourceTypeEnum.getDescByCode(resource.getType()));
-        excelVO.setOrderNum(resource.getOrderNum());
-        excelVO.setState(StateEnum.getDescByCode(resource.getState()));
-        excelVO.setRemark(resource.getRemark());
-        return excelVO;
     }
     
     /**
-     * 构建资源树形结构
+     * 业务规则校验
      */
-    private List<ResourceNodeTreeVO> buildResourceTree(List<ResourceNode> resources, Map<Long, User> userMap) {
-        // 1. 转换为VO
-        List<ResourceNodeTreeVO> resourceVOs = resources.stream()
-                .map(resource -> resourceConverter.toTreeVO(resource, userMap))
-                .toList();
+    private List<String> validateBusinessRules(List<ResourceNode> resourceNodes) {
+        List<String> errors = new ArrayList<>();
         
-        // 2. 构建父子关系
-        Map<Long, ResourceNodeTreeVO> resourceMap = resourceVOs.stream()
-                .collect(Collectors.toMap(ResourceNodeTreeVO::getId, vo -> vo));
+        // 1. 校验名称和code在Excel内部是否重复
+        Map<String, Integer> nameCountMap = new HashMap<>();
+        Map<String, Integer> codeCountMap = new HashMap<>();
         
-        List<ResourceNodeTreeVO> rootNodes = new ArrayList<>();
-        
-        for (ResourceNodeTreeVO vo : resourceVOs) {
-            if (vo.getParentId() == null || vo.getParentId() == 0) {
-                rootNodes.add(vo);
-            } else {
-                ResourceNodeTreeVO parent = resourceMap.get(vo.getParentId());
-                if (parent != null) {
-                    if (parent.getChildren() == null) {
-                        parent.setChildren(new ArrayList<>());
-                    }
-                    parent.getChildren().add(vo);
+        for (int i = 0; i < resourceNodes.size(); i++) {
+            ResourceNode resource = resourceNodes.get(i);
+            int rowNumber = i + 2; // Excel行号从2开始
+            
+            // 统计名称出现次数
+            String name = resource.getName();
+            if (name != null) {
+                nameCountMap.put(name, nameCountMap.getOrDefault(name, 0) + 1);
+                if (nameCountMap.get(name) > 1) {
+                    errors.add(String.format("第%d行: 资源名称'%s'在Excel中重复", rowNumber, name));
+                }
+            }
+            
+            // 统计code出现次数
+            String code = resource.getCode();
+            if (code != null) {
+                codeCountMap.put(code, codeCountMap.getOrDefault(code, 0) + 1);
+                if (codeCountMap.get(code) > 1) {
+                    errors.add(String.format("第%d行: 资源code'%s'在Excel中重复", rowNumber, code));
                 }
             }
         }
         
-        // 3. 排序
-        sortResourceTree(rootNodes);
+        // 2. 校验与数据库中的资源是否冲突
+        for (int i = 0; i < resourceNodes.size(); i++) {
+            ResourceNode resource = resourceNodes.get(i);
+            int rowNumber = i + 2;
+            
+            // 检查名称在同级下是否重复
+            if (resource.getName() != null && resource.getParentId() != null) {
+                boolean nameExists = resourceDomainService.existsByNameAndParentIdExcludeId(
+                    resource.getName(), resource.getParentId(), resource.getId());
+                if (nameExists) {
+                    errors.add(String.format("第%d行: 同级下已存在名称为'%s'的资源", rowNumber, resource.getName()));
+                }
+            }
+            
+            // 检查code是否重复（排除自己）
+            if (resource.getCode() != null) {
+                boolean codeExists = resourceDomainService.existsByCodeExcludeId(resource.getCode(), resource.getId());
+                if (codeExists) {
+                    errors.add(String.format("第%d行: 资源code'%s'已存在", rowNumber, resource.getCode()));
+                }
+            }
+        }
         
-        return rootNodes;
+        return errors;
+    }
+    
+    @Override
+    public Map<String, Long> getResourceIdMapByCodes(List<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        return resourceDomainService.getResourceIdMapByCodes(codes);
+    }
+
+    /**
+     * 批量转换Excel数据为ResourceNode
+     */
+    private List<ResourceNode> convertExcelToResourceNodes(List<ResourceExcelVO> excelDataList) {
+        // 获取所有父资源code，用于批量查询
+        List<String> parentCodes = excelDataList.stream()
+                .map(ResourceExcelVO::getParentCode)
+                .filter(code -> code != null && !code.trim().isEmpty() && !"0".equals(code))
+                .distinct()
+                .collect(Collectors.toList());
+        
+        // 批量查询父资源ID映射
+        Map<String, Long> parentCodeToIdMap = getResourceIdMapByCodes(parentCodes);
+        
+        return excelDataList.stream()
+                .map(excelData -> convertExcelToResourceNode(excelData, parentCodeToIdMap))
+                .collect(Collectors.toList());
     }
     
     /**
-     * 递归排序资源树
-     * 优先显示顺序，其次更新时间
+     * 转换Excel数据为ResourceNode
      */
-    private void sortResourceTree(List<ResourceNodeTreeVO> nodes) {
-        if (nodes == null || nodes.isEmpty()) {
-            return;
+    private ResourceNode convertExcelToResourceNode(ResourceExcelVO excelData, Map<String, Long> parentCodeToIdMap) {
+        // 根据code查找父资源ID
+        Long parentId = null;
+        if (excelData.getParentCode() != null && !excelData.getParentCode().trim().isEmpty() 
+                && !"0".equals(excelData.getParentCode())) {
+            parentId = parentCodeToIdMap.get(excelData.getParentCode());
         }
         
-        // 排序当前层级
-        nodes.sort((a, b) -> {
-            int orderCompare = a.getOrderNum().compareTo(b.getOrderNum());
-            if (orderCompare != 0) {
-                return orderCompare;
-            }
-            return b.getUpdatedTime().compareTo(a.getUpdatedTime());
-        });
+        // 使用枚举转换类型
+        Integer type = convertType(excelData.getType());
         
-        // 递归排序子节点
-        for (ResourceNodeTreeVO node : nodes) {
-            if (node.getChildren() != null && !node.getChildren().isEmpty()) {
-                sortResourceTree(node.getChildren());
-            }
+        // 使用枚举转换状态
+        Integer state = convertState(excelData.getState());
+        
+        return ResourceNode.builder()
+                .name(excelData.getName())
+                .code(excelData.getCode())
+                .type(type)
+                .orderNum(excelData.getOrderNum())
+                .state(state)
+                .remark(excelData.getRemark())
+                .parentId(parentId)
+                .build();
+    }
+    
+    /**
+     * 使用枚举转换资源类型
+     */
+    private Integer convertType(String typeStr) {
+        if (typeStr == null) {
+            return ResourceTypeEnum.PAGE.getCode();
         }
+        
+        return switch (typeStr.trim()) {
+            case "页面" -> ResourceTypeEnum.PAGE.getCode();
+            case "按钮" -> ResourceTypeEnum.BUTTON.getCode();
+            case "接口" -> ResourceTypeEnum.API.getCode();
+            default -> ResourceTypeEnum.PAGE.getCode();
+        };
+    }
+    
+    /**
+     * 使用枚举转换状态
+     */
+    private Integer convertState(String stateStr) {
+        if (stateStr == null) {
+            return StateEnum.ENABLE.getCode();
+        }
+        
+        return switch (stateStr.trim()) {
+            case "启用" -> StateEnum.ENABLE.getCode();
+            case "禁用" -> StateEnum.DISABLE.getCode();
+            default -> StateEnum.ENABLE.getCode();
+        };
     }
 } 

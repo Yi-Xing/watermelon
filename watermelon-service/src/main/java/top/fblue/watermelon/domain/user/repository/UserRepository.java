@@ -25,7 +25,7 @@ public interface UserRepository {
      * @param userIds 用户ID集合
      * @return 用户列表
      */
-    List<User> findByIds(Collection<Long> userIds);
+    List<User> findByIds(List<Long> userIds);
 
     /**
      * 检查用户名是否存在

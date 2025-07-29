@@ -45,7 +45,7 @@ public class UserDomainServiceImpl implements UserDomainService {
         if (userIds == null || userIds.isEmpty()) {
             return new ArrayList<>();
         }
-        return userRepository.findByIds(new HashSet<>(userIds));
+        return userRepository.findByIds(userIds);
     }
 
     @Override

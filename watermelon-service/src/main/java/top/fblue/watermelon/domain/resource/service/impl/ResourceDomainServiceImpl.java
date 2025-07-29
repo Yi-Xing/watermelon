@@ -10,6 +10,9 @@ import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 资源领域服务实现
@@ -50,16 +53,62 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     }
 
     @Override
-    public List<ResourceNode> getResourceList(String name, Integer state) {
-        return resourceRepository.findByCondition(name, state);
+    public List<ResourceNode> getResourceList(String name, String code, Integer state) {
+        return resourceRepository.findByCondition(name, code, state);
+    }
+
+    @Override
+    public List<ResourceNode> getResourceListByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return resourceRepository.findByIds(ids);
+    }
+
+    @Override
+    public List<ResourceNode> buildFullPathNodes(List<ResourceNode> resources) {
+        Set<Long> resourceIds = new HashSet<>();
+        // 收集所有资源的ID
+        for (ResourceNode resource : resources) {
+            resourceIds.add(resource.getId());
+        }
+
+        // 收集所有资源父ID
+        for (ResourceNode resource : resources) {
+            // 递归收集所有父节点ID
+            collectParentIds(resource.getParentId(), resourceIds);
+        }
+
+        // 查询所有需要的资源
+        return this.getResourceListByIds(new ArrayList<>(resourceIds));
+    }
+
+    /**
+     * 递归收集父节点ID
+     */
+    private void collectParentIds(Long parentId, Set<Long> parentIds) {
+        if (parentId == null || parentId == 0 || parentIds.contains(parentId)) {
+            return;
+        }
+
+        parentIds.add(parentId);
+
+        // 获取父节点信息
+        ResourceNode parent = this.getResourceById(parentId);
+        if (parent != null && parent.getParentId() != null && parent.getParentId() != 0) {
+            collectParentIds(parent.getParentId(), parentIds);
+        }
     }
 
     @Override
     public boolean updateResource(ResourceNode resource) {
-        // 校验业务规则
-        validateResourceNode(resource);
+        // 1. 检查资源是否存在
+        ResourceNode existingResource = getResourceById(resource.getId());
+        
+        // 2. 校验业务规则（更新时的特殊校验）
+        validateResourceNodeForUpdate(resource, existingResource);
 
-        // 2. 更新资源
+        // 3. 更新资源
         return resourceRepository.update(resource);
     }
 
@@ -108,6 +157,31 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
 
         // 4. 校验资源code唯一性
         validateResourceCodeUnique(resourceNode.getCode());
+    }
+
+    /**
+     * 更新时校验资源节点的业务规则
+     */
+    private void validateResourceNodeForUpdate(ResourceNode resourceNode, ResourceNode existingResource) {
+        // 1. 校验自己不能为自己的父节点
+        validateSelfAsParent(resourceNode.getId(), resourceNode.getParentId());
+
+        // 2. 校验父级资源
+        validateParentResource(resourceNode.getParentId());
+
+        // 3. 校验环形引用
+        validateCircularReference(resourceNode.getParentId());
+
+        // 4. 校验同级资源名称是否已存在（过滤掉自己）
+
+        if (!existingResource.getName().equals(resourceNode.getName())) {
+            validateSiblingResourceNameExists(resourceNode.getName(), resourceNode.getParentId());
+        }
+
+        // 5. 校验资源code唯一性（过滤掉自己）
+        if (!existingResource.getCode().equals(resourceNode.getCode())) {
+            validateResourceCodeUnique(resourceNode.getCode());
+        }
     }
 
     /**
@@ -170,7 +244,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
      * 校验父级资源
      */
     private void validateParentResource(Long parentId) {
-        if (parentId != null) {
+        if (parentId != null && parentId != 0) {
             ResourceNode parentResource = resourceRepository.findById(parentId);
             if (parentResource == null) {
                 throw new IllegalArgumentException("上级资源不存在");
@@ -189,6 +263,16 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     }
 
     @Override
+    public ResourceNode findByCode(String code) {
+        return resourceRepository.findByCode(code);
+    }
+
+    @Override
+    public Map<String, Long> getResourceIdMapByCodes(List<String> codes) {
+        return resourceRepository.findIdMapByCodes(codes);
+    }
+
+    @Override
     public void importResource(ResourceNode resourceNode) {
         // 根据code判断是新增还是更新
         ResourceNode existingResource = resourceRepository.findByCode(resourceNode.getCode());
@@ -200,6 +284,15 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         } else {
             // 新增资源
             resourceRepository.save(resourceNode);
+        }
+    }
+
+    /**
+     * 校验自己不能为自己的父节点
+     */
+    private void validateSelfAsParent(Long resourceId, Long parentId) {
+        if (resourceId != null && resourceId.equals(parentId)) {
+            throw new IllegalArgumentException("自己不能为自己的父节点");
         }
     }
 }
