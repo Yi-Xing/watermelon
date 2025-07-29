@@ -7,7 +7,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
-import top.fblue.watermelon.domain.resource.repository.ResourceNodeRepository;
+import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
 import top.fblue.watermelon.infrastructure.converter.ResourceNodePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.ResourceNodeMapper;
 import top.fblue.watermelon.infrastructure.po.ResourceNodePO;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * 资源仓储实现
  */
 @Repository
-public class ResourceNodeRepositoryImpl implements ResourceNodeRepository {
+public class ResourceRepositoryImpl implements ResourceRepository {
 
     @Resource
     private ResourceNodeMapper resourceNodeMapper;
@@ -106,6 +106,36 @@ public class ResourceNodeRepositoryImpl implements ResourceNodeRepository {
     @Override
     public boolean delete(Long id) {
         return resourceNodeMapper.deleteById(id) > 0;
+    }
+
+    @Override
+    public boolean update(ResourceNode resource) {
+        ResourceNodePO po = resourceNodePOConverter.toPO(resource);
+        return resourceNodeMapper.updateById(po) > 0;
+    }
+    
+    @Override
+    public boolean existsById(Long id) {
+        return resourceNodeMapper.selectById(id) != null;
+    }
+    
+    @Override
+    public List<ResourceNode> findByCondition(String name, Integer state) {
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        
+        if (StringUtils.hasText(name)) {
+            queryWrapper.like("name", name);
+        }
+        
+        if (state != null) {
+            queryWrapper.eq("state", state);
+        }
+        
+        queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
+        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
+        return poList.stream()
+                .map(resourceNodePOConverter::toDomain)
+                .collect(Collectors.toList());
     }
 
     /**

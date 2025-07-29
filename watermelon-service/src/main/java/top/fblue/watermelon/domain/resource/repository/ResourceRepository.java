@@ -4,9 +4,9 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import java.util.List;
 
 /**
- * 资源节点仓储接口
+ * 资源仓储接口
  */
-public interface ResourceNodeRepository {
+public interface ResourceRepository {
     
     /**
      * 保存资源节点
@@ -24,14 +24,9 @@ public interface ResourceNodeRepository {
     ResourceNode findByCode(String code);
     
     /**
-     * 检查资源code是否存在
+     * 根据条件查询资源列表
      */
-    boolean existsByCode(String code);
-    
-    /**
-     * 检查同级资源名称是否存在
-     */
-    boolean existsByNameAndParentId(String name, Long parentId);
+    List<ResourceNode> findByCondition(String name, Integer state);
     
     /**
      * 根据父级ID查找子资源
@@ -49,7 +44,27 @@ public interface ResourceNodeRepository {
     List<ResourceNode> findAllEnabled();
     
     /**
+     * 更新资源
+     */
+    boolean update(ResourceNode resource);
+    
+    /**
      * 删除资源
      */
     boolean delete(Long id);
+    
+    /**
+     * 检查资源ID是否存在
+     */
+    boolean existsById(Long id);
+    
+    /**
+     * 检查资源code是否存在
+     */
+    boolean existsByCode(String code);
+    
+    /**
+     * 检查同级资源名称是否存在
+     */
+    boolean existsByNameAndParentId(String name, Long parentId);
 } 

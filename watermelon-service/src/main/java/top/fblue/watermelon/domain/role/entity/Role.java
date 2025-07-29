@@ -1,4 +1,4 @@
-package top.fblue.watermelon.domain.resource.entity;
+package top.fblue.watermelon.domain.role.entity;
 
 import lombok.Data;
 import lombok.Builder;
@@ -7,43 +7,28 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 资源节点领域实体
+ * 角色聚合根
  */
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceNode {
+public class Role {
     
     /**
-     * 资源ID
+     * 角色ID
      */
     private Long id;
     
     /**
-     * 资源名称
+     * 角色名称
      */
     private String name;
-    
-    /**
-     * 资源类型：1 页面，2 按钮，3 接口
-     */
-    private Integer type;
-    
-    /**
-     * 资源code
-     */
-    private String code;
     
     /**
      * 显示顺序
      */
     private Integer orderNum;
-    
-    /**
-     * 父级ID
-     */
-    private Long parentId;
     
     /**
      * 状态：1 启用 2 禁用

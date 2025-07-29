@@ -40,26 +40,9 @@ public class UserConverter {
     /**
      * User转换为UserVO（包含关联用户信息）
      */
-    public UserVO toVO(User user, Map<Long, User> userIDMap) {
+    public UserVO toVO(User user, Map<Long, User> userMap) {
         if (user == null) {
             return null;
-        }
-        User createdBy = userIDMap.get(user.getCreatedBy());
-        UserInfoVO createdByInfo= null;
-        if (createdBy != null) {
-            createdByInfo = UserInfoVO.builder()
-                    .id(createdBy.getId())
-                    .name(createdBy.getUsername())
-                    .build();
-        }
-
-        User updatedBy = userIDMap.get(user.getUpdatedBy());
-        UserInfoVO updatedByInfo= null;
-        if (updatedBy != null) {
-            updatedByInfo = UserInfoVO.builder()
-                    .id(updatedBy.getId())
-                    .name(updatedBy.getUsername())
-                    .build();
         }
 
         return UserVO.builder()
@@ -70,11 +53,23 @@ public class UserConverter {
                 .state(user.getState())
                 .stateDesc(StateEnum.fromCode(user.getState()).getDesc())
                 .remark(user.getRemark())
-                .createdBy(createdByInfo)
+                .createdBy(convertToUserInfoVO(userMap.get(user.getCreatedBy())))
                 .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
-                .updatedBy(updatedByInfo)
+                .updatedBy(convertToUserInfoVO(userMap.get(user.getUpdatedBy())))
                 .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
                 .build();
     }
+    /**
+     * User转换为UserInfoVO
+     */
+    private UserInfoVO convertToUserInfoVO(User user) {
+        if (user == null) {
+            return null;
+        }
 
+        return UserInfoVO.builder()
+                .id(user.getId())
+                .name(user.getUsername())
+                .build();
+    }
 }

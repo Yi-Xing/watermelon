@@ -1,19 +1,15 @@
-package top.fblue.watermelon.domain.resource.entity;
+package top.fblue.watermelon.application.vo;
 
-import lombok.Data;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+import lombok.Data;
+import java.util.List;
 
 /**
- * 资源节点领域实体
+ * 资源树形结构视图对象
  */
 @Data
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ResourceNode {
+@Builder
+public class ResourceNodeTreeVO {
     
     /**
      * 资源ID
@@ -29,6 +25,11 @@ public class ResourceNode {
      * 资源类型：1 页面，2 按钮，3 接口
      */
     private Integer type;
+    
+    /**
+     * 资源类型描述
+     */
+    private String typeDesc;
     
     /**
      * 资源code
@@ -51,27 +52,37 @@ public class ResourceNode {
     private Integer state;
     
     /**
+     * 状态描述
+     */
+    private String stateDesc;
+    
+    /**
      * 备注
      */
     private String remark;
     
     /**
-     * 创建人
+     * 创建人信息
      */
-    private Long createdBy;
+    private UserInfoVO createdBy;
     
     /**
      * 创建时间
      */
-    private LocalDateTime createdTime;
+    private String createdTime;
     
     /**
-     * 更新人
+     * 更新人信息
      */
-    private Long updatedBy;
+    private UserInfoVO updatedBy;
     
     /**
      * 更新时间
      */
-    private LocalDateTime updatedTime;
+    private String updatedTime;
+    
+    /**
+     * 子节点列表
+     */
+    private List<ResourceNodeTreeVO> children;
 } 

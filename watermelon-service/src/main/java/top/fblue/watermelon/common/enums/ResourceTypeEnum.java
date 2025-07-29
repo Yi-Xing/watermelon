@@ -3,17 +3,19 @@ package top.fblue.watermelon.common.enums;
 import lombok.Getter;
 
 /**
- * 状态枚举
+ * 资源类型枚举
+ * 1 页面，2 按钮，3 接口
  */
 @Getter
-public enum StateEnum {
-    ENABLE(1, "启用"),
-    DISABLE(2, "禁用");
+public enum ResourceTypeEnum {
+    PAGE(1, "页面"),
+    BUTTON(2, "按钮"),
+    API(3, "接口");
 
     private final Integer code;
     private final String desc;
 
-    StateEnum(Integer code, String description) {
+    ResourceTypeEnum(Integer code, String description) {
         this.code = code;
         this.desc = description;
     }
@@ -21,24 +23,24 @@ public enum StateEnum {
     /**
      * 根据code获取枚举
      */
-    public static StateEnum fromCode(Integer code) {
+    public static ResourceTypeEnum fromCode(Integer code) {
         if (code == null) {
             return null;
         }
-        for (StateEnum state : values()) {
-            if (state.getCode().equals(code)) {
-                return state;
+        for (ResourceTypeEnum type : values()) {
+            if (type.getCode().equals(code)) {
+                return type;
             }
         }
-        throw new IllegalArgumentException("Invalid state code: " + code);
+        throw new IllegalArgumentException("Invalid resource type code: " + code);
     }
 
     /**
      * 根据code获取描述
      */
     public static String getDescByCode(Integer code) {
-        StateEnum state = fromCode(code);
-        return state != null ? state.getDesc() : null;
+        ResourceTypeEnum type = fromCode(code);
+        return type != null ? type.getDesc() : null;
     }
 
     /**
@@ -48,8 +50,8 @@ public enum StateEnum {
         if (code == null) {
             return false;
         }
-        for (StateEnum state : values()) {
-            if (state.getCode().equals(code)) {
+        for (ResourceTypeEnum type : values()) {
+            if (type.getCode().equals(code)) {
                 return true;
             }
         }
