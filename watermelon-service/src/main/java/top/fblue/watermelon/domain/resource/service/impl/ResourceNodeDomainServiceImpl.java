@@ -5,9 +5,7 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceNodeRepository;
-import top.fblue.watermelon.domain.resource.repository.UserRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceNodeDomainService;
-import top.fblue.watermelon.domain.resource.entity.UserBasicInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,9 +18,6 @@ public class ResourceNodeDomainServiceImpl implements ResourceNodeDomainService 
 
     @Resource
     private ResourceNodeRepository resourceNodeRepository;
-
-    @Resource
-    private UserRepository userRepository;
 
     @Override
     public ResourceNode createResourceNode(ResourceNode resourceNode) {
@@ -45,25 +40,6 @@ public class ResourceNodeDomainServiceImpl implements ResourceNodeDomainService 
         if (resourceNode == null) {
             return null;
         }
-
-        // 2. 填充创建人信息
-        if (resourceNode.getCreatedBy() != null) {
-            UserBasicInfo createdByUser = userRepository.findById(resourceNode.getCreatedBy());
-            resourceNode.setCreatedByUser(createdByUser);
-        }
-
-        // 3. 填充更新人信息
-        if (resourceNode.getUpdatedBy() != null) {
-            UserBasicInfo updatedByUser = userRepository.findById(resourceNode.getUpdatedBy());
-            resourceNode.setUpdatedByUser(updatedByUser);
-        }
-
-        // 4. 填充父级节点信息
-        if (resourceNode.getParentId() != null) {
-            ResourceNode parentNode = findById(resourceNode.getParentId());
-            resourceNode.setParentNode(parentNode);
-        }
-
         return resourceNode;
     }
 

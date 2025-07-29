@@ -1,4 +1,4 @@
-package top.fblue.watermelon.infrastructure.repository.resource;
+package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceNodeRepository;
-import top.fblue.watermelon.infrastructure.repository.resource.converter.ResourceNodePOConverter;
+import top.fblue.watermelon.infrastructure.converter.ResourceNodePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.ResourceNodeMapper;
 import top.fblue.watermelon.infrastructure.po.ResourceNodePO;
 

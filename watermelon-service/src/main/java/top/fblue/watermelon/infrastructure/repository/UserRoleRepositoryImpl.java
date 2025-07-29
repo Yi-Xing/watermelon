@@ -1,4 +1,4 @@
-package top.fblue.watermelon.infrastructure.repository.user;
+package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;

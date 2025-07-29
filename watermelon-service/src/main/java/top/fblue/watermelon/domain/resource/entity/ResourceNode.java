@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import top.fblue.watermelon.domain.resource.entity.UserBasicInfo;
 
 import java.time.LocalDateTime;
 
@@ -76,12 +75,4 @@ public class ResourceNode {
      * 更新时间
      */
     private LocalDateTime updatedTime;
-
-    /**
-     * 父级资源节点
-     */
-    private ResourceNode parentNode;
-    // 关联的用户信息（可选，用于展示时的详细信息）
-    private UserBasicInfo createdByUser;
-    private UserBasicInfo updatedByUser;
 } 

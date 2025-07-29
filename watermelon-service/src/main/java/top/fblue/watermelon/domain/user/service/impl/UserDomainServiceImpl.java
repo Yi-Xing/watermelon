@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.user.entity.UserBasicInfo;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 
 import java.util.List;

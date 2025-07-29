@@ -1,4 +1,4 @@
-package top.fblue.watermelon.infrastructure.repository.user;
+package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
-import top.fblue.watermelon.infrastructure.repository.user.converter.UserPOConverter;
+import top.fblue.watermelon.infrastructure.converter.UserPOConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserMapper;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
