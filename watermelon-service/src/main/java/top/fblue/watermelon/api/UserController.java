@@ -8,7 +8,7 @@ import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.dto.ResetPasswordDTO;
 import top.fblue.watermelon.application.dto.UserQueryDTO;
-import top.fblue.watermelon.application.vo.PageVO;
+import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 
@@ -86,8 +86,8 @@ public class UserController {
      * 分页查询用户列表
      */
     @GetMapping("/list")
-    public ApiResponse<PageVO<UserVO>> getUserList(@Valid UserQueryDTO queryDTO) {
-        PageVO<UserVO> pageVO = userApplicationService.getUserList(queryDTO);
-        return ApiResponse.success(pageVO, "获取用户列表成功");
+    public ApiResponse<Page<UserVO>> getUserList(@Valid UserQueryDTO queryDTO) {
+        Page<UserVO> page = userApplicationService.getUserList(queryDTO);
+        return ApiResponse.success(page, "获取用户列表成功");
     }
 }

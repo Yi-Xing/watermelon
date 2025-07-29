@@ -8,7 +8,7 @@ import top.fblue.watermelon.application.dto.CreateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleResourceDTO;
 import top.fblue.watermelon.application.dto.RoleQueryDTO;
-import top.fblue.watermelon.application.vo.PageVO;
+import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.RoleVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 
@@ -38,9 +38,9 @@ public class RoleController {
      * 分页查询角色列表
      */
     @GetMapping("/list")
-    public ApiResponse<PageVO<RoleVO>> getRoleList(@Valid RoleQueryDTO queryDTO) {
-        PageVO<RoleVO> pageVO = roleApplicationService.getRoleList(queryDTO);
-        return ApiResponse.success(pageVO, "获取角色列表成功");
+    public ApiResponse<Page<RoleVO>> getRoleList(@Valid RoleQueryDTO queryDTO) {
+        Page<RoleVO> page = roleApplicationService.getRoleList(queryDTO);
+        return ApiResponse.success(page, "获取角色列表成功");
     }
     
     /**

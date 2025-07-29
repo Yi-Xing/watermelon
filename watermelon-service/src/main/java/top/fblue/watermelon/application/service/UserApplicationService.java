@@ -4,7 +4,7 @@ import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.dto.ResetPasswordDTO;
 import top.fblue.watermelon.application.dto.UserQueryDTO;
-import top.fblue.watermelon.application.vo.PageVO;
+import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
 
 /**
@@ -45,5 +45,5 @@ public interface UserApplicationService {
     /**
      * 分页查询用户列表
      */
-    PageVO<UserVO> getUserList(UserQueryDTO queryDTO);
+    Page<UserVO> getUserList(UserQueryDTO queryDTO);
 }

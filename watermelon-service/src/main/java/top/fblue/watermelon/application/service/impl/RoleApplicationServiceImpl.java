@@ -9,7 +9,7 @@ import top.fblue.watermelon.application.dto.UpdateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleResourceDTO;
 import top.fblue.watermelon.application.dto.RoleQueryDTO;
 import top.fblue.watermelon.application.service.RoleApplicationService;
-import top.fblue.watermelon.application.vo.PageVO;
+import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.RoleVO;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.domain.role.service.RoleDomainService;
@@ -61,7 +61,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     }
 
     @Override
-    public PageVO<RoleVO> getRoleList(RoleQueryDTO queryDTO) {
+    public Page<RoleVO> getRoleList(RoleQueryDTO queryDTO) {
         // 1. 查询角色列表
         List<Role> roles = roleDomainService.getRoleList(
                 queryDTO.getName(),
@@ -82,7 +82,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
                 .collect(Collectors.toList());
 
         // 4. 构建分页响应
-        return new PageVO<>(
+        return new Page<>(
                 roleVOs,
                 total,
                 queryDTO.getPageNum(),

@@ -1,4 +1,4 @@
-package top.fblue.watermelon.application.vo;
+package top.fblue.watermelon.common.response;
 
 import lombok.Data;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.List;
  * 分页响应VO
  */
 @Data
-public class PageVO<T> {
+public class Page<T> {
     
     /**
      * 数据列表
@@ -46,7 +46,7 @@ public class PageVO<T> {
     /**
      * 构造函数
      */
-    public PageVO(List<T> dataList, long total, int current, int size) {
+    public Page(List<T> dataList, long total, int current, int size) {
         this.dataList = dataList;
         this.total = total;
         this.current = current;

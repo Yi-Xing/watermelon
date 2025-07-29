@@ -9,11 +9,8 @@ import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.dto.ResetPasswordDTO;
 import top.fblue.watermelon.application.dto.UserQueryDTO;
 import top.fblue.watermelon.application.service.UserApplicationService;
-import top.fblue.watermelon.application.vo.PageVO;
+import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
-import top.fblue.watermelon.common.enums.StateEnum;
-import top.fblue.watermelon.common.utils.StringUtil;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 
@@ -103,7 +100,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     }
 
     @Override
-    public PageVO<UserVO> getUserList(UserQueryDTO queryDTO) {
+    public Page<UserVO> getUserList(UserQueryDTO queryDTO) {
 
         // 查询用户列表
         List<User> users = userDomainService.getUserList(
@@ -125,7 +122,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
                 .collect(Collectors.toList());
 
         // 构建分页响应
-        return new PageVO<>(
+        return new Page<>(
                 userVOs,
                 total,
                 queryDTO.getPageNum(),

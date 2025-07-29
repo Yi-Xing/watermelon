@@ -4,7 +4,7 @@ import top.fblue.watermelon.application.dto.CreateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleResourceDTO;
 import top.fblue.watermelon.application.dto.RoleQueryDTO;
-import top.fblue.watermelon.application.vo.PageVO;
+import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.RoleVO;
 
 /**
@@ -25,7 +25,7 @@ public interface RoleApplicationService {
     /**
      * 分页查询角色列表
      */
-    PageVO<RoleVO> getRoleList(RoleQueryDTO queryDTO);
+    Page<RoleVO> getRoleList(RoleQueryDTO queryDTO);
     
     /**
      * 更新角色
