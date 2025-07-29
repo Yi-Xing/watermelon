@@ -1,10 +1,14 @@
 package top.fblue.watermelon.application.service;
 
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
+import top.fblue.watermelon.application.vo.ResourceExcelVO;
 
 import java.util.List;
 
@@ -40,4 +44,24 @@ public interface ResourceApplicationService {
      * 删除资源
      */
     boolean deleteResource(Long id);
+    
+    /**
+     * 根据code获取资源ID
+     */
+    Long getResourceIdByCode(String code);
+    
+    /**
+     * 导入资源
+     */
+    void importResource(ResourceNode resourceNode);
+    
+    /**
+     * 导出Excel
+     */
+    byte[] exportExcel() throws IOException;
+    
+    /**
+     * 导入Excel
+     */
+    String importExcel(MultipartFile file);
 }

@@ -6,49 +6,67 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+import top.fblue.watermelon.domain.role.entity.Role;
+import top.fblue.watermelon.domain.role.repository.RoleRepository;
+import top.fblue.watermelon.domain.role.repository.RoleResourceRepository;
 import top.fblue.watermelon.infrastructure.converter.RolePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.RoleMapper;
 import top.fblue.watermelon.infrastructure.po.RolePO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 角色仓储实现
  * 注意：需要先创建对应的RoleRepository接口在domain层
  */
 @Repository
-public class RoleRepositoryImpl {
+public class RoleRepositoryImpl implements RoleRepository {
 
     @Resource
     private RoleMapper roleMapper;
     @Resource
     private RolePOConverter rolePOConverter;
+    
+    @Resource
+    private RoleResourceRepository roleResourceRepository;
 
-    /**
-     * 保存角色
-     * 
-     * 注意：需要先创建Role domain实体和RoleRepository接口
-     * public Role save(Role role) {
-     *     RolePO po = rolePOConverter.toPO(role);
-     *     if (po.getId() == null) {
-     *         roleMapper.insert(po);
-     *     } else {
-     *         roleMapper.updateById(po);
-     *     }
-     *     RolePO savedPO = roleMapper.selectById(po.getId());
-     *     return rolePOConverter.toDomain(savedPO);
-     * }
-     */
+    @Override
+    public Role save(Role role) {
+        RolePO po = rolePOConverter.toPO(role);
+        if (po.getId() == null) {
+            roleMapper.insert(po);
+        } else {
+            roleMapper.updateById(po);
+        }
+        RolePO savedPO = roleMapper.selectById(po.getId());
+        return rolePOConverter.toDomain(savedPO);
+    }
 
-    /**
-     * 根据ID查找角色
-     * 
-     * 注意：需要先创建Role domain实体和RoleRepository接口
-     * public Role findById(Long id) {
-     *     RolePO po = roleMapper.selectById(id);
-     *     return rolePOConverter.toDomain(po);
-     * }
-     */
+    @Override
+    public Role findById(Long id) {
+        RolePO po = roleMapper.selectById(id);
+        return rolePOConverter.toDomain(po);
+    }
+
+    @Override
+    public boolean update(Role role) {
+        RolePO po = rolePOConverter.toPO(role);
+        return roleMapper.updateById(po) > 0;
+    }
+
+    @Override
+    public boolean updateRoleResource(Long roleId, List<Long> resourceIds) {
+        // 先删除原有的角色资源关系
+        roleResourceRepository.deleteByRoleId(roleId);
+        
+        // 如果有新的资源ID，则批量保存
+        if (resourceIds != null && !resourceIds.isEmpty()) {
+            roleResourceRepository.saveBatch(List.of(roleId), resourceIds);
+        }
+        
+        return true;
+    }
 
     /**
      * 检查角色名是否存在
@@ -66,17 +84,17 @@ public class RoleRepositoryImpl {
         return roleMapper.deleteById(id) > 0;
     }
 
-    /**
-     * 根据条件分页查询角色列表
-     */
-    public List<RolePO> findByCondition(String keyword, Integer state, int pageNum, int pageSize) {
+    @Override
+    public List<Role> findByCondition(String keyword, Integer state, int pageNum, int pageSize) {
         QueryWrapper<RolePO> queryWrapper = buildQueryWrapper(keyword, state);
         queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
         
         Page<RolePO> page = new Page<>(pageNum, pageSize);
         IPage<RolePO> pageResult = roleMapper.selectPage(page, queryWrapper);
         
-        return pageResult.getRecords();
+        return pageResult.getRecords().stream()
+                .map(rolePOConverter::toDomain)
+                .collect(Collectors.toList());
     }
 
     /**

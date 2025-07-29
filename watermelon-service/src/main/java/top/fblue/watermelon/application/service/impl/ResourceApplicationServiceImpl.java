@@ -4,9 +4,15 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.fblue.watermelon.application.converter.ResourceConverter;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
+import top.fblue.watermelon.application.dto.ResourceExcelDTO;
+import top.fblue.watermelon.application.listener.ResourceExcelListener;
+import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.service.ResourceApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
@@ -15,7 +21,10 @@ import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
+import top.fblue.watermelon.common.enums.StateEnum;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -95,6 +104,76 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     public boolean deleteResource(Long id) {
         // 通过领域服务删除资源
         return resourceDomainService.deleteResource(id);
+    }
+
+    @Override
+    public Long getResourceIdByCode(String code) {
+        // 通过领域服务根据code获取资源ID
+        return resourceDomainService.getResourceIdByCode(code);
+    }
+
+    @Override
+    @Transactional
+    public void importResource(ResourceNode resourceNode) {
+        // 通过领域服务导入资源
+        resourceDomainService.importResource(resourceNode);
+    }
+
+    @Override
+    public byte[] exportExcel() throws IOException {
+        // 1. 获取所有资源
+        List<ResourceNode> resources = resourceDomainService.getResourceList(null, null);
+        
+        // 2. 转换为Excel VO
+        List<ResourceExcelVO> excelData = resources.stream()
+                .map(this::convertToExcelVO)
+                .collect(Collectors.toList());
+        
+        // 3. 生成Excel文件
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        EasyExcel.write(outputStream, ResourceExcelVO.class)
+                .sheet("资源列表")
+                .doWrite(excelData);
+        
+        return outputStream.toByteArray();
+    }
+
+    @Override
+    public String importExcel(MultipartFile file) {
+        try {
+            // 使用EasyExcel读取文件
+            EasyExcel.read(file.getInputStream(), ResourceExcelDTO.class, new ResourceExcelListener(this))
+                    .sheet()
+                    .doRead();
+            
+            return "导入成功";
+        } catch (Exception e) {
+            throw new RuntimeException("导入Excel失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 转换资源为Excel VO
+     */
+    private ResourceExcelVO convertToExcelVO(ResourceNode resource) {
+        // 获取父资源code
+        String parentCode = null;
+        if (resource.getParentId() != null) {
+            ResourceNode parentResource = resourceDomainService.getResourceById(resource.getParentId());
+            if (parentResource != null) {
+                parentCode = parentResource.getCode();
+            }
+        }
+        
+        ResourceExcelVO excelVO = new ResourceExcelVO();
+        excelVO.setParentCode(parentCode);
+        excelVO.setName(resource.getName());
+        excelVO.setCode(resource.getCode());
+        excelVO.setType(ResourceTypeEnum.getDescByCode(resource.getType()));
+        excelVO.setOrderNum(resource.getOrderNum());
+        excelVO.setState(StateEnum.getDescByCode(resource.getState()));
+        excelVO.setRemark(resource.getRemark());
+        return excelVO;
     }
     
     /**

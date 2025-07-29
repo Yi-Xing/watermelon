@@ -40,6 +40,16 @@ public interface ResourceDomainService {
     boolean deleteResource(Long id);
     
     /**
+     * 根据code获取资源ID
+     */
+    Long getResourceIdByCode(String code);
+    
+    /**
+     * 导入资源
+     */
+    void importResource(ResourceNode resourceNode);
+    
+    /**
      * 检查资源ID是否存在
      */
     boolean existsById(Long id);

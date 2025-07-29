@@ -1,6 +1,7 @@
 package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.infrastructure.po.RolePO;
 
 /**
@@ -13,38 +14,38 @@ public class RolePOConverter {
 
     /**
      * PO转换为Domain实体
-     * 
-     * 注意：需要先创建对应的Role domain实体类
-     * public Role toDomain(RolePO po) {
-     *     if (po == null) return null;
-     *     
-     *     return Role.builder()
-     *             .id(po.getId())
-     *             .name(po.getName())
-     *             .orderNum(po.getOrderNum())
-     *             .state(po.getState())
-     *             .remark(po.getRemark())
-     *             .createdBy(po.getCreatedBy())
-     *             .createdTime(po.getCreatedTime())
-     *             .updatedBy(po.getUpdatedBy())
-     *             .updatedTime(po.getUpdatedTime())
-     *             .build();
-     * }
      */
+    public Role toDomain(RolePO po) {
+        if (po == null) return null;
+        
+        return Role.builder()
+                .id(po.getId())
+                .name(po.getName())
+                .orderNum(po.getOrderNum())
+                .state(po.getState())
+                .remark(po.getRemark())
+                .createdBy(po.getCreatedBy())
+                .createdTime(po.getCreatedTime())
+                .updatedBy(po.getUpdatedBy())
+                .updatedTime(po.getUpdatedTime())
+                .build();
+    }
 
     /**
      * Domain实体转换为PO
-     * 
-     * 注意：需要先创建对应的Role domain实体类
-     * public RolePO toPO(Role domain) {
-     *     if (domain == null) return null;
-     *     return RolePO.builder()
-     *             .id(domain.getId())
-     *             .name(domain.getName())
-     *             .orderNum(domain.getOrderNum())
-     *             .state(domain.getState())
-     *             .remark(domain.getRemark())
-     *             .build();
-     * }
      */
+    public RolePO toPO(Role domain) {
+        if (domain == null) return null;
+        return RolePO.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .orderNum(domain.getOrderNum())
+                .state(domain.getState())
+                .remark(domain.getRemark())
+                .createdBy(domain.getCreatedBy())
+                .createdTime(domain.getCreatedTime())
+                .updatedBy(domain.getUpdatedBy())
+                .updatedTime(domain.getUpdatedTime())
+                .build();
+    }
 } 

@@ -181,4 +181,25 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
             }
         }
     }
+
+    @Override
+    public Long getResourceIdByCode(String code) {
+        ResourceNode resource = resourceRepository.findByCode(code);
+        return resource != null ? resource.getId() : null;
+    }
+
+    @Override
+    public void importResource(ResourceNode resourceNode) {
+        // 根据code判断是新增还是更新
+        ResourceNode existingResource = resourceRepository.findByCode(resourceNode.getCode());
+        
+        if (existingResource != null) {
+            // 更新现有资源
+            resourceNode.setId(existingResource.getId());
+            resourceRepository.update(resourceNode);
+        } else {
+            // 新增资源
+            resourceRepository.save(resourceNode);
+        }
+    }
 }

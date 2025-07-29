@@ -4,14 +4,22 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
-import top.fblue.watermelon.application.service.ResourceApplicationService;
-import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
+import top.fblue.watermelon.application.dto.UpdateResourceDTO;
+import top.fblue.watermelon.application.dto.ResourceExcelDTO;
+import top.fblue.watermelon.application.service.ResourceApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
+import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -79,5 +87,30 @@ public class ResourceController {
         } else {
             return ApiResponse.error("资源删除失败", false);
         }
+    }
+    
+    /**
+     * 导出Excel
+     */
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportExcel() throws IOException {
+        byte[] excelBytes = resourceApplicationService.exportExcel();
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "resources.xlsx");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(excelBytes);
+    }
+    
+    /**
+     * 导入Excel
+     */
+    @PostMapping("/import")
+    public ApiResponse<String> importExcel(@RequestParam("file") MultipartFile file) {
+        String result = resourceApplicationService.importExcel(file);
+        return ApiResponse.success(result, "导入Excel成功");
     }
 } 
