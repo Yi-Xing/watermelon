@@ -18,12 +18,7 @@ public interface ResourceRepository {
      * 根据ID查找资源节点
      */
     ResourceNode findById(Long id);
-    
-    /**
-     * 根据code查找资源节点
-     */
-    ResourceNode findByCode(String code);
-    
+
     /**
      * 根据条件查询资源列表
      */
@@ -38,11 +33,6 @@ public interface ResourceRepository {
      * 根据父级ID查找子资源
      */
     List<ResourceNode> findByParentId(Long parentId);
-
-    /**
-     * 查询所有启用的资源
-     */
-    List<ResourceNode> findAllEnabled();
     
     /**
      * 更新资源
@@ -73,10 +63,4 @@ public interface ResourceRepository {
      * 检查同级资源名称是否存在
      */
     boolean existsByNameAndParentId(String name, Long parentId);
-    
-    
-    /**
-     * 根据code列表批量获取资源ID映射
-     */
-    Map<String, Long> findIdMapByCodes(List<String> codes);
 } 

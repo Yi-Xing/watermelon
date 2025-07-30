@@ -219,7 +219,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     @Transactional(rollbackFor = Exception.class)
     public ResourceImportResultVO batchImportExcelData(List<ResourceExcelVO> excelDataList) {
         // 1. 转换为导入VO
-        List<ResourceNodeImportDTO> importDTOs = convertToImportDTOs(excelDataList);
+        List<ResourceNodeImportDTO> importDTOs = convertSortToImportDTOs(excelDataList);
 
         // 2. 批量导入（带事务）
         return batchImportResources(importDTOs);
@@ -296,9 +296,9 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     }
 
     /**
-     * 转换为导入VO
+     * 转换为导入VO并进行拓扑排序
      */
-    private List<ResourceNodeImportDTO> convertToImportDTOs(List<ResourceExcelVO> excelDataList) {
+    private List<ResourceNodeImportDTO> convertSortToImportDTOs(List<ResourceExcelVO> excelDataList) {
         // 1. 构建code到Excel数据的映射
         Map<String, ResourceExcelVO> codeToExcelMap = excelDataList.stream()
                 .collect(Collectors.toMap(ResourceExcelVO::getCode, data -> data));

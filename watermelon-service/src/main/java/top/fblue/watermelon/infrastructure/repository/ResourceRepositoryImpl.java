@@ -45,14 +45,6 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public ResourceNode findByCode(String code) {
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("code", code);
-        ResourceNodePO po = resourceNodeMapper.selectOne(queryWrapper);
-        return resourceNodePOConverter.toDomain(po);
-    }
-
-    @Override
     public boolean existsByCode(String code) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", code);
@@ -72,17 +64,6 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("parent_id", parentId);
         queryWrapper.orderByAsc("order_num");
-        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
-        return poList.stream()
-                .map(resourceNodePOConverter::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ResourceNode> findAllEnabled() {
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", 1);
-        queryWrapper.orderByAsc("parent_id").orderByAsc("order_num");
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)
@@ -147,20 +128,5 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Map<String, Long> findIdMapByCodes(List<String> codes) {
-        if (codes == null || codes.isEmpty()) {
-            return new HashMap<>();
-        }
-        
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("code", codes);
-        queryWrapper.select("code", "id");
-        
-        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
-        return poList.stream()
-                .collect(Collectors.toMap(ResourceNodePO::getCode, ResourceNodePO::getId));
     }
 }

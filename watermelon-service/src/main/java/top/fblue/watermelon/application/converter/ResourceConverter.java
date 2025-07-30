@@ -66,9 +66,9 @@ public class ResourceConverter {
                 .state(resourceNode.getState())
                 .stateDesc(StateEnum.fromCode(resourceNode.getState()).getDesc())
                 .remark(resourceNode.getRemark())
-                .createdBy(convertToUserInfoVO(userMap.get(resourceNode.getCreatedBy())))
+                .createdBy(toUserInfoVO(userMap.get(resourceNode.getCreatedBy())))
                 .createdTime(DateTimeUtil.formatDateTime(resourceNode.getCreatedTime()))
-                .updatedBy(convertToUserInfoVO(userMap.get(resourceNode.getUpdatedBy())))
+                .updatedBy(toUserInfoVO(userMap.get(resourceNode.getUpdatedBy())))
                 .updatedTime(DateTimeUtil.formatDateTime(resourceNode.getUpdatedTime()))
                 .build();
     }
@@ -147,9 +147,9 @@ public class ResourceConverter {
                 .state(resource.getState())
                 .stateDesc(StateEnum.fromCode(resource.getState()).getDesc())
                 .remark(resource.getRemark())
-                .createdBy(convertToUserInfoVO(userMap.get(resource.getCreatedBy())))
+                .createdBy(toUserInfoVO(userMap.get(resource.getCreatedBy())))
                 .createdTime(DateTimeUtil.formatDateTime(resource.getCreatedTime()))
-                .updatedBy(convertToUserInfoVO(userMap.get(resource.getUpdatedBy())))
+                .updatedBy(toUserInfoVO(userMap.get(resource.getUpdatedBy())))
                 .updatedTime(DateTimeUtil.formatDateTime(resource.getUpdatedTime()))
                 .build();
     }
@@ -157,7 +157,7 @@ public class ResourceConverter {
     /**
      * User转换为UserInfoVO
      */
-    private UserInfoVO convertToUserInfoVO(User user) {
+    private UserInfoVO toUserInfoVO(User user) {
         if (user == null) {
             return null;
         }

@@ -47,12 +47,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     }
 
     @Override
-    public ResourceNode findByIdWithAssociations(Long id) {
-        // 1. 获取资源节点基本信息
-        return getResourceById(id);
-    }
-
-    @Override
     public List<ResourceNode> getResourceList(String name, String code, Integer state) {
         return resourceRepository.findByCondition(name, code, state);
     }
@@ -154,16 +148,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     @Override
     public boolean existsById(Long id) {
         return resourceRepository.existsById(id);
-    }
-
-    @Override
-    public boolean existsByCode(String code) {
-        return resourceRepository.existsByCode(code);
-    }
-
-    @Override
-    public boolean existsByNameAndParentId(String name, Long parentId) {
-        return resourceRepository.existsByNameAndParentId(name, parentId);
     }
 
     /**
@@ -277,37 +261,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
             if (!StateEnum.ENABLE.equals(StateEnum.fromCode(parentResource.getState()))) {
                 throw new IllegalArgumentException("上级资源已禁用，无法创建子资源");
             }
-        }
-    }
-
-    @Override
-    public Long getResourceIdByCode(String code) {
-        ResourceNode resource = resourceRepository.findByCode(code);
-        return resource != null ? resource.getId() : null;
-    }
-
-    @Override
-    public ResourceNode findByCode(String code) {
-        return resourceRepository.findByCode(code);
-    }
-
-    @Override
-    public Map<String, Long> getResourceIdMapByCodes(List<String> codes) {
-        return resourceRepository.findIdMapByCodes(codes);
-    }
-
-    @Override
-    public void importResource(ResourceNode resourceNode) {
-        // 根据code判断是新增还是更新
-        ResourceNode existingResource = resourceRepository.findByCode(resourceNode.getCode());
-
-        if (existingResource != null) {
-            // 更新现有资源
-            resourceNode.setId(existingResource.getId());
-            resourceRepository.update(resourceNode);
-        } else {
-            // 新增资源
-            resourceRepository.save(resourceNode);
         }
     }
 
