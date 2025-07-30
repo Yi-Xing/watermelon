@@ -57,4 +57,16 @@ public enum ResourceTypeEnum {
         }
         return false;
     }
+
+    /**
+     * 检查 desc 是否有效
+     */
+    public static boolean isValidDesc(String desc) {
+        for (ResourceTypeEnum type : values()) {
+            if (type.getDesc().equals(desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

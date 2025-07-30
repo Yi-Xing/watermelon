@@ -55,4 +55,16 @@ public enum StateEnum {
         }
         return false;
     }
+
+    /**
+     * 检查 desc 是否有效
+     */
+    public static boolean isValidDesc(String desc) {
+        for (StateEnum type : values()) {
+            if (type.getDesc().equals(desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

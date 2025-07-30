@@ -37,12 +37,12 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         if (id == null) {
             throw new IllegalArgumentException("资源ID不能为空");
         }
-        
+
         ResourceNode resource = resourceRepository.findById(id);
         if (resource == null) {
             throw new IllegalArgumentException("资源不存在");
         }
-        
+
         return resource;
     }
 
@@ -104,7 +104,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     public boolean updateResource(ResourceNode resource) {
         // 1. 检查资源是否存在
         ResourceNode existingResource = getResourceById(resource.getId());
-        
+
         // 2. 校验业务规则（更新时的特殊校验）
         validateResourceNodeForUpdate(resource, existingResource);
 
@@ -116,13 +116,13 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     public boolean deleteResource(Long id) {
         // 1. 检查资源是否存在
         getResourceById(id);
-        
+
         // 2. 检查是否有子资源
         List<ResourceNode> children = resourceRepository.findByParentId(id);
         if (!children.isEmpty()) {
             throw new IllegalArgumentException("该资源下有子资源，无法删除");
         }
-        
+
         // 3. 删除资源
         return resourceRepository.delete(id);
     }
@@ -141,7 +141,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     public boolean existsByNameAndParentId(String name, Long parentId) {
         return resourceRepository.existsByNameAndParentId(name, parentId);
     }
-    
+
     /**
      * 校验资源节点的业务规则
      */
@@ -276,7 +276,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     public void importResource(ResourceNode resourceNode) {
         // 根据code判断是新增还是更新
         ResourceNode existingResource = resourceRepository.findByCode(resourceNode.getCode());
-        
+
         if (existingResource != null) {
             // 更新现有资源
             resourceNode.setId(existingResource.getId());

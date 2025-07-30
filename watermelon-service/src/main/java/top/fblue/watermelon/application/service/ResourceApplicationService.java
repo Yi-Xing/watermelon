@@ -54,14 +54,10 @@ public interface ResourceApplicationService {
      * 导入Excel
      */
     ResourceImportResultVO importExcel(MultipartFile file);
-    
+
     /**
      * 批量导入资源
      */
     ResourceImportResultVO batchImportResources(List<ResourceNode> resourceNodes);
-    
-    /**
-     * 根据code列表批量获取资源ID映射
-     */
-    Map<String, Long> getResourceIdMapByCodes(List<String> codes);
+
 }
