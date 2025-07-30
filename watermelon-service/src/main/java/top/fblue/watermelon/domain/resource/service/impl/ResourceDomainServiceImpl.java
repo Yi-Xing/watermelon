@@ -118,30 +118,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         // 3. 删除资源
         return resourceRepository.delete(id);
     }
-    
-    @Override
-    public int batchDeleteResources(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return 0;
-        }
-        
-        // 1. 检查所有资源是否存在
-        List<ResourceNode> resources = getResourceListByIds(ids);
-        if (resources.size() != ids.size()) {
-            throw new IllegalArgumentException("部分资源不存在");
-        }
-        
-        // 2. 检查是否有子资源
-        for (ResourceNode resource : resources) {
-            List<ResourceNode> children = resourceRepository.findByParentId(resource.getId());
-            if (!children.isEmpty()) {
-                throw new IllegalArgumentException("资源 [" + resource.getName() + "] 下有子资源，无法删除");
-            }
-        }
-        
-        // 3. 批量删除资源
-        return resourceRepository.batchDelete(ids);
-    }
 
     @Override
     public boolean existsById(Long id) {

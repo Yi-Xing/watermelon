@@ -44,11 +44,6 @@ public interface ResourceDomainService {
     boolean deleteResource(Long id);
 
     /**
-     * 批量删除资源
-     */
-    int batchDeleteResources(List<Long> ids);
-    
-    /**
      * 检查资源IDs是否存在
      */
     boolean existsById(Long id);
