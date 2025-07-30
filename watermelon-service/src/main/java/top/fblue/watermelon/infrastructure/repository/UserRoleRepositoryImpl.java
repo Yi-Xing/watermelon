@@ -42,4 +42,33 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
     public List<Long> findRoleIdsByUserId(Long userId) {
         return userRoleMapper.selectRoleIdsByUserId(userId);
     }
+    
+    @Override
+    public void deleteBatch(Long userId, List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return;
+        }
+        
+        QueryWrapper<UserRolePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.in("role_id", roleIds);
+        
+        // 使用 MyBatis-Plus 的逻辑删除
+        userRoleMapper.delete(queryWrapper);
+    }
+    
+    @Override
+    public void insertBatch(Long userId, List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return;
+        }
+        
+        for (Long roleId : roleIds) {
+            UserRolePO po = UserRolePO.builder()
+                    .userId(userId)
+                    .roleId(roleId)
+                    .build();
+            userRoleMapper.insert(po);
+        }
+    }
 } 

@@ -7,6 +7,9 @@ import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 import top.fblue.watermelon.domain.user.repository.UserRoleRepository;
+import top.fblue.watermelon.domain.role.entity.Role;
+import top.fblue.watermelon.domain.role.service.RoleDomainService;
+import java.util.stream.Collectors;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,6 +27,9 @@ public class UserDomainServiceImpl implements UserDomainService {
     
     @Resource
     private UserRoleRepository userRoleRepository;
+    
+    @Resource
+    private RoleDomainService roleDomainService;
 
     @Override
     public User createUser(User user) {
@@ -73,6 +79,56 @@ public class UserDomainServiceImpl implements UserDomainService {
         
         // 3. 删除用户
         return userRepository.delete(userId);
+    }
+    
+    @Override
+    public List<Role> getUserRoles(Long userId) {
+        // 1. 检查用户是否存在
+        getUserById(userId);
+        
+        // 2. 获取用户关联的角色ID列表
+        List<Long> roleIds = userRoleRepository.findRoleIdsByUserId(userId);
+        
+        // 3. 如果用户没有关联角色，返回空列表
+        if (roleIds == null || roleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 4. 根据角色ID列表获取角色信息，并过滤掉已删除的角色
+        return roleIds.stream()
+                .map(roleDomainService::getRoleById)
+                .filter(role -> role != null && role.getState() != null && role.getState() == 1) // 只返回启用的角色
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public boolean updateUserRole(Long userId, List<Long> roleIds) {
+        // 1. 检查用户是否存在
+        getUserById(userId);
+        
+        // 2. 查询现有的用户角色关系
+        List<Long> existingRoleIds = userRoleRepository.findRoleIdsByUserId(userId);
+        
+        // 3. 计算需要删除和新增的角色ID
+        List<Long> toDelete = existingRoleIds.stream()
+                .filter(id -> !roleIds.contains(id))
+                .collect(Collectors.toList());
+        
+        List<Long> toInsert = roleIds.stream()
+                .filter(id -> !existingRoleIds.contains(id))
+                .collect(Collectors.toList());
+        
+        // 4. 批量删除不需要的关系
+        if (!toDelete.isEmpty()) {
+            userRoleRepository.deleteBatch(userId, toDelete);
+        }
+        
+        // 5. 批量新增新的关系
+        if (!toInsert.isEmpty()) {
+            userRoleRepository.insertBatch(userId, toInsert);
+        }
+        
+        return true;
     }
 
     @Override

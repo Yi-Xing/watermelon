@@ -5,12 +5,17 @@ import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.application.vo.UserInfoVO;
+import top.fblue.watermelon.application.vo.RoleInfoVO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * 用户转换器
@@ -60,6 +65,30 @@ public class UserConverter {
                 .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
                 .updatedBy(convertToUserInfoVO(userMap.get(user.getUpdatedBy())))
                 .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
+                .build();
+    }
+    
+    /**
+     * User转换为UserVO（包含关联用户信息和角色信息）
+     */
+    public UserVO toVOWithRoles(User user, Map<Long, User> userMap, List<Role> roles) {
+        if (user == null) {
+            return null;
+        }
+
+        return UserVO.builder()
+                .id(user.getId())
+                .name(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .state(user.getState())
+                .stateDesc(StateEnum.fromCode(user.getState()).getDesc())
+                .remark(user.getRemark())
+                .createdBy(convertToUserInfoVO(userMap.get(user.getCreatedBy())))
+                .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
+                .updatedBy(convertToUserInfoVO(userMap.get(user.getUpdatedBy())))
+                .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
+                .roles(convertToRoleInfoVOList(roles))
                 .build();
     }
 
@@ -113,6 +142,35 @@ public class UserConverter {
         return UserInfoVO.builder()
                 .id(user.getId())
                 .name(user.getUsername())
+                .build();
+    }
+    
+    /**
+     * Role列表转换为RoleInfoVO列表
+     */
+    private List<RoleInfoVO> convertToRoleInfoVOList(List<Role> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        return roles.stream()
+                .map(this::convertToRoleInfoVO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Role转换为RoleInfoVO
+     */
+    private RoleInfoVO convertToRoleInfoVO(Role role) {
+        if (role == null) {
+            return null;
+        }
+        
+        return RoleInfoVO.builder()
+                .id(role.getId())
+                .name(role.getName())
+                .state(role.getState())
+                .stateDesc(StateEnum.fromCode(role.getState()).getDesc())
                 .build();
     }
 }

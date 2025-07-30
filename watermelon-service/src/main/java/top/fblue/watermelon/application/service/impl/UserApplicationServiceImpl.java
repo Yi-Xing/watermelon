@@ -13,6 +13,7 @@ import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
+import top.fblue.watermelon.domain.role.entity.Role;
 
 import java.util.List;
 import java.util.Map;
@@ -47,24 +48,35 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Override
     public UserVO getUserDetailById(Long id) {
-        // 获取基础用户数据
+        // 1. 获取基础用户数据
         User user = userDomainService.getUserById(id);
 
-        // 组装详细信息（包含关联角色）
+        // 2. 获取关联的用户信息
         List<Long> userIds = List.of(user.getCreatedBy(), user.getUpdatedBy());
-        Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIds);
+        Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
+        
+        // 3. 获取用户关联的角色信息
+        List<Role> roles = userDomainService.getUserRoles(id);
 
-        return userConverter.toVO(user, userIDMap);
+        // 4. 组装详细信息（包含关联角色）
+        return userConverter.toVOWithRoles(user, userMap, roles);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateUser(UpdateUserDTO updateUserDTO) {
-        // 转换DTO为Domain实体
+        // 1. 转换DTO为Domain实体
         User user = userConverter.toUser(updateUserDTO);
         
-        // 调用领域服务更新用户
-        return userDomainService.updateUser(user);
+        // 2. 调用领域服务更新用户基本信息
+        boolean userUpdated = userDomainService.updateUser(user);
+        
+        // 3. 更新用户角色关系
+        if (updateUserDTO.getRoleIds() != null) {
+            userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
+        }
+        
+        return userUpdated;
     }
 
     @Override

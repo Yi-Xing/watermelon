@@ -3,6 +3,8 @@ package top.fblue.watermelon.application.vo;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 用户视图对象
  */
@@ -64,4 +66,9 @@ public class UserVO {
      * 更新时间（格式：yyyy-MM-dd HH:mm:ss）
      */
     private String updatedTime;
+    
+    /**
+     * 关联的角色列表
+     */
+    private List<RoleInfoVO> roles;
 }

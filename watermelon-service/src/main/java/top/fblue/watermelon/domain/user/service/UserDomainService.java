@@ -1,6 +1,7 @@
 package top.fblue.watermelon.domain.user.service;
 
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.role.entity.Role;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,4 +57,14 @@ public interface UserDomainService {
      * 删除用户
      */
     boolean deleteUser(Long userId);
+    
+    /**
+     * 获取用户关联的角色信息
+     */
+    List<Role> getUserRoles(Long userId);
+    
+    /**
+     * 更新用户角色关系
+     */
+    boolean updateUserRole(Long userId, List<Long> roleIds);
 }
