@@ -14,54 +14,39 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 @Data
 @Builder
 public class ResourceNodeImportDTO {
-    
+
     /**
      * 上级资源code
      */
     private String parentCode;
-    
+
     /**
      * 资源名称
      */
     private String name;
-    
-    /**
-     * 资源code
-     */
-    private String code;
-    
+
     /**
      * 资源类型
      */
     private Integer type;
-    
+
+    /**
+     * 资源code
+     */
+    private String code;
+
     /**
      * 显示顺序
      */
     private Integer orderNum;
-    
+
     /**
      * 状态
      */
     private Integer state;
-    
+
     /**
      * 备注
      */
     private String remark;
-    
-    /**
-     * 转换为ResourceNode
-     */
-    public ResourceNode toResourceNode(Long parentId) {
-        return ResourceNode.builder()
-                .name(this.name)
-                .code(this.code)
-                .type(this.type)
-                .orderNum(this.orderNum)
-                .state(this.state)
-                .remark(this.remark)
-                .parentId(parentId)
-                .build();
-    }
-} 
+}

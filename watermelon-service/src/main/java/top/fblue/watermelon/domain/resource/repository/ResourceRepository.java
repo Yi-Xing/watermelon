@@ -55,6 +55,11 @@ public interface ResourceRepository {
     boolean delete(Long id);
     
     /**
+     * 批量删除资源
+     */
+    int batchDelete(List<Long> ids);
+    
+    /**
      * 检查资源ID是否存在
      */
     boolean existsById(Long id);

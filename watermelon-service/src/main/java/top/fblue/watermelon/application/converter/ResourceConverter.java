@@ -93,6 +93,22 @@ public class ResourceConverter {
     }
 
     /**
+     * 转换为ResourceNode
+     */
+    public ResourceNode toResourceNode(ResourceNodeImportDTO dto,Long parentId) {
+        return ResourceNode.builder()
+                .name(dto.getName())
+                .code(dto.getCode())
+                .type(dto.getType())
+                .orderNum(dto.getOrderNum())
+                .state(dto.getState())
+                .remark(dto.getRemark())
+                .parentId(parentId)
+                .build();
+    }
+
+
+    /**
      * UpdateResourceDTO转换为ResourceNode
      */
     public ResourceNode toResourceNode(UpdateResourceDTO dto) {
@@ -274,15 +290,15 @@ public class ResourceConverter {
      * 转换资源为Excel VO
      */
     public ResourceExcelVO convertToExcelVO(ResourceNode resource, String parentCode) {
-        ResourceExcelVO excelVO = new ResourceExcelVO();
-        excelVO.setParentCode(parentCode);
-        excelVO.setName(resource.getName());
-        excelVO.setCode(resource.getCode());
-        excelVO.setType(ResourceTypeEnum.getDescByCode(resource.getType()));
-        excelVO.setOrderNum(resource.getOrderNum());
-        excelVO.setState(StateEnum.getDescByCode(resource.getState()));
-        excelVO.setRemark(resource.getRemark());
-        return excelVO;
+        return ResourceExcelVO.builder()
+                .parentCode(parentCode)
+                .name(resource.getName())
+                .code(resource.getCode())
+                .type(ResourceTypeEnum.getDescByCode(resource.getType()))
+                .orderNum(resource.getOrderNum())
+                .state(StateEnum.getDescByCode(resource.getState()))
+                .remark(resource.getRemark())
+                .build();
     }
 
     /**

@@ -51,6 +51,11 @@ public interface ResourceDomainService {
     boolean deleteResource(Long id);
     
     /**
+     * 批量删除资源
+     */
+    int batchDeleteResources(List<Long> ids);
+    
+    /**
      * 根据code获取资源ID
      */
     Long getResourceIdByCode(String code);

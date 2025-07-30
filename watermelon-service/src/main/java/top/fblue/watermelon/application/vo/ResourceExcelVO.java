@@ -1,12 +1,18 @@
 package top.fblue.watermelon.application.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 /**
  * 资源Excel导出VO
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResourceExcelVO {
     
     /**

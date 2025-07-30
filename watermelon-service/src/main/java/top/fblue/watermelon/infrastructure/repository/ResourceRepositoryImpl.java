@@ -93,6 +93,14 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     public boolean delete(Long id) {
         return resourceNodeMapper.deleteById(id) > 0;
     }
+    
+    @Override
+    public int batchDelete(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        return resourceNodeMapper.deleteByIds(ids);
+    }
 
     @Override
     public boolean update(ResourceNode resource) {
