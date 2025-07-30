@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.domain.role.repository.RoleRepository;
-import top.fblue.watermelon.domain.role.repository.RoleResourceRepository;
 import top.fblue.watermelon.infrastructure.converter.RolePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.RoleMapper;
 import top.fblue.watermelon.infrastructure.po.RolePO;

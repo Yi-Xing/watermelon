@@ -10,7 +10,7 @@ public interface RoleResourceRepository {
     /**
      * 根据角色ID删除资源关系
      */
-    boolean deleteByRoleId(Long roleId);
+    void deleteByRoleId(Long roleId);
 
     /**
      * 根据角色ID查询资源ID列表

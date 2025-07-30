@@ -86,11 +86,6 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return resourceNodeMapper.selectById(id) != null;
-    }
-
-    @Override
     public List<ResourceNode> findByCondition(String name, String code, Integer state) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
 

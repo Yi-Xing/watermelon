@@ -9,7 +9,6 @@ import top.fblue.watermelon.infrastructure.mapper.RoleResourceNodeMapper;
 import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
 
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * 角色资源关系仓储实现
@@ -23,12 +22,11 @@ public class RoleResourceRepositoryImpl implements RoleResourceRepository {
     private RoleResourceNodePOConverter roleResourceNodePOConverter;
 
     @Override
-    public boolean deleteByRoleId(Long roleId) {
+    public void deleteByRoleId(Long roleId) {
         QueryWrapper<RoleResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", roleId);
-        
-        // 使用 MyBatis-Plus 的逻辑删除
-        return roleResourceNodeMapper.delete(queryWrapper) > 0;
+
+        roleResourceNodeMapper.delete(queryWrapper);
     }
 
     @Override
