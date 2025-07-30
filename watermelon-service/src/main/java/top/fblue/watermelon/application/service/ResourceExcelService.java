@@ -2,6 +2,8 @@ package top.fblue.watermelon.application.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
+import top.fblue.watermelon.application.vo.ResourceImportResultVO;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 import java.util.List;
 
@@ -24,4 +26,10 @@ public interface ResourceExcelService {
      * 写入Excel文件
      */
     byte[] writeExcel(List<ResourceExcelVO> data);
+    
+    /**
+     * 批量导入Excel数据（带事务）
+     * 支持增删改操作，确保数据一致性
+     */
+    ResourceImportResultVO batchImportExcelData(List<ResourceExcelVO> excelDataList);
 }

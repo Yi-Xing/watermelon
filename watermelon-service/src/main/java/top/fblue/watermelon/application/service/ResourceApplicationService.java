@@ -8,6 +8,7 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
+import top.fblue.watermelon.application.vo.ResourceExcelVO;
 
 import java.util.List;
 import java.util.Map;
@@ -54,10 +55,4 @@ public interface ResourceApplicationService {
      * 导入Excel
      */
     ResourceImportResultVO importExcel(MultipartFile file);
-
-    /**
-     * 批量导入资源
-     */
-    ResourceImportResultVO batchImportResources(List<ResourceNode> resourceNodes);
-
 }

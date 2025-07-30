@@ -4,22 +4,32 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
+import top.fblue.watermelon.application.vo.ResourceNodeImportVO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
+import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 
-import javax.naming.Name;
+import jakarta.annotation.Resource;
+
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 资源Excel处理服务实现 - 负责Excel的读写操作和数据校验
  */
+@Slf4j
 @Service
 public class ResourceExcelServiceImpl implements ResourceExcelService {
+
+    @Resource
+    private ResourceDomainService resourceDomainService;
 
     @Override
     public List<ResourceExcelVO> readExcel(MultipartFile file) {
@@ -40,7 +50,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     @Override
     public List<String> validateExcelData(List<ResourceExcelVO> dataList) {
         List<String> errors = new ArrayList<>();
-        Map<String,Set<String>> nameMap = new HashMap<>();
+        Map<String, Set<String>> nameMap = new HashMap<>();
         Set<String> codeSet = new HashSet<>();
         // 构建 code 到 ResourceExcelVO 的映射
         Map<String, ResourceExcelVO> codeToResourceMap = new HashMap<>();
@@ -190,5 +200,181 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         // 从当前路径中移除当前节点（回溯）
         path.remove(currentCode);
         return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResourceImportResultVO batchImportExcelData(List<ResourceExcelVO> excelDataList) {
+        // 1. 转换为导入VO
+        List<ResourceNodeImportVO> importVOs = convertToImportVOs(excelDataList);
+        
+        // 2. 批量导入（带事务）
+        return batchImportResources(importVOs);
+    }
+
+    private ResourceImportResultVO batchImportResources(List<ResourceNodeImportVO> importVOs) {
+        int totalRows = importVOs.size();
+        int insertedRows = 0;
+        int updatedRows = 0;
+        int deletedRows = 0;
+        // 1. 获取Excel中的所有code
+        Set<String> excelCodes = importVOs.stream()
+                .map(ResourceNodeImportVO::getCode)
+                .collect(Collectors.toSet());
+
+        // 2. 获取数据库中所有资源
+        List<ResourceNode> existingResources = resourceDomainService.getResourceList(null, null, null);
+        Map<String, ResourceNode> existingCodeToResource = existingResources.stream()
+                .collect(Collectors.toMap(ResourceNode::getCode, resource -> resource));
+
+                    // 3. 分类处理
+            List<ResourceNodeImportVO> toInsert = new ArrayList<>();
+            List<ResourceNode> toUpdate = new ArrayList<>();
+            List<String> toDelete = new ArrayList<>();
+
+                    // 处理Excel中的资源
+            for (ResourceNodeImportVO importVO : importVOs) {
+                ResourceNode existingResource = existingCodeToResource.get(importVO.getCode());
+
+                            if (existingResource != null) {
+                    // 数据库存在，Excel存在 -> 更新
+                    ResourceNode resourceNode = importVO.toResourceNode(existingResource.getParentId());
+                    resourceNode.setId(existingResource.getId());
+                    toUpdate.add(resourceNode);
+                } else {
+                    // 数据库不存在，Excel存在 -> 新增
+                    toInsert.add(importVO);
+                }
+        }
+
+        // 处理需要删除的资源（数据库存在，Excel不存在）
+        for (String existingCode : existingCodeToResource.keySet()) {
+            if (!excelCodes.contains(existingCode)) {
+                toDelete.add(existingCode);
+            }
+        }
+
+                    // 4. 按拓扑排序处理新增资源
+            Map<String, Long> codeToIdMap = new HashMap<>();
+            if (!toInsert.isEmpty()) {
+                // 按拓扑排序处理，确保父节点在子节点之前插入
+                for (ResourceNodeImportVO importVO : toInsert) {
+                    // 根据parentCode查找父节点ID
+                    Long parentId = null;
+                    if (importVO.getParentCode() != null && !importVO.getParentCode().isEmpty()) {
+                        parentId = codeToIdMap.get(importVO.getParentCode());
+                    }
+                    
+                    // 转换为ResourceNode并插入
+                    ResourceNode resourceNode = importVO.toResourceNode(parentId);
+                    ResourceNode insertedResource = resourceDomainService.createResourceNode(resourceNode);
+                    insertedRows++;
+                    
+                    // 记录code到真实ID的映射
+                    codeToIdMap.put(importVO.getCode(), insertedResource.getId());
+                }
+            }
+
+        // 5. 批量更新
+        if (!toUpdate.isEmpty()) {
+            for (ResourceNode resourceNode : toUpdate) {
+                resourceDomainService.updateResource(resourceNode);
+                updatedRows++;
+            }
+        }
+
+        // 6. 批量删除
+        if (!toDelete.isEmpty()) {
+            for (String code : toDelete) {
+                ResourceNode existingResource = existingCodeToResource.get(code);
+                if (existingResource != null) {
+                    resourceDomainService.deleteResource(existingResource.getId());
+                    deletedRows++;
+                }
+            }
+        }
+
+        return ResourceImportResultVO.builder()
+                .success(true)
+                .totalRows(totalRows)
+                .insertedRows(insertedRows)
+                .updatedRows(updatedRows)
+                .deletedRows(deletedRows)
+                .build();
+    }
+
+        /**
+     * 转换为导入VO
+     */
+    private List<ResourceNodeImportVO> convertToImportVOs(List<ResourceExcelVO> excelDataList) {
+        // 1. 构建code到Excel数据的映射
+        Map<String, ResourceExcelVO> codeToExcelMap = excelDataList.stream()
+                .collect(Collectors.toMap(ResourceExcelVO::getCode, data -> data));
+        
+        // 2. 拓扑排序，确保父节点在子节点之前
+        List<ResourceExcelVO> sortedDataList = topologicalSort(excelDataList, codeToExcelMap);
+        
+        // 3. 转换为导入VO
+        return sortedDataList.stream()
+                .map(ResourceNodeImportVO::fromExcelVO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * 拓扑排序，确保父节点在子节点之前处理
+     */
+    private List<ResourceExcelVO> topologicalSort(List<ResourceExcelVO> dataList, Map<String, ResourceExcelVO> codeToExcelMap) {
+        // 构建邻接表
+        Map<String, List<String>> adjacencyList = new HashMap<>();
+        Map<String, Integer> inDegree = new HashMap<>();
+        
+        // 初始化
+        for (ResourceExcelVO data : dataList) {
+            adjacencyList.put(data.getCode(), new ArrayList<>());
+            inDegree.put(data.getCode(), 0);
+        }
+        
+        // 构建依赖关系
+        for (ResourceExcelVO data : dataList) {
+            if (data.getParentCode() != null && !data.getParentCode().isEmpty() 
+                    && codeToExcelMap.containsKey(data.getParentCode())) {
+                // 如果父节点也在Excel中，建立依赖关系
+                adjacencyList.get(data.getParentCode()).add(data.getCode());
+                inDegree.put(data.getCode(), inDegree.get(data.getCode()) + 1);
+            }
+        }
+        
+        // 拓扑排序
+        List<ResourceExcelVO> result = new ArrayList<>();
+        Queue<String> queue = new LinkedList<>();
+        
+        // 将所有入度为0的节点加入队列
+        for (String code : inDegree.keySet()) {
+            if (inDegree.get(code) == 0) {
+                queue.offer(code);
+            }
+        }
+        
+        // 处理队列中的节点
+        while (!queue.isEmpty()) {
+            String currentCode = queue.poll();
+            ResourceExcelVO currentData = codeToExcelMap.get(currentCode);
+            result.add(currentData);
+            
+            // 减少所有邻居的入度
+            for (String neighbor : adjacencyList.get(currentCode)) {
+                inDegree.put(neighbor, inDegree.get(neighbor) - 1);
+                if (inDegree.get(neighbor) == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+        
+        // 如果结果数量不等于输入数量，说明存在环
+        if (result.size() != dataList.size()) {
+            throw new RuntimeException("资源树中存在循环引用");
+        }
+        
+        return result;
     }
 }
