@@ -1,8 +1,6 @@
 package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -16,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * 资源仓储实现

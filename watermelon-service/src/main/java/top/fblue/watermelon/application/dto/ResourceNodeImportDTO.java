@@ -2,10 +2,6 @@ package top.fblue.watermelon.application.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import top.fblue.watermelon.application.vo.ResourceExcelVO;
-import top.fblue.watermelon.common.enums.ResourceTypeEnum;
-import top.fblue.watermelon.common.enums.StateEnum;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 /**
  * 资源节点导入VO

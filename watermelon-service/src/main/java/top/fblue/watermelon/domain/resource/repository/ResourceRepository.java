@@ -2,7 +2,6 @@ package top.fblue.watermelon.domain.resource.repository;
 
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 资源仓储接口

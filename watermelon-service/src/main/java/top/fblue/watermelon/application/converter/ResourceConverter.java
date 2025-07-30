@@ -7,7 +7,6 @@ import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.application.vo.UserInfoVO;
-import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;

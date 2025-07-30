@@ -2,7 +2,6 @@ package top.fblue.watermelon.domain.resource.service;
 
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 资源领域服务接口
