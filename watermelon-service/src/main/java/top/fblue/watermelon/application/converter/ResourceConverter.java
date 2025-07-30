@@ -1,6 +1,7 @@
 package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.application.dto.ResourceNodeImportDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
@@ -282,5 +283,20 @@ public class ResourceConverter {
         excelVO.setState(StateEnum.getDescByCode(resource.getState()));
         excelVO.setRemark(resource.getRemark());
         return excelVO;
+    }
+
+    /**
+     * 从ResourceExcelVO转换为ResourceNodeImportVO
+     */
+    public ResourceNodeImportDTO toImportDTO(ResourceExcelVO excelVO) {
+        return ResourceNodeImportDTO.builder()
+                .parentCode(excelVO.getParentCode())
+                .name(excelVO.getName())
+                .code(excelVO.getCode())
+                .type(ResourceTypeEnum.fromDesc(excelVO.getType()).getCode())
+                .orderNum(excelVO.getOrderNum())
+                .state(StateEnum.fromDesc(excelVO.getState()).getCode())
+                .remark(excelVO.getRemark())
+                .build();
     }
 }

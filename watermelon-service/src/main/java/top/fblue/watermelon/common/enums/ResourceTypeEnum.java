@@ -25,7 +25,7 @@ public enum ResourceTypeEnum {
      */
     public static ResourceTypeEnum fromCode(Integer code) {
         if (code == null) {
-            return null;
+            throw new IllegalArgumentException("Invalid resource type code is null ");
         }
         for (ResourceTypeEnum type : values()) {
             if (type.getCode().equals(code)) {
@@ -33,6 +33,21 @@ public enum ResourceTypeEnum {
             }
         }
         throw new IllegalArgumentException("Invalid resource type code: " + code);
+    }
+
+    /**
+     * 根据描述获取枚举
+     */
+    public static ResourceTypeEnum fromDesc(String desc) {
+        if (desc == null) {
+            throw new IllegalArgumentException("Invalid resource type desc is null ");
+        }
+        for (ResourceTypeEnum type : values()) {
+            if (type.getDesc().equals(desc)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Invalid resource type desc: " + desc);
     }
 
     /**

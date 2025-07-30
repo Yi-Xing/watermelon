@@ -34,6 +34,21 @@ public enum StateEnum {
     }
 
     /**
+     * 根据描述获取枚举
+     */
+    public static StateEnum fromDesc(String desc) {
+        if (desc == null) {
+            throw new IllegalArgumentException("Invalid state type desc is null ");
+        }
+        for (StateEnum type : values()) {
+            if (type.getDesc().equals(desc)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Invalid state type desc: " + desc);
+    }
+
+    /**
      * 根据code获取描述
      */
     public static String getDescByCode(Integer code) {

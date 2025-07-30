@@ -34,7 +34,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     private UserConverter userConverter;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public UserVO createUser(CreateUserDTO createUserDTO) {
         // 转换DTO为Domain实体
         User user = userConverter.toUser(createUserDTO);
@@ -77,7 +77,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateUser(UpdateUserDTO updateUserDTO) {
         // 转换DTO为Domain实体
         User user = userConverter.toUser(updateUserDTO);
@@ -87,14 +87,14 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean resetPassword(ResetPasswordDTO resetPasswordDTO) {
         // 调用领域服务重设密码
         return userDomainService.resetPassword(resetPasswordDTO.getId(), resetPasswordDTO.getPassword());
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteUser(Long id) {
         return userDomainService.deleteUser(id);
     }

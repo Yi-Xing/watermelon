@@ -6,10 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
-import top.fblue.watermelon.application.vo.ResourceNodeImportVO;
+import top.fblue.watermelon.application.dto.ResourceNodeImportDTO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
@@ -30,7 +31,8 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
 
     @Resource
     private ResourceDomainService resourceDomainService;
-
+    @Resource
+    private ResourceConverter resourceConverter;
     @Override
     public List<ResourceExcelVO> readExcel(MultipartFile file) {
         try {
@@ -49,15 +51,19 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
 
     @Override
     public List<String> validateExcelData(List<ResourceExcelVO> dataList) {
+        // 记录错误信息
         List<String> errors = new ArrayList<>();
+        // 用于同级 name 去重校验
         Map<String, Set<String>> nameMap = new HashMap<>();
+        // code 去重校验
         Set<String> codeSet = new HashSet<>();
-        // 构建 code 到 ResourceExcelVO 的映射
+        // 构建 code 到 ResourceExcelVO 的映射，检测是否存在环
         Map<String, ResourceExcelVO> codeToResourceMap = new HashMap<>();
-        Set<String> allCdeSet = new HashSet<>();
+        // 用于校验父级是否存在
+        Set<String> allCodeSet = new HashSet<>();
 
         for (ResourceExcelVO data : dataList) {
-            allCdeSet.add(data.getCode());
+            allCodeSet.add(data.getCode());
             codeToResourceMap.put(data.getCode(), data);
         }
 
@@ -66,7 +72,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             int rowNumber = i + 2; // Excel行号从2开始（第1行是标题）
 
             // 校验父级 code 是否存在
-            if (!data.getParentCode().isEmpty() && !allCdeSet.contains(data.getParentCode())) {
+            if (!data.getParentCode().isEmpty() && !allCodeSet.contains(data.getParentCode())) {
                 errors.add(String.format("第%d行: 上级资源code不存在", rowNumber));
             }
 
@@ -206,20 +212,20 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     @Transactional(rollbackFor = Exception.class)
     public ResourceImportResultVO batchImportExcelData(List<ResourceExcelVO> excelDataList) {
         // 1. 转换为导入VO
-        List<ResourceNodeImportVO> importVOs = convertToImportVOs(excelDataList);
+        List<ResourceNodeImportDTO> importVOs = convertToImportVOs(excelDataList);
         
         // 2. 批量导入（带事务）
         return batchImportResources(importVOs);
     }
 
-    private ResourceImportResultVO batchImportResources(List<ResourceNodeImportVO> importVOs) {
+    private ResourceImportResultVO batchImportResources(List<ResourceNodeImportDTO> importVOs) {
         int totalRows = importVOs.size();
         int insertedRows = 0;
         int updatedRows = 0;
         int deletedRows = 0;
         // 1. 获取Excel中的所有code
         Set<String> excelCodes = importVOs.stream()
-                .map(ResourceNodeImportVO::getCode)
+                .map(ResourceNodeImportDTO::getCode)
                 .collect(Collectors.toSet());
 
         // 2. 获取数据库中所有资源
@@ -228,12 +234,12 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .collect(Collectors.toMap(ResourceNode::getCode, resource -> resource));
 
                     // 3. 分类处理
-            List<ResourceNodeImportVO> toInsert = new ArrayList<>();
+            List<ResourceNodeImportDTO> toInsert = new ArrayList<>();
             List<ResourceNode> toUpdate = new ArrayList<>();
             List<String> toDelete = new ArrayList<>();
 
                     // 处理Excel中的资源
-            for (ResourceNodeImportVO importVO : importVOs) {
+            for (ResourceNodeImportDTO importVO : importVOs) {
                 ResourceNode existingResource = existingCodeToResource.get(importVO.getCode());
 
                             if (existingResource != null) {
@@ -258,7 +264,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             Map<String, Long> codeToIdMap = new HashMap<>();
             if (!toInsert.isEmpty()) {
                 // 按拓扑排序处理，确保父节点在子节点之前插入
-                for (ResourceNodeImportVO importVO : toInsert) {
+                for (ResourceNodeImportDTO importVO : toInsert) {
                     // 根据parentCode查找父节点ID
                     Long parentId = null;
                     if (importVO.getParentCode() != null && !importVO.getParentCode().isEmpty()) {
@@ -303,10 +309,10 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .build();
     }
 
-        /**
+    /**
      * 转换为导入VO
      */
-    private List<ResourceNodeImportVO> convertToImportVOs(List<ResourceExcelVO> excelDataList) {
+    private List<ResourceNodeImportDTO> convertToImportVOs(List<ResourceExcelVO> excelDataList) {
         // 1. 构建code到Excel数据的映射
         Map<String, ResourceExcelVO> codeToExcelMap = excelDataList.stream()
                 .collect(Collectors.toMap(ResourceExcelVO::getCode, data -> data));
@@ -316,7 +322,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         
         // 3. 转换为导入VO
         return sortedDataList.stream()
-                .map(ResourceNodeImportVO::fromExcelVO)
+                .map(resourceConverter::toImportDTO)
                 .collect(Collectors.toList());
     }
     

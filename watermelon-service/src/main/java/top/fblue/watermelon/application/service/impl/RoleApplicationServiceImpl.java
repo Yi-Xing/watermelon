@@ -36,7 +36,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     private RoleConverter roleConverter;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public RoleVO createRole(CreateRoleDTO createRoleDTO) {
         // 1. 转换DTO为Domain实体
         Role role = roleConverter.toRole(createRoleDTO);
@@ -91,7 +91,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateRole(UpdateRoleDTO updateRoleDTO) {
         // 1. 转换DTO为Domain实体
         Role role = roleConverter.toRole(updateRoleDTO);
@@ -101,7 +101,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateRoleResource(UpdateRoleResourceDTO updateRoleResourceDTO) {
         return roleDomainService.updateRoleResource(
                 updateRoleResourceDTO.getId(),
@@ -110,7 +110,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteRole(Long id) {
         return roleDomainService.deleteRole(id);
     }

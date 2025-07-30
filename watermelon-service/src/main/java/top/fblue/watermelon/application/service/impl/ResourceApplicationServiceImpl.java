@@ -107,7 +107,7 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateResource(UpdateResourceDTO updateResourceDTO) {
         // 1. 转换DTO为Domain实体
         ResourceNode resource = resourceConverter.toResourceNode(updateResourceDTO);
@@ -117,7 +117,7 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteResource(Long id) {
         // 通过领域服务删除资源
         return resourceDomainService.deleteResource(id);
