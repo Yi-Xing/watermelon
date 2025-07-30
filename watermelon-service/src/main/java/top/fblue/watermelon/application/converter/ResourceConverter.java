@@ -1,9 +1,9 @@
 package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
-import top.fblue.watermelon.application.dto.ResourceNodeImportDTO;
+import top.fblue.watermelon.application.dto.ResourceImportDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
-import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
+import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.application.vo.UserInfoVO;
@@ -75,7 +75,7 @@ public class ResourceConverter {
     /**
      * CreateResourceNodeDTO转换为ResourceNode
      */
-    public ResourceNode toResourceNode(CreateResourceNodeDTO dto) {
+    public ResourceNode toResourceNode(CreateResourceDTO dto) {
         if (dto == null) {
             return null;
         }
@@ -94,7 +94,7 @@ public class ResourceConverter {
     /**
      * 转换为ResourceNode
      */
-    public ResourceNode toResourceNode(ResourceNodeImportDTO dto,Long parentId) {
+    public ResourceNode toResourceNode(ResourceImportDTO dto, Long parentId) {
         return ResourceNode.builder()
                 .name(dto.getName())
                 .code(dto.getCode())
@@ -303,8 +303,8 @@ public class ResourceConverter {
     /**
      * 从ResourceExcelVO转换为ResourceNodeImportVO
      */
-    public ResourceNodeImportDTO toImportDTO(ResourceExcelVO excelVO) {
-        return ResourceNodeImportDTO.builder()
+    public ResourceImportDTO toImportDTO(ResourceExcelVO excelVO) {
+        return ResourceImportDTO.builder()
                 .parentCode(excelVO.getParentCode())
                 .name(excelVO.getName())
                 .code(excelVO.getCode())

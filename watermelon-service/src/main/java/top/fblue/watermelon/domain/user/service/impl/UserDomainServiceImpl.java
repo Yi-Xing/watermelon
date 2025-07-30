@@ -7,6 +7,7 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
+import top.fblue.watermelon.domain.user.repository.UserRoleRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,6 +22,9 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Resource
     private UserRepository userRepository;
+    
+    @Resource
+    private UserRoleRepository userRoleRepository;
 
     @Override
     public User createUser(User user) {
@@ -62,6 +66,13 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Override
     public boolean deleteUser(Long userId) {
+        // 1. 检查用户是否存在
+        getUserById(userId);
+        
+        // 2. 删除用户角色关系
+        userRoleRepository.deleteByUserId(userId);
+        
+        // 3. 删除用户
         return userRepository.delete(userId);
     }
 

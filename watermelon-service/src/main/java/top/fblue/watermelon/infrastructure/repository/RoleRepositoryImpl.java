@@ -51,19 +51,6 @@ public class RoleRepositoryImpl implements RoleRepository {
         return roleMapper.updateById(po) > 0;
     }
 
-    @Override
-    public boolean updateRoleResource(Long roleId, List<Long> resourceIds) {
-        // 先删除原有的角色资源关系
-        roleResourceRepository.deleteByRoleId(roleId);
-        
-        // 如果有新的资源ID，则批量保存
-        if (resourceIds != null && !resourceIds.isEmpty()) {
-            roleResourceRepository.saveBatch(List.of(roleId), resourceIds);
-        }
-        
-        return true;
-    }
-
     /**
      * 检查角色名是否存在
      */
@@ -83,7 +70,7 @@ public class RoleRepositoryImpl implements RoleRepository {
     @Override
     public List<Role> findByCondition(String keyword, Integer state, int pageNum, int pageSize) {
         QueryWrapper<RolePO> queryWrapper = buildQueryWrapper(keyword, state);
-        queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
+        queryWrapper.orderByDesc("order_num").orderByDesc("updated_time");
         
         Page<RolePO> page = new Page<>(pageNum, pageSize);
         IPage<RolePO> pageResult = roleMapper.selectPage(page, queryWrapper);

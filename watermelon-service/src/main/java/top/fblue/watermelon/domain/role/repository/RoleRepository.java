@@ -34,11 +34,6 @@ public interface RoleRepository {
     boolean update(Role role);
     
     /**
-     * 更新角色资源关系
-     */
-    boolean updateRoleResource(Long roleId, List<Long> resourceIds);
-    
-    /**
      * 删除角色
      */
     boolean delete(Long id);

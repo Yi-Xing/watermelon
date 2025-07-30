@@ -1,14 +1,12 @@
 package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
-import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.application.vo.UserInfoVO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
 

@@ -4,12 +4,13 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.domain.role.repository.RoleRepository;
+import top.fblue.watermelon.domain.role.repository.RoleResourceRepository;
 import top.fblue.watermelon.domain.role.service.RoleDomainService;
-import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  * 角色领域服务实现
@@ -21,7 +22,7 @@ public class RoleDomainServiceImpl implements RoleDomainService {
     private RoleRepository roleRepository;
     
     @Resource
-    private ResourceDomainService resourceDomainService;
+    private RoleResourceRepository roleResourceRepository;
 
     @Override
     public Role createRole(Role role) {
@@ -79,22 +80,35 @@ public class RoleDomainServiceImpl implements RoleDomainService {
         // 1. 检查角色是否存在
         getRoleById(roleId);
         
-        // 2. 检查资源是否都存在
-        if (resourceIds != null && !resourceIds.isEmpty()) {
-            Set<Long> invalidResourceIds = new HashSet<>();
-            for (Long resourceId : resourceIds) {
-                if (!resourceDomainService.existsById(resourceId)) {
-                    invalidResourceIds.add(resourceId);
-                }
-            }
-            
-            if (!invalidResourceIds.isEmpty()) {
-                throw new IllegalArgumentException("以下资源ID不存在：" + invalidResourceIds);
-            }
+        // 2. 查询现有的角色资源关系
+        List<Long> existingResourceIds = roleResourceRepository.findResourceIdsByRoleId(roleId);
+        
+        // 3. 计算需要删除和新增的资源ID
+        Set<Long> resourceIdSet = new HashSet<>(resourceIds);
+        List<Long> toDelete = existingResourceIds.stream()
+                .filter(id -> !resourceIdSet.contains(id))
+                .collect(Collectors.toList());
+        
+        List<Long> toInsert = resourceIds.stream()
+                .filter(id -> !existingResourceIds.contains(id))
+                .collect(Collectors.toList());
+        
+        // 4. 批量删除不需要的关系
+        if (!toDelete.isEmpty()) {
+            roleResourceRepository.deleteBatch(roleId, toDelete);
         }
         
-        // 3. 更新角色资源关系
-        return roleRepository.updateRoleResource(roleId, resourceIds);
+        // 5. 批量新增新的关系
+        if (!toInsert.isEmpty()) {
+            roleResourceRepository.insertBatch(roleId, toInsert);
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public List<Long> getRoleResourceIds(Long roleId) {
+        return roleResourceRepository.findResourceIdsByRoleId(roleId);
     }
 
     @Override
@@ -102,7 +116,10 @@ public class RoleDomainServiceImpl implements RoleDomainService {
         // 1. 检查角色是否存在
         getRoleById(id);
         
-        // 2. 删除角色
+        // 2. 删除角色资源关系
+        roleResourceRepository.deleteByRoleId(id);
+        
+        // 3. 删除角色
         return roleRepository.delete(id);
     }
 

@@ -39,6 +39,11 @@ public interface RoleDomainService {
     boolean updateRoleResource(Long roleId, List<Long> resourceIds);
     
     /**
+     * 获取角色关联的资源ID列表
+     */
+    List<Long> getRoleResourceIds(Long roleId);
+    
+    /**
      * 删除角色
      */
     boolean deleteRole(Long id);

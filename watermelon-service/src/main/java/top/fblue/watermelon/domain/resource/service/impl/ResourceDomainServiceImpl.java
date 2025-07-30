@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * 资源领域服务实现
@@ -122,6 +123,30 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     @Override
     public boolean existsById(Long id) {
         return resourceRepository.existsById(id);
+    }
+    
+    @Override
+    public void validateResourceIds(List<Long> resourceIds) {
+        if (resourceIds == null || resourceIds.isEmpty()) {
+            return;
+        }
+        
+        // 批量查询资源信息
+        List<ResourceNode> resources = getResourceListByIds(resourceIds);
+        
+        // 检查是否有不存在的资源
+        if (resources.size() != resourceIds.size()) {
+            // 找出不存在的资源ID
+            Set<Long> existingIds = resources.stream()
+                    .map(ResourceNode::getId)
+                    .collect(Collectors.toSet());
+            
+            List<Long> invalidResourceIds = resourceIds.stream()
+                    .filter(id -> !existingIds.contains(id))
+                    .toList();
+            
+            throw new IllegalArgumentException("以下资源不存在：" + invalidResourceIds);
+        }
     }
 
     /**

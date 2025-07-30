@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
+import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.service.ResourceApplicationService;
@@ -33,12 +33,12 @@ public class ResourceController {
     /**
      * 新增资源
      *
-     * @param createResourceNodeDTO 创建资源DTO
+     * @param createResourceDTO 创建资源DTO
      * @return 资源基本信息
      */
     @PostMapping
-    public ApiResponse<ResourceNodeVO> createResource(@Valid @RequestBody CreateResourceNodeDTO createResourceNodeDTO) {
-        ResourceNodeVO resourceNodeVO = resourceApplicationService.createResource(createResourceNodeDTO);
+    public ApiResponse<ResourceNodeVO> createResource(@Valid @RequestBody CreateResourceDTO createResourceDTO) {
+        ResourceNodeVO resourceNodeVO = resourceApplicationService.createResource(createResourceDTO);
         return ApiResponse.success(resourceNodeVO, "资源创建成功");
     }
 

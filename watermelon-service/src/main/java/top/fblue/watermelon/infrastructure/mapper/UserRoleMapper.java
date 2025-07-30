@@ -20,10 +20,4 @@ public interface UserRoleMapper extends BaseMapper<UserRolePO> {
      */
     @Select("SELECT role_id FROM user_role WHERE user_id = #{userId} AND is_deleted = 0")
     List<Long> selectRoleIdsByUserId(Long userId);
-    
-    /**
-     * 根据角色ID查询用户ID列表
-     */
-    @Select("SELECT user_id FROM user_role WHERE role_id = #{roleId} AND is_deleted = 0")
-    List<Long> selectUserIdsByRoleId(Long roleId);
-} 
+}

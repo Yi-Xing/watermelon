@@ -119,7 +119,6 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         }
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("id", ids);
-        queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)

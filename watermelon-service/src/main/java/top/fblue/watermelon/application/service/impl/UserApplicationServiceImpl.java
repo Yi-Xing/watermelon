@@ -52,26 +52,8 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         User user = userDomainService.getUserById(id);
 
         // 组装详细信息（包含关联角色）
-        List<Long> userIdList = new ArrayList<>();
-        userIdList.add(user.getCreatedBy());
-        userIdList.add(user.getUpdatedBy());
-
-        Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIdList);
-
-        return userConverter.toVO(user, userIDMap);
-    }
-
-    @Override
-    public UserVO getUserById(Long id) {
-        // 获取基础用户数据
-        User user = userDomainService.getUserById(id);
-
-        // 组装详细信息
-        List<Long> userIdList = new ArrayList<>();
-        userIdList.add(user.getCreatedBy());
-        userIdList.add(user.getUpdatedBy());
-
-        Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIdList);
+        List<Long> userIds = List.of(user.getCreatedBy(), user.getUpdatedBy());
+        Map<Long, User> userIDMap = userDomainService.getUserMapByIds(userIds);
 
         return userConverter.toVO(user, userIDMap);
     }

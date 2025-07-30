@@ -10,7 +10,7 @@ import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
-import top.fblue.watermelon.application.dto.ResourceNodeImportDTO;
+import top.fblue.watermelon.application.dto.ResourceImportDTO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
@@ -219,20 +219,20 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     @Transactional(rollbackFor = Exception.class)
     public ResourceImportResultVO batchImportExcelData(List<ResourceExcelVO> excelDataList) {
         // 1. 转换为导入VO
-        List<ResourceNodeImportDTO> importDTOs = convertSortToImportDTOs(excelDataList);
+        List<ResourceImportDTO> importDTOs = convertSortToImportDTOs(excelDataList);
 
         // 2. 批量导入（带事务）
         return batchImportResources(importDTOs);
     }
 
-    private ResourceImportResultVO batchImportResources(List<ResourceNodeImportDTO> importDTOs) {
+    private ResourceImportResultVO batchImportResources(List<ResourceImportDTO> importDTOs) {
         int totalRows = importDTOs.size();
         int insertedRows = 0;
         int updatedRows = 0;
         int deletedRows = 0;
         // 1. 获取Excel中的所有code
         Set<String> excelCodes = importDTOs.stream()
-                .map(ResourceNodeImportDTO::getCode)
+                .map(ResourceImportDTO::getCode)
                 .collect(Collectors.toSet());
 
         // 2. 获取数据库中所有资源
@@ -245,7 +245,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         Map<String, Long> codeToIdMap = new HashMap<>();
 
         // 处理Excel中的资源
-        for (ResourceNodeImportDTO importDTO : importDTOs) {
+        for (ResourceImportDTO importDTO : importDTOs) {
             ResourceNode existingResource = existingCodeToResource.get(importDTO.getCode());
 
             // 根据 parentCode 查找父节点ID 并转为 ResourceNode
@@ -298,7 +298,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     /**
      * 转换为导入VO并进行拓扑排序
      */
-    private List<ResourceNodeImportDTO> convertSortToImportDTOs(List<ResourceExcelVO> excelDataList) {
+    private List<ResourceImportDTO> convertSortToImportDTOs(List<ResourceExcelVO> excelDataList) {
         // 1. 构建code到Excel数据的映射
         Map<String, ResourceExcelVO> codeToExcelMap = excelDataList.stream()
                 .collect(Collectors.toMap(ResourceExcelVO::getCode, data -> data));

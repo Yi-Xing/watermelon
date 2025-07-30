@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class ResourceNodeImportDTO {
+public class ResourceImportDTO {
 
     /**
      * 上级资源code

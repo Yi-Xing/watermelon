@@ -1,6 +1,13 @@
 package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.domain.role.entity.Role;
+import top.fblue.watermelon.infrastructure.po.RolePO;
+import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 角色资源关系转换器
@@ -10,35 +17,17 @@ import org.springframework.stereotype.Component;
 public class RoleResourceNodePOConverter {
 
     /**
-     * PO转换为Domain实体
-     * 
-     * 注意：需要先创建对应的RoleResource domain实体类
-     * public RoleResource toDomain(RoleResourcePO po) {
-     *     if (po == null) return null;
-     *     
-     *     return RoleResource.builder()
-     *             .id(po.getId())
-     *             .roleId(po.getRoleId())
-     *             .resourceId(po.getResourceId())
-     *             .createdBy(po.getCreatedBy())
-     *             .createdTime(po.getCreatedTime())
-     *             .updatedBy(po.getUpdatedBy())
-     *             .updatedTime(po.getUpdatedTime())
-     *             .build();
-     * }
+     * 转换为PO列表
      */
-
-    /**
-     * Domain实体转换为PO
-     * 
-     * 注意：需要先创建对应的RoleResource domain实体类
-     * public RoleResourcePO toPO(RoleResource domain) {
-     *     if (domain == null) return null;
-     *     return RoleResourcePO.builder()
-     *             .id(domain.getId())
-     *             .roleId(domain.getRoleId())
-     *             .resourceId(domain.getResourceId())
-     *             .build();
-     * }
-     */
+    public List<RoleResourceNodePO> toPOList(Long roleId, List<Long> resourceIds) {
+        if (resourceIds == null || resourceIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return resourceIds.stream()
+                .map(resourceId -> RoleResourceNodePO.builder()
+                        .roleId(roleId)
+                        .resourceNodeId(resourceId)
+                        .build())
+                .collect(Collectors.toList());
+    }
 } 

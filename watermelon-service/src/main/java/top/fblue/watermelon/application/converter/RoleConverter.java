@@ -11,6 +11,7 @@ import top.fblue.watermelon.common.utils.DateTimeUtil;
 import top.fblue.watermelon.common.enums.StateEnum;
 
 import java.util.Map;
+import java.util.List;
 
 /**
  * 角色转换器
@@ -50,7 +51,26 @@ public class RoleConverter {
                 .remark(dto.getRemark())
                 .build();
     }
-    
+    /**
+     * Role转换为RoleVO
+     */
+    public RoleVO toVO(Role role) {
+        if (role == null) {
+            return null;
+        }
+
+        return RoleVO.builder()
+                .id(role.getId())
+                .name(role.getName())
+                .orderNum(role.getOrderNum())
+                .state(role.getState())
+                .stateDesc(StateEnum.getDescByCode(role.getState()))
+                .remark(role.getRemark())
+                .createdTime(DateTimeUtil.formatDateTime(role.getCreatedTime()))
+                .updatedTime(DateTimeUtil.formatDateTime(role.getUpdatedTime()))
+                .build();
+    }
+
     /**
      * Role转换为RoleVO
      */
@@ -64,19 +84,42 @@ public class RoleConverter {
                 .name(role.getName())
                 .orderNum(role.getOrderNum())
                 .state(role.getState())
-                .stateDesc(getStateDesc(role.getState()))
+                .stateDesc(StateEnum.getDescByCode(role.getState()))
                 .remark(role.getRemark())
-                .createdBy(convertToUserInfoVO(userMap.get(role.getCreatedBy())))
+                .createdBy(toUserInfoVO(userMap.get(role.getCreatedBy())))
                 .createdTime(DateTimeUtil.formatDateTime(role.getCreatedTime()))
-                .updatedBy(convertToUserInfoVO(userMap.get(role.getUpdatedBy())))
+                .updatedBy(toUserInfoVO(userMap.get(role.getUpdatedBy())))
                 .updatedTime(DateTimeUtil.formatDateTime(role.getUpdatedTime()))
+                .build();
+    }
+    
+    /**
+     * Role转换为RoleVO（包含资源ID）
+     */
+    public RoleVO toVO(Role role, Map<Long, User> userMap, List<Long> resourceIds) {
+        if (role == null) {
+            return null;
+        }
+        
+        return RoleVO.builder()
+                .id(role.getId())
+                .name(role.getName())
+                .orderNum(role.getOrderNum())
+                .state(role.getState())
+                .stateDesc(StateEnum.getDescByCode(role.getState()))
+                .remark(role.getRemark())
+                .createdBy(toUserInfoVO(userMap.get(role.getCreatedBy())))
+                .createdTime(DateTimeUtil.formatDateTime(role.getCreatedTime()))
+                .updatedBy(toUserInfoVO(userMap.get(role.getUpdatedBy())))
+                .updatedTime(DateTimeUtil.formatDateTime(role.getUpdatedTime()))
+                .resourceIds(resourceIds)
                 .build();
     }
     
     /**
      * User转换为UserInfoVO
      */
-    private UserInfoVO convertToUserInfoVO(User user) {
+    private UserInfoVO toUserInfoVO(User user) {
         if (user == null) {
             return null;
         }
@@ -85,12 +128,5 @@ public class RoleConverter {
                 .id(user.getId())
                 .name(user.getUsername())
                 .build();
-    }
-    
-    /**
-     * 获取状态描述
-     */
-    private String getStateDesc(Integer state) {
-        return StateEnum.getDescByCode(state);
     }
 } 

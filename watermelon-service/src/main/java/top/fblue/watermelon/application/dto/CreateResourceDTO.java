@@ -7,7 +7,7 @@ import jakarta.validation.constraints.*;
  * 创建资源DTO
  */
 @Data
-public class CreateResourceNodeDTO {
+public class CreateResourceDTO {
     
     /**
      * 上级资源ID - 非必填
@@ -40,6 +40,7 @@ public class CreateResourceNodeDTO {
      * 显示顺序 - 必填
      */
     @NotNull(message = "显示顺序不能为空")
+    @Min(value = 0, message = "显示顺序必须大于等于0")
     private Integer orderNum;
     
     /**

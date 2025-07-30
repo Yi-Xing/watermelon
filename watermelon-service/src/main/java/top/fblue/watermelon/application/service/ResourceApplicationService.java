@@ -1,17 +1,14 @@
 package top.fblue.watermelon.application.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import top.fblue.watermelon.application.dto.CreateResourceNodeDTO;
+import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
-import top.fblue.watermelon.application.vo.ResourceExcelVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 资源应用服务接口
@@ -26,10 +23,10 @@ public interface ResourceApplicationService {
     /**
      * 创建资源
      *
-     * @param createResourceNodeDTO 创建资源DTO
+     * @param createResourceDTO 创建资源DTO
      * @return 资源视图对象
      */
-    ResourceNodeVO createResource(CreateResourceNodeDTO createResourceNodeDTO);
+    ResourceNodeVO createResource(CreateResourceDTO createResourceDTO);
     
     /**
      * 查询资源树

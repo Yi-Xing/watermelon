@@ -21,12 +21,7 @@ public interface UserApplicationService {
      * 根据ID获取用户详情（包含关联角色）
      */
     UserVO getUserDetailById(Long id);
-    
-    /**
-     * 根据ID获取用户基本信息
-     */
-    UserVO getUserById(Long id);
-    
+
     /**
      * 更新用户
      */
