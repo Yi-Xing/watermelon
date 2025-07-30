@@ -135,22 +135,4 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     public boolean deleteRole(Long id) {
         return roleDomainService.deleteRole(id);
     }
-
-    /**
-     * 构建RoleVO（包含关联信息）
-     */
-    private RoleVO buildRoleVO(Role role) {
-        if (role == null) {
-            return null;
-        }
-
-        // 1. 获取关联的用户信息
-        List<Long> userIds = List.of(role.getCreatedBy(), role.getUpdatedBy());
-        Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
-
-        // 2. 转换为VO
-        return roleConverter.toVO(role, userMap);
-    }
-
-
-} 
+}

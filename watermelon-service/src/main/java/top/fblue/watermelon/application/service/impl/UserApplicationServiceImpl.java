@@ -14,7 +14,6 @@ import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

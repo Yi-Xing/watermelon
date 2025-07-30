@@ -32,28 +32,6 @@ public class RoleResourceRepositoryImpl implements RoleResourceRepository {
     }
 
     @Override
-    public void saveBatch(List<Long> roleIds, List<Long> resourceIds) {
-        // 构建批量插入的实体列表
-        List<RoleResourceNodePO> entities = new ArrayList<>();
-        for (Long roleId : roleIds) {
-            for (Long resourceId : resourceIds) {
-                RoleResourceNodePO entity = new RoleResourceNodePO();
-                entity.setRoleId(roleId);
-                entity.setResourceNodeId(resourceId);
-                entity.setCreatedBy(1L); // TODO: 应该从当前用户上下文获取真实的用户ID
-                entity.setUpdatedBy(1L); // TODO: 应该从当前用户上下文获取真实的用户ID
-                entity.setIsDeleted(0);
-                entities.add(entity);
-            }
-        }
-        
-        // 使用 MyBatis-Plus 的批量插入
-        for (RoleResourceNodePO entity : entities) {
-            roleResourceNodeMapper.insert(entity);
-        }
-    }
-
-    @Override
     public List<Long> findResourceIdsByRoleId(Long roleId) {
         return roleResourceNodeMapper.selectResourceIdsByRoleId(roleId);
     }

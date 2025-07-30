@@ -121,11 +121,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return resourceRepository.existsById(id);
-    }
-    
-    @Override
     public void validateResourceIds(List<Long> resourceIds) {
         if (resourceIds == null || resourceIds.isEmpty()) {
             return;

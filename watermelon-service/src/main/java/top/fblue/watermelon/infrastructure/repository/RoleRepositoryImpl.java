@@ -28,9 +28,6 @@ public class RoleRepositoryImpl implements RoleRepository {
     @Resource
     private RolePOConverter rolePOConverter;
     
-    @Resource
-    private RoleResourceRepository roleResourceRepository;
-
     @Override
     public Role save(Role role) {
         RolePO po = rolePOConverter.toPO(role);
@@ -86,16 +83,6 @@ public class RoleRepositoryImpl implements RoleRepository {
     public Long countByCondition(String keyword, Integer state) {
         QueryWrapper<RolePO> queryWrapper = buildQueryWrapper(keyword, state);
         return roleMapper.selectCount(queryWrapper);
-    }
-
-    /**
-     * 查询所有启用的角色
-     */
-    public List<RolePO> findAllEnabled() {
-        QueryWrapper<RolePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", 1);
-        queryWrapper.orderByAsc("order_num");
-        return roleMapper.selectList(queryWrapper);
     }
 
     /**

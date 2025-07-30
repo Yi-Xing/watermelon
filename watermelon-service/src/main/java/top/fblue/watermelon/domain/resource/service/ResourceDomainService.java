@@ -44,11 +44,6 @@ public interface ResourceDomainService {
     boolean deleteResource(Long id);
 
     /**
-     * 检查资源ID是否存在
-     */
-    boolean existsById(Long id);
-    
-    /**
      * 校验资源IDs是否合法
      */
     void validateResourceIds(List<Long> resourceIds);
