@@ -18,7 +18,6 @@ public class ResetPasswordDTO {
     /**
      * 新密码
      */
-    @Size(min = 8, max = 8, message = "密码必须是8位数字")
-    @Pattern(regexp = "^\\d{8}$", message = "密码必须是8位数字")
+    @NotBlank(message = "密码不能为空")
     private String password;
 } 

@@ -22,18 +22,17 @@ public class UpdateUserDTO {
     @NotBlank(message = "用户名称不能为空")
     @Size(min = 3, max = 10, message = "用户名称长度必须在3-10个字符之间")
     private String name;
-    
+
     /**
-     * 邮箱
+     * 邮箱 - 非必填，正则校验
      */
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", 
-             message = "邮箱格式不正确")
+    @Pattern(regexp = "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "邮箱格式不正确")
     private String email;
-    
+
     /**
-     * 手机号
+     * 手机号 - 非必填，正则校验
      */
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    @Pattern(regexp = "^$|^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String phone;
     
     /**
