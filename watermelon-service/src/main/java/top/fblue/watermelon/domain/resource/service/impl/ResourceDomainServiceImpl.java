@@ -125,22 +125,23 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         if (resourceIds == null || resourceIds.isEmpty()) {
             return;
         }
-        
+
         // 批量查询资源信息
         List<ResourceNode> resources = getResourceListByIds(resourceIds);
-        
-        // 检查是否有不存在的资源
-        if (resources.size() != resourceIds.size()) {
-            // 找出不存在的资源ID
-            Set<Long> existingIds = resources.stream()
-                    .map(ResourceNode::getId)
-                    .collect(Collectors.toSet());
-            
-            List<Long> invalidResourceIds = resourceIds.stream()
-                    .filter(id -> !existingIds.contains(id))
-                    .toList();
-            
-            throw new IllegalArgumentException("以下资源不存在：" + invalidResourceIds);
+        if (resources.size() == resourceIds.size()) {
+            return;
+        }
+        // 找出不存在的资源ID
+        Set<Long> existResourceIdSet = resources.stream()
+                .map(ResourceNode::getId)
+                .collect(Collectors.toSet());
+
+        List<Long> notExistResourceIds = resourceIds.stream()
+                .filter(id -> !existResourceIdSet.contains(id))
+                .toList();
+        if (!notExistResourceIds.isEmpty()) {
+            String ids = notExistResourceIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            throw new IllegalArgumentException("以下资源ID不存在: " + ids);
         }
     }
 

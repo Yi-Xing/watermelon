@@ -22,7 +22,12 @@ public interface RoleDomainService {
      * 根据IDs获取角色
      */
     List<Role> getRoleByIds(List<Long> ids);
-    
+
+    /**
+     * 校验角色ID是否存在
+     */
+    void validateRoleIds(List<Long> roleIds);
+
     /**
      * 分页查询角色列表
      */

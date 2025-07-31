@@ -60,6 +60,26 @@ public class RoleDomainServiceImpl implements RoleDomainService {
     }
 
     @Override
+    public void validateRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return;
+        }
+
+        List<Role> roles = getRoleByIds(roleIds);
+        if (roles.size() == roleIds.size()) {
+            return;
+        }
+        Set<Long> existRoleIdSet = roles.stream().map(Role::getId).collect(Collectors.toSet());
+        List<Long> notExistRoleIds = roleIds.stream()
+                .filter(id -> !existRoleIdSet.contains(id))
+                .toList();
+        if (!notExistRoleIds.isEmpty()) {
+            String ids = notExistRoleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            throw new IllegalArgumentException("以下角色ID不存在: " + ids);
+        }
+    }
+
+    @Override
     public List<Role> getRoleList(String name, Integer state, int pageNum, int pageSize) {
         return roleRepository.findByCondition(name, state, pageNum, pageSize);
     }

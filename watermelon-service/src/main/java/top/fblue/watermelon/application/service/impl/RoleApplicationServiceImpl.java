@@ -122,35 +122,13 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public boolean updateRoleResource(UpdateRoleResourceDTO updateRoleResourceDTO) {
         // 1. 校验资源是否存在
-        validateResourceIds(updateRoleResourceDTO.getResourceIds());
+        resourceDomainService.validateResourceIds(updateRoleResourceDTO.getResourceIds());
 
         // 2. 更新角色资源关系
         return roleDomainService.updateRoleResource(
                 updateRoleResourceDTO.getId(),
                 updateRoleResourceDTO.getResourceIds()
         );
-    }
-
-    /**
-     * 校验资源ID是否存在
-     */
-    private void validateResourceIds(List<Long> resourceIds) {
-        if (resourceIds == null || resourceIds.isEmpty()) {
-            return;
-        }
-
-        List<ResourceNode> resources = resourceDomainService.getResourceListByIds(resourceIds);
-        if (resources.size() == resourceIds.size()) {
-            return;
-        }
-        Set<Long> existResourceIdSet = resources.stream().map(ResourceNode::getId).collect(Collectors.toSet());
-        List<Long> notExistResourceIds = resourceIds.stream()
-                .filter(id -> !existResourceIdSet.contains(id))
-                .toList();
-        if (!notExistResourceIds.isEmpty()) {
-            String ids = notExistResourceIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-            throw new IllegalArgumentException("以下资源ID不存在: " + ids);
-        }
     }
 
     @Override

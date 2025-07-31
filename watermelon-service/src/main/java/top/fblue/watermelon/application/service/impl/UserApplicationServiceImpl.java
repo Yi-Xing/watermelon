@@ -18,7 +18,6 @@ import top.fblue.watermelon.domain.role.entity.Role;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,14 +38,15 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserVO createUser(CreateUserDTO createUserDTO) {
+        // 校验角色是否存在
+        roleDomainService.validateRoleIds(createUserDTO.getRoleIds());
+
         // 转换DTO为Domain实体
         User user = userConverter.toUser(createUserDTO);
 
         // 调用领域服务创建用户
         User createUser = userDomainService.createUser(user);
 
-        // 校验角色是否存在
-        validateRoleIds(createUserDTO.getRoleIds());
         // 创建用户和角色的关联关系
         userDomainService.createUserRole(createUser.getId(), createUserDTO.getRoleIds());
 
@@ -74,11 +74,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateUser(UpdateUserDTO updateUserDTO) {
-        // 1. 转换DTO为Domain实体
-        User user = userConverter.toUser(updateUserDTO);
+        // 1. 校验角色是否存在
+        roleDomainService.validateRoleIds(updateUserDTO.getRoleIds());
 
-        // 2. 校验角色是否存在
-        validateRoleIds(updateUserDTO.getRoleIds());
+        // 2. 转换DTO为Domain实体
+        User user = userConverter.toUser(updateUserDTO);
 
         // 3. 更新用户角色关系
         userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
@@ -131,25 +131,5 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         );
     }
 
-    /**
-     * 校验角色ID是否存在
-     */
-    private void validateRoleIds(List<Long> roleIds) {
-        if (roleIds == null || roleIds.isEmpty()) {
-            return;
-        }
 
-        List<Role> roles = roleDomainService.getRoleByIds(roleIds);
-        if (roles.size() == roleIds.size()) {
-            return;
-        }
-        Set<Long> existRoleIdSet = roles.stream().map(Role::getId).collect(Collectors.toSet());
-        List<Long> notExistRoleIds = roleIds.stream()
-                .filter(id -> !existRoleIdSet.contains(id))
-                .toList();
-        if (!notExistRoleIds.isEmpty()) {
-            String ids = notExistRoleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-            throw new IllegalArgumentException("以下角色ID不存在: " + ids);
-        }
-    }
 }
