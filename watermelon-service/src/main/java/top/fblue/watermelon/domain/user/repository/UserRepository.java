@@ -71,4 +71,9 @@ public interface UserRepository {
      * 重设密码
      */
     boolean resetPassword(Long userId, String password);
+    
+    /**
+     * 根据账号查找用户（支持邮箱或手机号）
+     */
+    User findByAccount(String account);
 }

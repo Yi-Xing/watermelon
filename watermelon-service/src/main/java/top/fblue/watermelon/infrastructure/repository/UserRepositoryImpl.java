@@ -111,19 +111,18 @@ public class UserRepositoryImpl implements UserRepository {
     }
     
     @Override
-    public User findByEmail(String email) {
-        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email);
-        UserPO po = userMapper.selectOne(queryWrapper);
-        return userPOConverter.toDomain(po);
-    }
-    
-    @Override
-    public User findByPhone(String phone) {
-        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("phone", phone);
-        UserPO po = userMapper.selectOne(queryWrapper);
-        return userPOConverter.toDomain(po);
+    public User findByAccount(String account) {
+        if (StringUtils.hasText(account)) {
+            QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
+            queryWrapper.and(wrapper -> wrapper
+                    .eq("email", account)
+                    .or()
+                    .eq("phone", account)
+            );
+            UserPO po = userMapper.selectOne(queryWrapper);
+            return userPOConverter.toDomain(po);
+        }
+        return null;
     }
     
     /**

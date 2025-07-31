@@ -8,6 +8,7 @@ import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.common.response.ApiResponse;
+import top.fblue.watermelon.common.utils.TokenUtil;
 
 import jakarta.validation.Valid;
 
@@ -18,10 +19,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/user")
 @Validated
 public class LoginController {
-    
+
     @Resource
-    private  LoginApplicationService loginApplicationService;
-    
+    private LoginApplicationService loginApplicationService;
+
     /**
      * 用户登录
      */
@@ -30,17 +31,22 @@ public class LoginController {
         LoginVO loginVO = loginApplicationService.login(loginDTO);
         return ApiResponse.success(loginVO, "登录成功");
     }
-    
+
     /**
      * 退出登录
      */
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(@RequestHeader("Authorization") String token) {
-        boolean success = loginApplicationService.logout(token);
-        if (success) {
-            return ApiResponse.success(null, "退出登录成功");
-        } else {
-            return ApiResponse.error(400, "退出登录失败");
-        }
+    public ApiResponse<Void> logout(@RequestHeader(value = "Authorization") String authHeader) {
+        loginApplicationService.logout(authHeader);
+        return ApiResponse.success(null, "退出登录成功");
+    }
+
+    /**
+     * 刷新token
+     */
+    @PostMapping("/token/refresh")
+    public ApiResponse<String> refreshToken(@RequestHeader(value = "Authorization") String authHeader) {
+        String newToken = loginApplicationService.refreshToken(authHeader);
+        return ApiResponse.success(newToken, "Token刷新成功");
     }
 }

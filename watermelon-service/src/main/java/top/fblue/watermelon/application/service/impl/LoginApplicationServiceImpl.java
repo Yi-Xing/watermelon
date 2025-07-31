@@ -1,19 +1,16 @@
 package top.fblue.watermelon.application.service.impl;
 
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import top.fblue.watermelon.application.converter.UserConverter;
 import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
-import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.user.service.TokenDomainService;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 登录应用服务实现类
@@ -22,54 +19,52 @@ import java.util.UUID;
 public class LoginApplicationServiceImpl implements LoginApplicationService {
 
     @Resource
-    private  UserDomainService userDomainService;
-    
+    private UserDomainService userDomainService;
+
+    @Resource
+    private UserConverter userConverter;
+
+    @Resource
+    private TokenDomainService tokenDomainService;
+
     @Override
     public LoginVO login(LoginDTO loginDTO) {
-        String account = loginDTO.getAccount();
-        
-        // 根据账号查找用户（支持手机号、邮箱）
-        User user = userDomainService.findByAccount(account);
-        if (user == null) {
-            throw new IllegalArgumentException("用户不存在");
-        }
-        
-        // 验证密码
-        if (!user.getPassword().equals(loginDTO.getPassword())) {
-            throw new IllegalArgumentException("密码错误");
-        }
-        
-        // 检查用户状态
-        if (!StateEnum.ENABLE.getCode().equals(user.getState())) {
-            throw new IllegalArgumentException("用户已被禁用");
-        }
-        
-        // 生成token（这里使用简单的UUID，实际项目中应该使用JWT）
-        String token = UUID.randomUUID().toString();
-        
-        // 构建用户信息
-        UserVO userInfo = UserVO.builder()
-                .id(user.getId())
-                .name(user.getUsername())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .state(user.getState())
-                .stateDesc(StateEnum.getDescByCode(user.getState()))
-                .remark(user.getRemark())
-                .createdTime(user.getCreatedTime() != null ? user.getCreatedTime().toString() : null)
-                .updatedTime(user.getUpdatedTime() != null ? user.getUpdatedTime().toString() : null)
-                .build();
-        
+        // 调用领域服务进行登录验证
+        User user = userDomainService.login(loginDTO.getAccount(), loginDTO.getPassword());
+
+        // 生成并存储token
+        String token = tokenDomainService.generateToken(user);
+
+        // 使用转换器构建用户信息
+        UserVO userInfo = userConverter.toVO(user);
+
         return LoginVO.builder()
                 .userInfo(userInfo)
                 .token(token)
                 .build();
     }
-    
+
     @Override
-    public boolean logout(String token) {
-        // TODO: 实现token失效逻辑
-        // 实际项目中应该将token加入黑名单或从Redis中删除
-        return true;
+    public void logout(String authHeader) {
+        // 提取token
+        String token = TokenUtil.extractTokenFromHeader(authHeader);
+
+        // 先验证token是否存在
+        tokenDomainService.validateToken(token);
+
+        // 使token失效
+        tokenDomainService.invalidateToken(token);
+    }
+
+    @Override
+    public String refreshToken(String authHeader) {
+        // 提取token
+        String token = TokenUtil.extractTokenFromHeader(authHeader);
+
+        // 验证原token是否有效
+        tokenDomainService.validateToken(token);
+
+        // 刷新token
+        return tokenDomainService.refreshToken(token);
     }
 }

@@ -2,6 +2,7 @@ package top.fblue.watermelon.domain.user.service.impl;
 
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
@@ -145,21 +146,26 @@ public class UserDomainServiceImpl implements UserDomainService {
     public Long countUsers(String keyword, Integer state) {
         return userRepository.countByCondition(keyword, state);
     }
-    
+
     @Override
-    public User findByAccount(String account) {
-        if (StringUtil.isEmpty(account)) {
-            return null;
+    public User login(String account, String password) {
+        // 根据账号查找用户
+        User user = userRepository.findByAccount(account);
+        if (user == null) {
+            throw new IllegalArgumentException("用户不存在");
         }
         
-        // 先尝试按邮箱查找
-        User user = userRepository.findByEmail(account);
-        if (user != null) {
-            return user;
+        // 验证密码
+        if (!user.getPassword().equals(password)) {
+            throw new IllegalArgumentException("密码错误");
         }
         
-        // 再尝试按手机号查找
-        return userRepository.findByPhone(account);
+        // 检查用户状态
+        if (!StateEnum.ENABLE.getCode().equals(user.getState())) {
+            throw new IllegalArgumentException("用户已被禁用");
+        }
+        
+        return user;
     }
 
     /**

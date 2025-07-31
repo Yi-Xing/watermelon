@@ -16,5 +16,10 @@ public interface LoginApplicationService {
     /**
      * 退出登录
      */
-    boolean logout(String token);
+    void logout(String authHeader);
+    
+    /**
+     * 刷新token
+     */
+    String refreshToken(String authHeader);
 } 
