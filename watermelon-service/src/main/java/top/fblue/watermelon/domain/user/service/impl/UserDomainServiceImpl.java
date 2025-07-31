@@ -166,11 +166,6 @@ public class UserDomainServiceImpl implements UserDomainService {
      * 校验用户的业务规则
      */
     private void validateUser(User user) {
-        // 检查用户名是否已存在
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new IllegalArgumentException("用户名已存在");
-        }
-
         // 检查邮箱是否已存在（如果邮箱不为空）
         if (StringUtil.isNotEmpty(user.getEmail())) {
             if (userRepository.existsByEmail(user.getEmail())) {
@@ -192,13 +187,6 @@ public class UserDomainServiceImpl implements UserDomainService {
     private void validateUserUpdate(User user) {
         // 检查用户是否存在
         User existingUser = getUserById(user.getId());
-
-        // 检查用户名是否已存在（如果修改了用户名）
-        if (!existingUser.getUsername().equals(user.getUsername())) {
-            if (userRepository.existsByUsername(user.getUsername())) {
-                throw new IllegalArgumentException("用户名已存在");
-            }
-        }
 
         // 检查邮箱是否已存在（如果修改了邮箱且不为空）
         if (StringUtil.isNotEmpty(user.getEmail()) && !user.getEmail().equals(existingUser.getEmail())) {

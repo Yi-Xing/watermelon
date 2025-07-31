@@ -77,13 +77,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", username);
-        return userMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
     public List<User> findByCondition(String keyword, Integer state, int pageNum, int pageSize) {
         QueryWrapper<UserPO> queryWrapper = buildQueryWrapper(keyword, state);
         queryWrapper.orderByDesc("updated_time");

@@ -80,11 +80,13 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         // 2. 转换DTO为Domain实体
         User user = userConverter.toUser(updateUserDTO);
 
-        // 3. 更新用户角色关系
+        // 3. 更新用户基本信息
+        boolean userUpdated = userDomainService.updateUser(user);
+
+        // 4. 更新用户角色关联关系
         userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
 
-        // 4. 调用领域服务更新用户基本信息
-        return userDomainService.updateUser(user);
+        return userUpdated;
     }
 
     @Override

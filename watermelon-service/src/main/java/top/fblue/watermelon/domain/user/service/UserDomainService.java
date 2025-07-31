@@ -74,4 +74,9 @@ public interface UserDomainService {
      * 根据账号查找用户（支持手机号、邮箱）
      */
     User findByAccount(String account);
+    
+    /**
+     * 用户登录验证
+     */
+    User login(String account, String password);
 }

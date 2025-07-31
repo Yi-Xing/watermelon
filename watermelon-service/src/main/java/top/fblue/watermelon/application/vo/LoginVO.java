@@ -22,8 +22,4 @@ public class LoginVO {
      */
     private String token;
     
-    /**
-     * 用户权限列表
-     */
-    private List<String> permissions;
-} 
+}

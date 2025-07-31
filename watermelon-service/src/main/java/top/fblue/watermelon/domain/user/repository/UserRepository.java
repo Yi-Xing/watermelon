@@ -28,11 +28,6 @@ public interface UserRepository {
     List<User> findByIds(List<Long> userIds);
 
     /**
-     * 检查用户名是否存在
-     */
-    boolean existsByUsername(String username);
-
-    /**
      * 检查邮箱是否存在
      */
     boolean existsByEmail(String email);
