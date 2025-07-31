@@ -58,13 +58,13 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- 热部署 -->
-		<dependency>
+		<!-- 热部署 禁用热部署，有点烦人-->
+		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>
+		</dependency> -->
 
 		<!-- 配置处理器 配置类注解-->
 		<dependency>
