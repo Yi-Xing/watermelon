@@ -145,6 +145,22 @@ public class UserDomainServiceImpl implements UserDomainService {
     public Long countUsers(String keyword, Integer state) {
         return userRepository.countByCondition(keyword, state);
     }
+    
+    @Override
+    public User findByAccount(String account) {
+        if (StringUtil.isEmpty(account)) {
+            return null;
+        }
+        
+        // 先尝试按邮箱查找
+        User user = userRepository.findByEmail(account);
+        if (user != null) {
+            return user;
+        }
+        
+        // 再尝试按手机号查找
+        return userRepository.findByPhone(account);
+    }
 
     /**
      * 校验用户的业务规则

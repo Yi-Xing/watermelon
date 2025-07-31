@@ -69,4 +69,9 @@ public interface UserDomainService {
      * 新增用户角色关系
      */
     void createUserRole(Long userId, List<Long> roleIds);
+    
+    /**
+     * 根据账号查找用户（支持手机号、邮箱）
+     */
+    User findByAccount(String account);
 }

@@ -117,6 +117,22 @@ public class UserRepositoryImpl implements UserRepository {
         return userMapper.selectCount(queryWrapper);
     }
     
+    @Override
+    public User findByEmail(String email) {
+        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email);
+        UserPO po = userMapper.selectOne(queryWrapper);
+        return userPOConverter.toDomain(po);
+    }
+    
+    @Override
+    public User findByPhone(String phone) {
+        QueryWrapper<UserPO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", phone);
+        UserPO po = userMapper.selectOne(queryWrapper);
+        return userPOConverter.toDomain(po);
+    }
+    
     /**
      * 构建查询条件
      */
