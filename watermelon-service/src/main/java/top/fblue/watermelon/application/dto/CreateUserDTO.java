@@ -57,5 +57,6 @@ public class CreateUserDTO {
     /**
      * 角色列表 - 可选多个
      */
+    @NotNull(message = "角色列表不能为空")
     private List<Long> roleIds;
 } 

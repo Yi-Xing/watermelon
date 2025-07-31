@@ -7,9 +7,6 @@ import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
 import top.fblue.watermelon.domain.user.repository.UserRoleRepository;
-import top.fblue.watermelon.domain.role.entity.Role;
-import top.fblue.watermelon.domain.role.service.RoleDomainService;
-import java.util.stream.Collectors;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,12 +21,9 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Resource
     private UserRepository userRepository;
-    
+
     @Resource
     private UserRoleRepository userRoleRepository;
-    
-    @Resource
-    private RoleDomainService roleDomainService;
 
     @Override
     public User createUser(User user) {
@@ -73,46 +67,55 @@ public class UserDomainServiceImpl implements UserDomainService {
     public boolean deleteUser(Long userId) {
         // 1. 检查用户是否存在
         getUserById(userId);
-        
+
         // 2. 删除用户角色关系
         userRoleRepository.deleteByUserId(userId);
-        
+
         // 3. 删除用户
         return userRepository.delete(userId);
     }
-    
+
     @Override
     public List<Long> getUserRoles(Long userId) {
         return userRoleRepository.findRoleIdsByUserId(userId);
     }
-    
+
     @Override
     public void updateUserRole(Long userId, List<Long> roleIds) {
         // 1. 检查用户是否存在
         getUserById(userId);
-        
+
         // 2. 查询现有的用户角色关系
         List<Long> existingRoleIds = userRoleRepository.findRoleIdsByUserId(userId);
-        
+
         // 3. 计算需要删除和新增的角色ID
         Set<Long> roleIdSet = new HashSet<>(roleIds);
         List<Long> toDelete = existingRoleIds.stream()
                 .filter(id -> !roleIdSet.contains(id))
                 .collect(Collectors.toList());
-        
+
         List<Long> toInsert = roleIds.stream()
                 .filter(id -> !existingRoleIds.contains(id))
                 .collect(Collectors.toList());
-        
+
         // 4. 批量删除不需要的关系
         if (!toDelete.isEmpty()) {
             userRoleRepository.deleteBatch(userId, toDelete);
         }
-        
+
         // 5. 批量新增新的关系
         if (!toInsert.isEmpty()) {
             userRoleRepository.insertBatch(userId, toInsert);
         }
+    }
+
+    @Override
+    public void createUserRole(Long userId, List<Long> roleIds) {
+        // 1. 检查用户是否存在
+        getUserById(userId);
+
+        // 2. 创建用户角色关系
+        userRoleRepository.insertBatch(userId, roleIds);
     }
 
     @Override
@@ -124,7 +127,7 @@ public class UserDomainServiceImpl implements UserDomainService {
     public boolean updateUser(User user) {
         // 校验业务规则
         validateUserUpdate(user);
-        
+
         // 更新用户
         return userRepository.update(user);
     }
@@ -133,7 +136,7 @@ public class UserDomainServiceImpl implements UserDomainService {
     public boolean resetPassword(Long userId, String password) {
         // 检查用户是否存在
         getUserById(userId);
-        
+
         // 重设密码
         return userRepository.resetPassword(userId, password);
     }
@@ -166,14 +169,14 @@ public class UserDomainServiceImpl implements UserDomainService {
             }
         }
     }
-    
+
     /**
      * 校验用户更新的业务规则
      */
     private void validateUserUpdate(User user) {
         // 检查用户是否存在
         User existingUser = getUserById(user.getId());
-        
+
         // 检查用户名是否已存在（如果修改了用户名）
         if (!existingUser.getUsername().equals(user.getUsername())) {
             if (userRepository.existsByUsername(user.getUsername())) {

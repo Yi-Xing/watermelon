@@ -67,4 +67,9 @@ public interface UserDomainService {
      * 更新用户角色关系
      */
     void updateUserRole(Long userId, List<Long> roleIds);
+
+    /**
+     * 新增用户角色关系
+     */
+    void createUserRole(Long userId, List<Long> roleIds);
 }

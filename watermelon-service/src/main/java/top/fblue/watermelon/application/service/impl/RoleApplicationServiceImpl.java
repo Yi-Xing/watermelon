@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 /**
  * 角色应用服务实现
@@ -61,7 +62,7 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
         // 2. 获取关联的用户信息
         List<Long> userIds = List.of(role.getCreatedBy(), role.getUpdatedBy());
         Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
-        
+
         // 3. 获取角色关联的资源ID列表
         List<Long> resourceIds = roleDomainService.getRoleResourceIds(id);
 
@@ -120,14 +121,36 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateRoleResource(UpdateRoleResourceDTO updateRoleResourceDTO) {
-        // 1. 批量校验资源是否存在
-        resourceDomainService.validateResourceIds(updateRoleResourceDTO.getResourceIds());
+        // 1. 校验资源是否存在
+        validateResourceIds(updateRoleResourceDTO.getResourceIds());
 
         // 2. 更新角色资源关系
         return roleDomainService.updateRoleResource(
                 updateRoleResourceDTO.getId(),
                 updateRoleResourceDTO.getResourceIds()
         );
+    }
+
+    /**
+     * 校验资源ID是否存在
+     */
+    private void validateResourceIds(List<Long> resourceIds) {
+        if (resourceIds == null || resourceIds.isEmpty()) {
+            return;
+        }
+
+        List<ResourceNode> resources = resourceDomainService.getResourceListByIds(resourceIds);
+        if (resources.size() == resourceIds.size()) {
+            return;
+        }
+        Set<Long> existResourceIdSet = resources.stream().map(ResourceNode::getId).collect(Collectors.toSet());
+        List<Long> notExistResourceIds = resourceIds.stream()
+                .filter(id -> !existResourceIdSet.contains(id))
+                .toList();
+        if (!notExistResourceIds.isEmpty()) {
+            String ids = notExistResourceIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            throw new IllegalArgumentException("以下资源ID不存在: " + ids);
+        }
     }
 
     @Override

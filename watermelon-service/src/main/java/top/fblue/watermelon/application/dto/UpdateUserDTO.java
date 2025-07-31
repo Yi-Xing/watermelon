@@ -53,5 +53,6 @@ public class UpdateUserDTO {
     /**
      * 角色ID列表
      */
+    @NotNull(message = "角色列表不能为空")
     private List<Long> roleIds;
 } 

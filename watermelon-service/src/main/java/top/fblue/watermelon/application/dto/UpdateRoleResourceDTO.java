@@ -19,5 +19,6 @@ public class UpdateRoleResourceDTO {
     /**
      * 资源ID列表
      */
+    @NotNull(message = "资源列表不能为空")
     private List<Long> resourceIds;
 } 

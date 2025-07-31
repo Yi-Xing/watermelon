@@ -18,6 +18,7 @@ import top.fblue.watermelon.domain.role.entity.Role;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +44,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
         // 调用领域服务创建用户
         User createUser = userDomainService.createUser(user);
+
+        // 校验角色是否存在
+        validateRoleIds(createUserDTO.getRoleIds());
+        // 创建用户和角色的关联关系
+        userDomainService.createUserRole(createUser.getId(), createUserDTO.getRoleIds());
 
         // 直接转换并返回
         return userConverter.toVO(createUser);
@@ -71,10 +77,13 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         // 1. 转换DTO为Domain实体
         User user = userConverter.toUser(updateUserDTO);
 
-        // 2. 更新用户角色关系
+        // 2. 校验角色是否存在
+        validateRoleIds(updateUserDTO.getRoleIds());
+
+        // 3. 更新用户角色关系
         userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
 
-        // 3. 调用领域服务更新用户基本信息
+        // 4. 调用领域服务更新用户基本信息
         return userDomainService.updateUser(user);
     }
 
@@ -120,5 +129,27 @@ public class UserApplicationServiceImpl implements UserApplicationService {
                 queryDTO.getPageNum(),
                 queryDTO.getPageSize()
         );
+    }
+
+    /**
+     * 校验角色ID是否存在
+     */
+    private void validateRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return;
+        }
+
+        List<Role> roles = roleDomainService.getRoleByIds(roleIds);
+        if (roles.size() == roleIds.size()) {
+            return;
+        }
+        Set<Long> existRoleIdSet = roles.stream().map(Role::getId).collect(Collectors.toSet());
+        List<Long> notExistRoleIds = roleIds.stream()
+                .filter(id -> !existRoleIdSet.contains(id))
+                .toList();
+        if (!notExistRoleIds.isEmpty()) {
+            String ids = notExistRoleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            throw new IllegalArgumentException("以下角色ID不存在: " + ids);
+        }
     }
 }

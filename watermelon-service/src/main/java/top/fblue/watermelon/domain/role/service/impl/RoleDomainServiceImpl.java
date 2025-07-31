@@ -89,10 +89,10 @@ public class RoleDomainServiceImpl implements RoleDomainService {
     public boolean updateRoleResource(Long roleId, List<Long> resourceIds) {
         // 1. 检查角色是否存在
         getRoleById(roleId);
-        
+
         // 2. 查询现有的角色资源关系
         List<Long> existingResourceIds = roleResourceRepository.findResourceIdsByRoleId(roleId);
-        
+
         // 3. 计算需要删除和新增的资源ID
         Set<Long> resourceIdSet = new HashSet<>(resourceIds);
         List<Long> toDelete = existingResourceIds.stream()
@@ -102,17 +102,17 @@ public class RoleDomainServiceImpl implements RoleDomainService {
         List<Long> toInsert = resourceIds.stream()
                 .filter(id -> !existingResourceIds.contains(id))
                 .collect(Collectors.toList());
-        
+
         // 4. 批量删除不需要的关系
         if (!toDelete.isEmpty()) {
             roleResourceRepository.deleteBatch(roleId, toDelete);
         }
-        
+
         // 5. 批量新增新的关系
         if (!toInsert.isEmpty()) {
             roleResourceRepository.insertBatch(roleId, toInsert);
         }
-        
+
         return true;
     }
     
