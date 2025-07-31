@@ -61,10 +61,10 @@ public interface UserDomainService {
     /**
      * 获取用户关联的角色信息
      */
-    List<Role> getUserRoles(Long userId);
+    List<Long> getUserRoles(Long userId);
     
     /**
      * 更新用户角色关系
      */
-    boolean updateUserRole(Long userId, List<Long> roleIds);
+    void updateUserRole(Long userId, List<Long> roleIds);
 }

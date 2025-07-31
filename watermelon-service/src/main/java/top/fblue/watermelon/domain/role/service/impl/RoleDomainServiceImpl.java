@@ -7,6 +7,7 @@ import top.fblue.watermelon.domain.role.repository.RoleRepository;
 import top.fblue.watermelon.domain.role.repository.RoleResourceRepository;
 import top.fblue.watermelon.domain.role.service.RoleDomainService;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,15 @@ public class RoleDomainServiceImpl implements RoleDomainService {
         }
         
         return role;
+    }
+
+    @Override
+    public List<Role> getRoleByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        return roleRepository.findByIds(ids);
     }
 
     @Override

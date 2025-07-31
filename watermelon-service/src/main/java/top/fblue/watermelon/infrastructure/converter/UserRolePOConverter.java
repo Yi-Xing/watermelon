@@ -1,7 +1,12 @@
 package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
 import top.fblue.watermelon.infrastructure.po.UserRolePO;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户角色关系转换器
@@ -11,35 +16,17 @@ import top.fblue.watermelon.infrastructure.po.UserRolePO;
 public class UserRolePOConverter {
 
     /**
-     * PO转换为Domain实体
-     * 
-     * 注意：需要先创建对应的UserRole domain实体类
-     * public UserRole toDomain(UserRolePO po) {
-     *     if (po == null) return null;
-     *     
-     *     return UserRole.builder()
-     *             .id(po.getId())
-     *             .userId(po.getUserId())
-     *             .roleId(po.getRoleId())
-     *             .createdBy(po.getCreatedBy())
-     *             .createdTime(po.getCreatedTime())
-     *             .updatedBy(po.getUpdatedBy())
-     *             .updatedTime(po.getUpdatedTime())
-     *             .build();
-     * }
+     * 转换为POList
      */
-
-    /**
-     * Domain实体转换为PO
-     * 
-     * 注意：需要先创建对应的UserRole domain实体类
-     * public UserRolePO toPO(UserRole domain) {
-     *     if (domain == null) return null;
-     *     return UserRolePO.builder()
-     *             .id(domain.getId())
-     *             .userId(domain.getUserId())
-     *             .roleId(domain.getRoleId())
-     *             .build();
-     * }
-     */
+    public List<UserRolePO> toPOList(Long userId, List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return roleIds.stream()
+                .map(roleId -> UserRolePO.builder()
+                        .userId(userId)
+                        .roleId(roleId)
+                        .build())
+                .collect(Collectors.toList());
+    }
 } 

@@ -54,8 +54,8 @@ public class RoleResourceRepositoryImpl implements RoleResourceRepository {
         }
 
         // 使用转换器转换为PO列表
-        List<RoleResourceNodePO> entities = roleResourceNodePOConverter.toPOList(roleId, resourceIds);
+        List<RoleResourceNodePO> poList = roleResourceNodePOConverter.toPOList(roleId, resourceIds);
 
-        roleResourceNodeMapper.insert(entities);
+        roleResourceNodeMapper.insert(poList);
     }
 } 

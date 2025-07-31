@@ -12,6 +12,7 @@ import top.fblue.watermelon.infrastructure.converter.RolePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.RoleMapper;
 import top.fblue.watermelon.infrastructure.po.RolePO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,19 @@ public class RoleRepositoryImpl implements RoleRepository {
     public Role findById(Long id) {
         RolePO po = roleMapper.selectById(id);
         return rolePOConverter.toDomain(po);
+    }
+
+    @Override
+    public List<Role> findByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        QueryWrapper<RolePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", ids);
+        List<RolePO> poList = roleMapper.selectList(queryWrapper);
+        return poList.stream()
+                .map(rolePOConverter::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override

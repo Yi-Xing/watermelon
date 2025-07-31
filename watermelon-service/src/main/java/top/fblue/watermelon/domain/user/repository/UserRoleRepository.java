@@ -10,12 +10,7 @@ public interface UserRoleRepository {
     /**
      * 根据用户ID删除角色关系
      */
-    boolean deleteByUserId(Long userId);
-    
-    /**
-     * 批量保存用户角色关系
-     */
-    void saveBatch(List<Long> userId, List<Long> roleIds);
+    void deleteByUserId(Long userId);
     
     /**
      * 根据用户ID查询角色ID列表

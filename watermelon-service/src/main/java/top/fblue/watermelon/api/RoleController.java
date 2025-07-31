@@ -42,7 +42,16 @@ public class RoleController {
         Page<RoleVO> page = roleApplicationService.getRoleList(queryDTO);
         return ApiResponse.success(page, "获取角色列表成功");
     }
-    
+
+    /**
+     * 根据ID获取角色详情（包含关联资源）
+     */
+    @GetMapping("/{id}")
+    public ApiResponse<RoleVO> getRoleById(@PathVariable Long id) {
+        RoleVO role = roleApplicationService.getRoleDetailById(id);
+        return ApiResponse.success(role, "获取角色详情成功");
+    }
+
     /**
      * 更新角色
      */
@@ -67,15 +76,6 @@ public class RoleController {
         } else {
             return ApiResponse.error("角色资源更新失败", false);
         }
-    }
-    
-    /**
-     * 根据ID获取角色详情（包含关联资源）
-     */
-    @GetMapping("/{id}")
-    public ApiResponse<RoleVO> getRoleById(@PathVariable Long id) {
-        RoleVO role = roleApplicationService.getRoleDetailById(id);
-        return ApiResponse.success(role, "获取角色详情成功");
     }
     
     /**

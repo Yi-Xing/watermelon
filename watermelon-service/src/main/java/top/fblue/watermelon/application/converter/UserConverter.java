@@ -71,7 +71,7 @@ public class UserConverter {
     /**
      * User转换为UserVO（包含关联用户信息和角色信息）
      */
-    public UserVO toVOWithRoles(User user, Map<Long, User> userMap, List<Role> roles) {
+    public UserVO toVO(User user, Map<Long, User> userMap, List<Role> roles) {
         if (user == null) {
             return null;
         }

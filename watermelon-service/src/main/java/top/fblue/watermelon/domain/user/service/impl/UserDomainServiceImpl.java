@@ -82,27 +82,12 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
     
     @Override
-    public List<Role> getUserRoles(Long userId) {
-        // 1. 检查用户是否存在
-        getUserById(userId);
-        
-        // 2. 获取用户关联的角色ID列表
-        List<Long> roleIds = userRoleRepository.findRoleIdsByUserId(userId);
-        
-        // 3. 如果用户没有关联角色，返回空列表
-        if (roleIds == null || roleIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        // 4. 根据角色ID列表获取角色信息，并过滤掉已删除的角色
-        return roleIds.stream()
-                .map(roleDomainService::getRoleById)
-                .filter(role -> role != null && role.getState() != null && role.getState() == 1) // 只返回启用的角色
-                .collect(Collectors.toList());
+    public List<Long> getUserRoles(Long userId) {
+        return userRoleRepository.findRoleIdsByUserId(userId);
     }
     
     @Override
-    public boolean updateUserRole(Long userId, List<Long> roleIds) {
+    public void updateUserRole(Long userId, List<Long> roleIds) {
         // 1. 检查用户是否存在
         getUserById(userId);
         
@@ -110,8 +95,9 @@ public class UserDomainServiceImpl implements UserDomainService {
         List<Long> existingRoleIds = userRoleRepository.findRoleIdsByUserId(userId);
         
         // 3. 计算需要删除和新增的角色ID
+        Set<Long> roleIdSet = new HashSet<>(roleIds);
         List<Long> toDelete = existingRoleIds.stream()
-                .filter(id -> !roleIds.contains(id))
+                .filter(id -> !roleIdSet.contains(id))
                 .collect(Collectors.toList());
         
         List<Long> toInsert = roleIds.stream()
@@ -127,8 +113,6 @@ public class UserDomainServiceImpl implements UserDomainService {
         if (!toInsert.isEmpty()) {
             userRoleRepository.insertBatch(userId, toInsert);
         }
-        
-        return true;
     }
 
     @Override

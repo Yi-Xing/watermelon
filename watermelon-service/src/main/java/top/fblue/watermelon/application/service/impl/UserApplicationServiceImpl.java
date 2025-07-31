@@ -11,6 +11,7 @@ import top.fblue.watermelon.application.dto.UserQueryDTO;
 import top.fblue.watermelon.application.service.UserApplicationService;
 import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
+import top.fblue.watermelon.domain.role.service.RoleDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.role.entity.Role;
@@ -29,7 +30,8 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Resource
     private UserDomainService userDomainService;
-
+    @Resource
+    private RoleDomainService roleDomainService;
     @Resource
     private UserConverter userConverter;
 
@@ -54,12 +56,13 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         // 2. 获取关联的用户信息
         List<Long> userIds = List.of(user.getCreatedBy(), user.getUpdatedBy());
         Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
-        
+
         // 3. 获取用户关联的角色信息
-        List<Role> roles = userDomainService.getUserRoles(id);
+        List<Long> roleIds = userDomainService.getUserRoles(id);
+        List<Role> roles = roleDomainService.getRoleByIds(roleIds);
 
         // 4. 组装详细信息（包含关联角色）
-        return userConverter.toVOWithRoles(user, userMap, roles);
+        return userConverter.toVO(user, userMap, roles);
     }
 
     @Override
@@ -67,16 +70,12 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     public boolean updateUser(UpdateUserDTO updateUserDTO) {
         // 1. 转换DTO为Domain实体
         User user = userConverter.toUser(updateUserDTO);
-        
-        // 2. 调用领域服务更新用户基本信息
-        boolean userUpdated = userDomainService.updateUser(user);
-        
-        // 3. 更新用户角色关系
-        if (updateUserDTO.getRoleIds() != null) {
-            userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
-        }
-        
-        return userUpdated;
+
+        // 2. 更新用户角色关系
+        userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
+
+        // 3. 调用领域服务更新用户基本信息
+        return userDomainService.updateUser(user);
     }
 
     @Override

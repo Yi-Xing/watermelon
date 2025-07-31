@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class RoleResourceNodePOConverter {
 
     /**
-     * 转换为PO列表
+     * 转换为POList
      */
     public List<RoleResourceNodePO> toPOList(Long roleId, List<Long> resourceIds) {
         if (resourceIds == null || resourceIds.isEmpty()) {

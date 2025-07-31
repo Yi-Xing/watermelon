@@ -33,6 +33,15 @@ public class UserController {
         UserVO user = userApplicationService.createUser(createUserDTO);
         return ApiResponse.success(user, "用户创建成功");
     }
+
+    /**
+     * 分页查询用户列表
+     */
+    @GetMapping("/list")
+    public ApiResponse<Page<UserVO>> getUserList(@Valid UserQueryDTO queryDTO) {
+        Page<UserVO> page = userApplicationService.getUserList(queryDTO);
+        return ApiResponse.success(page, "获取用户列表成功");
+    }
     
     /**
      * 根据ID获取用户详情（包含关联角色）
@@ -41,6 +50,32 @@ public class UserController {
     public ApiResponse<UserVO> getUserById(@PathVariable Long id) {
         UserVO user = userApplicationService.getUserDetailById(id);
         return ApiResponse.success(user, "获取用户详情成功");
+    }
+
+    /**
+     * 更新用户
+     */
+    @PutMapping
+    public ApiResponse<Boolean> updateUser(@Valid @RequestBody UpdateUserDTO updateUserDTO) {
+        boolean result = userApplicationService.updateUser(updateUserDTO);
+        if (result) {
+            return ApiResponse.success(true, "用户更新成功");
+        } else {
+            return ApiResponse.error("用户更新失败", false);
+        }
+    }
+
+    /**
+     * 重设密码
+     */
+    @PutMapping("/password")
+    public ApiResponse<Boolean> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        boolean result = userApplicationService.resetPassword(resetPasswordDTO);
+        if (result) {
+            return ApiResponse.success(true, "密码重设成功");
+        } else {
+            return ApiResponse.error("密码重设失败", false);
+        }
     }
 
     /**
@@ -54,40 +89,5 @@ public class UserController {
         } else {
             return ApiResponse.error("用户删除失败", false);
         }
-    }
-    
-    /**
-     * 更新用户
-     */
-    @PutMapping
-    public ApiResponse<Boolean> updateUser(@Valid @RequestBody UpdateUserDTO updateUserDTO) {
-        boolean result = userApplicationService.updateUser(updateUserDTO);
-        if (result) {
-            return ApiResponse.success(true, "用户更新成功");
-        } else {
-            return ApiResponse.error("用户更新失败", false);
-        }
-    }
-    
-    /**
-     * 重设密码
-     */
-    @PutMapping("/password")
-    public ApiResponse<Boolean> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
-        boolean result = userApplicationService.resetPassword(resetPasswordDTO);
-        if (result) {
-            return ApiResponse.success(true, "密码重设成功");
-        } else {
-            return ApiResponse.error("密码重设失败", false);
-        }
-    }
-    
-    /**
-     * 分页查询用户列表
-     */
-    @GetMapping("/list")
-    public ApiResponse<Page<UserVO>> getUserList(@Valid UserQueryDTO queryDTO) {
-        Page<UserVO> page = userApplicationService.getUserList(queryDTO);
-        return ApiResponse.success(page, "获取用户列表成功");
     }
 }

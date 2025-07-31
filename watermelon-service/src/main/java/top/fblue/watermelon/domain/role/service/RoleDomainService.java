@@ -17,6 +17,11 @@ public interface RoleDomainService {
      * 根据ID获取角色
      */
     Role getRoleById(Long id);
+
+    /**
+     * 根据IDs获取角色
+     */
+    List<Role> getRoleByIds(List<Long> ids);
     
     /**
      * 分页查询角色列表

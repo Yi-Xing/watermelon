@@ -19,6 +19,11 @@ public interface RoleRepository {
     Role findById(Long id);
     
     /**
+     * 根据IDs批量查找角色
+     */
+    List<Role> findByIds(List<Long> ids);
+    
+    /**
      * 根据条件分页查询角色列表
      */
     List<Role> findByCondition(String name, Integer state, int pageNum, int pageSize);
