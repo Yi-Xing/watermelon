@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import top.fblue.watermelon.domain.user.entity.User;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 /**
  * 角色应用服务实现

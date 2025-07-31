@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import top.fblue.watermelon.domain.user.repository.UserRoleRepository;
 import top.fblue.watermelon.infrastructure.converter.UserRolePOConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserRoleMapper;
-import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
 import top.fblue.watermelon.infrastructure.po.UserRolePO;
 
 import java.util.List;

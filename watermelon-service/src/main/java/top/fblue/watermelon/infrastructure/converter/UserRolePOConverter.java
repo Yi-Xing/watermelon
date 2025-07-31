@@ -1,7 +1,6 @@
 package top.fblue.watermelon.infrastructure.converter;
 
 import org.springframework.stereotype.Component;
-import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
 import top.fblue.watermelon.infrastructure.po.UserRolePO;
 
 import java.util.ArrayList;

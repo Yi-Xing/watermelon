@@ -46,29 +46,6 @@ public class UserConverter {
     }
 
     /**
-     * User转换为UserVO（包含关联用户信息）
-     */
-    public UserVO toVO(User user, Map<Long, User> userMap) {
-        if (user == null) {
-            return null;
-        }
-
-        return UserVO.builder()
-                .id(user.getId())
-                .name(user.getUsername())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .state(user.getState())
-                .stateDesc(StateEnum.fromCode(user.getState()).getDesc())
-                .remark(user.getRemark())
-                .createdBy(convertToUserInfoVO(userMap.get(user.getCreatedBy())))
-                .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
-                .updatedBy(convertToUserInfoVO(userMap.get(user.getUpdatedBy())))
-                .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
-                .build();
-    }
-    
-    /**
      * User转换为UserVO（包含关联用户信息和角色信息）
      */
     public UserVO toVO(User user, Map<Long, User> userMap, List<Role> roles) {
