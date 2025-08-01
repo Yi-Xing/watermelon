@@ -7,13 +7,15 @@ import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
 import top.fblue.watermelon.application.vo.LoginVO;
+import top.fblue.watermelon.application.vo.UserVO;
+import top.fblue.watermelon.common.context.UserContext;
 import top.fblue.watermelon.common.response.ApiResponse;
 import top.fblue.watermelon.common.utils.TokenUtil;
 
 import jakarta.validation.Valid;
 
 /**
- * 登录控制器
+ * 登录相关
  */
 @RestController
 @RequestMapping("/api/user")
@@ -48,5 +50,14 @@ public class LoginController {
     public ApiResponse<String> refreshToken(@RequestHeader(value = "Authorization") String authHeader) {
         String newToken = loginApplicationService.refreshToken(authHeader);
         return ApiResponse.success(newToken, "Token刷新成功");
+    }
+
+    /**
+     * 获取当前登录用户信息
+     */
+    @GetMapping("/current")
+    public ApiResponse<UserVO> getCurrentUser() {
+        UserVO userVO = loginApplicationService.getCurrentUser();
+        return ApiResponse.success(userVO, "获取当前用户信息成功");
     }
 }

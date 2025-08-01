@@ -11,12 +11,12 @@ import top.fblue.watermelon.application.dto.UserQueryDTO;
 import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.response.ApiResponse;
-import top.fblue.watermelon.common.utils.UserContext;
+import top.fblue.watermelon.common.context.UserContext;
 
 import jakarta.validation.Valid;
 
 /**
- * 用户控制器
+ * 用户管理
  */
 @RestController
 @RequestMapping("/api/user")
@@ -90,20 +90,5 @@ public class UserController {
         } else {
             return ApiResponse.error("用户删除失败", false);
         }
-    }
-    
-    /**
-     * 获取当前登录用户信息
-     */
-    @GetMapping("/current")
-    public ApiResponse<UserVO> getCurrentUser() {
-        // 通过UserContext获取当前登录用户
-        Long currentUserId = UserContext.getCurrentUserId();
-        if (currentUserId == null) {
-            return ApiResponse.error(401, "用户未登录");
-        }
-        
-        UserVO userVO = userApplicationService.getUserDetailById(currentUserId);
-        return ApiResponse.success(userVO, "获取当前用户信息成功");
     }
 }

@@ -5,11 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import top.fblue.watermelon.common.utils.TokenUtil;
-import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.user.entity.UserToken;
 import top.fblue.watermelon.domain.user.service.TokenDomainService;
+
+import static top.fblue.watermelon.common.constant.UserConst.CURRENT_USER_KEY;
 
 /**
  * 认证拦截器
@@ -18,35 +19,30 @@ import top.fblue.watermelon.domain.user.service.TokenDomainService;
 @Slf4j
 @Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
-    
+
     @Resource
     private TokenDomainService tokenDomainService;
-    
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 获取请求路径
         String requestURI = request.getRequestURI();
 
         // 获取token
-        String token = TokenUtil.extractTokenFromRequest(request);
-        if (!StringUtils.hasText(token)) {
-            log.warn("请求缺少token: {}", requestURI);
+        UserToken user;
+        String token = "";
+        try {
+            token = TokenUtil.extractTokenFromRequest(request);
+            // 验证token
+            user = tokenDomainService.validateToken(token);
+        } catch (Exception e) {
+            log.warn("请求token不合法: {}，{}", requestURI, token);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
-        
-        // 验证token
-        User user = tokenDomainService.validateToken(token);
-        if (user == null) {
-            log.warn("Token验证失败: {}", token);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return false;
-        }
-        
         // 将用户信息存储到请求属性中，供后续使用
-        request.setAttribute("currentUser", user);
-        log.debug("Token验证成功，用户ID: {}", user.getId());
-        
+        request.setAttribute(CURRENT_USER_KEY, user.getUserId());
+        log.debug("Token验证成功，用户ID: {}", user.getUserId());
         return true;
     }
 

@@ -15,7 +15,7 @@ import top.fblue.watermelon.common.response.ApiResponse;
 import jakarta.validation.Valid;
 
 /**
- * 角色控制器
+ * 角色管理
  */
 @RestController
 @RequestMapping("/api/role")

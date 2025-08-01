@@ -40,17 +40,6 @@ public class TokenUtil {
     public static String extractTokenFromRequest(HttpServletRequest request) {
         // 优先从Authorization头中提取
         String authHeader = request.getHeader("Authorization");
-        String token = extractTokenFromHeader(authHeader);
-        if (StringUtils.hasText(token)) {
-            return token;
-        }
-
-        // 从请求参数中提取
-        String tokenParam = request.getParameter("token");
-        if (StringUtils.hasText(tokenParam)) {
-            return tokenParam.trim();
-        }
-
-        return null;
+        return extractTokenFromHeader(authHeader);
     }
 } 

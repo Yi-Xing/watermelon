@@ -20,7 +20,7 @@ import top.fblue.watermelon.common.response.ApiResponse;
 import java.util.List;
 
 /**
- * 资源控制器
+ * 资源管理
  */
 @RestController
 @RequestMapping("/api/resource")

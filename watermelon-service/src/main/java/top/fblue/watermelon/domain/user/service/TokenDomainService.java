@@ -1,6 +1,7 @@
 package top.fblue.watermelon.domain.user.service;
 
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.user.entity.UserToken;
 
 /**
  * Token服务接口
@@ -16,7 +17,7 @@ public interface TokenDomainService {
     /**
      * 验证token有效性
      */
-    User validateToken(String token);
+    UserToken validateToken(String token);
     
     /**
      * 使token失效

@@ -50,7 +50,7 @@ public class TokenDomainServiceImpl implements TokenDomainService {
     }
 
     @Override
-    public User validateToken(String token) {
+    public UserToken validateToken(String token) {
         UserToken userToken = userTokenRepository.findByToken(token);
         if (userToken == null) {
             throw new IllegalArgumentException("Token无效");
@@ -63,9 +63,7 @@ public class TokenDomainServiceImpl implements TokenDomainService {
             throw new IllegalArgumentException("Token已过期");
         }
 
-        return User.builder()
-                .id(userToken.getUserId())
-                .build();
+        return userToken;
     }
 
     @Override

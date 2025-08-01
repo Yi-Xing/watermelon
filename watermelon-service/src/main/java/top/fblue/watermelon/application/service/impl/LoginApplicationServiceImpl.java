@@ -7,6 +7,8 @@ import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
+import top.fblue.watermelon.common.context.UserContext;
+import top.fblue.watermelon.common.response.ApiResponse;
 import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.TokenDomainService;
@@ -66,5 +68,18 @@ public class LoginApplicationServiceImpl implements LoginApplicationService {
 
         // 刷新token
         return tokenDomainService.refreshToken(token);
+    }
+
+    /**
+     * 获取当前登录用户信息
+     */
+    @Override
+    public UserVO getCurrentUser(){
+        // 通过UserContext获取当前登录用户
+        Long currentUserId = UserContext.getCurrentUserId();
+
+        User user = userDomainService.getUserById(currentUserId);
+        // 之后需要返回用户可使用的资源
+        return userConverter.toVO(user);
     }
 }

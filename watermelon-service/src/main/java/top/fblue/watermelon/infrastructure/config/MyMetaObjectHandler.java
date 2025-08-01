@@ -3,6 +3,8 @@ package top.fblue.watermelon.infrastructure.config;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.common.context.UserContext;
+
 import java.time.LocalDateTime;
 
 /**
@@ -29,6 +31,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     private Long getCurrentUserId() {
         // 从SecurityContext获取当前用户ID mi:RequestContext.getRequestContext().getUserName()
         // 这里需要根据你的认证方式来实现
-        return 1L; // 临时返回1L，实际应该从认证上下文获取
+        return UserContext.getCurrentUserId(); // 临时返回1L，实际应该从认证上下文获取
     }
 }
