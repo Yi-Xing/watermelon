@@ -37,29 +37,6 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
     }
 
     @Override
-    public UserToken findValidByUserId(Long userId) {
-        String token = USER_TOKEN_MAP.get(userId);
-        if (token == null) {
-            return null;
-        }
-
-        UserToken userToken = TOKEN_STORE.get(token);
-        if (userToken == null) {
-            return null;
-        }
-
-        // 检查是否过期
-        if (LocalDateTime.now().isAfter(userToken.getExpireTime())) {
-            // 清理过期token
-            TOKEN_STORE.remove(token);
-            USER_TOKEN_MAP.remove(userId);
-            return null;
-        }
-
-        return userToken;
-    }
-
-    @Override
     public void deleteToken(String token) {
         UserToken userToken = TOKEN_STORE.get(token);
         if (userToken == null) {

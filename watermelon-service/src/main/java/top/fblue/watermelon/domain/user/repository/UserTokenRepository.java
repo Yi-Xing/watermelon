@@ -16,12 +16,7 @@ public interface UserTokenRepository {
      * 根据Token查找
      */
     UserToken findByToken(String token);
-    
-    /**
-     * 根据用户ID查找有效Token
-     */
-    UserToken findValidByUserId(Long userId);
-    
+
     /**
      * 删除Token
      */
