@@ -28,9 +28,4 @@ public interface TokenDomainService {
      * 刷新token
      */
     String refreshToken(String token);
-    
-    /**
-     * 获取token对应的用户ID
-     */
-    Long getUserIdByToken(String token);
-} 
+}

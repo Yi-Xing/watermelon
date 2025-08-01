@@ -1,16 +1,13 @@
 package top.fblue.watermelon.api;
 
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
-import top.fblue.watermelon.common.context.UserContext;
 import top.fblue.watermelon.common.response.ApiResponse;
-import top.fblue.watermelon.common.utils.TokenUtil;
 
 import jakarta.validation.Valid;
 

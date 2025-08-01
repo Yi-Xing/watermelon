@@ -97,10 +97,4 @@ public class TokenDomainServiceImpl implements TokenDomainService {
 
         return newToken;
     }
-
-    @Override
-    public Long getUserIdByToken(String token) {
-        UserToken userToken = userTokenRepository.findByToken(token);
-        return userToken != null ? userToken.getUserId() : null;
-    }
-} 
+}

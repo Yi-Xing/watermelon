@@ -11,7 +11,6 @@ import top.fblue.watermelon.application.dto.UserQueryDTO;
 import top.fblue.watermelon.common.response.Page;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.response.ApiResponse;
-import top.fblue.watermelon.common.context.UserContext;
 
 import jakarta.validation.Valid;
 

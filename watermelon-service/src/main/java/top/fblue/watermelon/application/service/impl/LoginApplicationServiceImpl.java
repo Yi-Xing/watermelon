@@ -8,7 +8,6 @@ import top.fblue.watermelon.application.service.LoginApplicationService;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.context.UserContext;
-import top.fblue.watermelon.common.response.ApiResponse;
 import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.TokenDomainService;
