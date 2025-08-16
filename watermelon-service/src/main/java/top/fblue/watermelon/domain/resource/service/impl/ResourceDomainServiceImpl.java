@@ -152,13 +152,10 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         // 1. 校验父级资源
         validateParentResource(resourceNode.getParentId());
 
-        // 2. 校验环形引用
-        validateCircularReference(resourceNode.getParentId());
-
-        // 3. 校验同级资源名称是否已存在
+        // 2. 校验同级资源名称是否已存在
         validateSiblingResourceNameExists(resourceNode.getName(), resourceNode.getParentId());
 
-        // 4. 校验资源code唯一性
+        // 3. 校验资源code唯一性
         validateResourceCodeUnique(resourceNode.getCode());
     }
 
@@ -173,7 +170,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         validateParentResource(resourceNode.getParentId());
 
         // 3. 校验环形引用
-        validateCircularReference(resourceNode.getParentId());
+        validateCircularReference(resourceNode);
 
         // 4. 校验同级资源名称是否已存在（过滤掉自己）
 
@@ -190,31 +187,29 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     /**
      * 校验环形引用
      */
-    private void validateCircularReference(Long parentId) {
-        if (parentId == null) {
-            return;
-        }
+    private void validateCircularReference(ResourceNode resourceNode) {
 
         // 使用Set记录已访问的节点，检测环形引用
         Set<Long> visitedNodes = new HashSet<>();
-        Long currentParentId = parentId;
+        visitedNodes.add(resourceNode.getId());
+        Long currentNodeId = resourceNode.getParentId();
 
-        while (currentParentId != null) {
+        while (currentNodeId != null) {
             // 如果当前节点已经访问过，说明存在环形引用
-            if (visitedNodes.contains(currentParentId)) {
+            if (visitedNodes.contains(currentNodeId)) {
                 throw new IllegalArgumentException("检测到环形引用，无法创建资源");
             }
 
             // 将当前节点加入已访问集合
-            visitedNodes.add(currentParentId);
+            visitedNodes.add(currentNodeId);
 
             // 查询当前节点的父节点
-            ResourceNode currentResource = resourceRepository.findById(currentParentId);
+            ResourceNode currentResource = resourceRepository.findById(currentNodeId);
             if (currentResource == null) {
                 break; // 父节点不存在，结束检查
             }
 
-            currentParentId = currentResource.getParentId();
+            currentNodeId = currentResource.getParentId();
 
             // 防止无限循环，设置最大深度限制
             if (visitedNodes.size() > 100) {
@@ -254,7 +249,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
             }
             // 检查上级资源是否启用
             if (!StateEnum.ENABLE.equals(StateEnum.fromCode(parentResource.getState()))) {
-                throw new IllegalArgumentException("上级资源已禁用，无法创建子资源");
+                throw new IllegalArgumentException("上级资源已禁用，无法编辑子资源");
             }
         }
     }

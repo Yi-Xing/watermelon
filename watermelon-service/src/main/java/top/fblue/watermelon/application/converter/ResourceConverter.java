@@ -176,10 +176,11 @@ public class ResourceConverter {
                 .map(resource -> toTreeVO(resource, userMap))
                 .toList();
 
-        // 2. 构建父子关系
+        // 2. 构建 id 和 VO 的映射关系
         Map<Long, ResourceNodeTreeVO> resourceMap = resourceVOs.stream()
                 .collect(Collectors.toMap(ResourceNodeTreeVO::getId, vo -> vo));
 
+        // 3. 构建树形结构
         List<ResourceNodeTreeVO> rootNodes = new ArrayList<>();
 
         for (ResourceNodeTreeVO vo : resourceVOs) {
@@ -196,7 +197,7 @@ public class ResourceConverter {
             }
         }
 
-        // 3. 排序
+        // 4. 排序
         sortResourceTree(rootNodes);
 
         return rootNodes;

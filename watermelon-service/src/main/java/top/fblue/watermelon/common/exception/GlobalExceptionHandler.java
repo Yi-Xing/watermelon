@@ -1,10 +1,12 @@
 package top.fblue.watermelon.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import top.fblue.watermelon.common.response.ApiResponse;
 
@@ -29,14 +31,15 @@ public class GlobalExceptionHandler {
     public ApiResponse<Object> handleIllegalArgumentException(IllegalArgumentException e) {
         log.warn("业务异常: {}", e.getMessage());
 
-        return ApiResponse.error(400, e.getMessage());
+        return ApiResponse.error(500, e.getMessage());
     }
 
     /**
-     * 处理参数验证异常 (MethodArgumentNotValidException)
+     * 处理参数验证异常 (400 Bad Request)
      * 处理@Valid注解的验证失败，@RequestBody + @Valid 校验失败，JSON请求体
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<Object> handleValidationException(MethodArgumentNotValidException e) {
         log.warn("参数验证异常: {}", e.getMessage());
 
@@ -44,10 +47,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理绑定异常 (BindException)
+     * 处理绑定异常 (400 Bad Request)
      * 处理表单绑定验证失败，@ModelAttribute 类型绑定失败，表单提交或非JSON
      */
     @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<Object> handleBindException(BindException e) {
         log.warn("绑定异常: {}", e.getMessage());
 
@@ -55,10 +59,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理约束违反异常 (ConstraintViolationException)
+     * 处理约束违反异常 (400 Bad Request)
      * 处理@Validated注解的验证失败，@RequestParam/@PathVariable 校验失败，GET或简单POST
      */
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<Object> handleConstraintViolationException(ConstraintViolationException e) {
         log.warn("约束违反异常: {}", e.getMessage());
 
@@ -81,13 +86,13 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理通用异常
+     * 处理通用异常 (500 Internal Server Error)
      */
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<Object> handleException(Exception e) {
         log.error("系统异常", e);
-
-        return ApiResponse.error(500, "系统内部错误");
+        return ApiResponse.error(500, e.getMessage());
     }
 
     /**

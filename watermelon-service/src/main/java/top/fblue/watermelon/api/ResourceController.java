@@ -26,10 +26,10 @@ import java.util.List;
 @RequestMapping("/api/resource")
 @Validated
 public class ResourceController {
-    
+
     @Resource
     private ResourceApplicationService resourceApplicationService;
-    
+
     /**
      * 新增资源
      *
@@ -50,7 +50,7 @@ public class ResourceController {
         List<ResourceNodeTreeVO> tree = resourceApplicationService.getResourceTree(queryDTO);
         return ApiResponse.success(tree, "获取资源树成功");
     }
-    
+
     /**
      * 根据ID获取资源详情（包含父资源名称）
      */
@@ -59,7 +59,7 @@ public class ResourceController {
         ResourceNodeVO resource = resourceApplicationService.getResourceDetailById(id);
         return ApiResponse.success(resource, "获取资源详情成功");
     }
-    
+
     /**
      * 更新资源
      */
@@ -72,7 +72,7 @@ public class ResourceController {
             return ApiResponse.error("资源更新失败", false);
         }
     }
-    
+
     /**
      * 删除资源
      */
@@ -85,34 +85,29 @@ public class ResourceController {
             return ApiResponse.error("资源删除失败", false);
         }
     }
-    
+
     /**
      * 导出Excel
      */
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportExcel() {
         byte[] excelBytes = resourceApplicationService.exportExcel();
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData("attachment", "resources.xlsx");
-        
+
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(excelBytes);
     }
-    
+
     /**
      * 导入Excel
      */
     @PostMapping("/import")
     public ApiResponse<ResourceImportResultVO> importExcel(@RequestParam("file") MultipartFile file) {
         ResourceImportResultVO result = resourceApplicationService.importExcel(file);
-        
-        if (result.isSuccess()) {
-            return ApiResponse.success(result, "导入Excel成功");
-        } else {
-            return ApiResponse.error("导入Excel失败", result);
-        }
+        return ApiResponse.success(result, "导入Excel完成");
     }
 } 
