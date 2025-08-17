@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-config
+data:
+    profile_name: "dev"
+    mysql_url: "xxx:3306"
+    mysql_username: "root"
+    mysql_password: "xxx"
+---
+# 指定资源的 API 版本。apps/v1 是用于 Deployment 的标准版本。
+apiVersion: apps/v1
+# 表示创建的是一个 Deployment，用于管理应用的副本、更新、回滚等。
+kind: Deployment
+metadata:
+  # Deployment 的名称。
+  name: watermelon-deployment
+  labels:
+    # 给这个对象打上标签，后续用于 selector 匹配。
+    app: watermelon
+spec:
+  # 副本数量，部署 1 个 Pod 实例。
+  replicas: 1
+  # Deployment 如何找到它要管理的 Pod：通过匹配 Pod 的标签 app=watermelon
+  selector:
+    matchLabels:
+      app: watermelon
+  template:
+    # 这是 Pod 模板，Deployment 会据此创建 Pod。
+    # 这个标签必须和 selector 匹配。
+    metadata:
+      labels:
+        app: watermelon
+    spec:
+      # 定义 Pod 中的容器数组。
+      containers:
+        # 容器名。
+        - name: watermelon
+        # 指定容器镜像及 tag，注意默认拉取的是 Docker Hub。
+          image: watermelon:1.0.0
+        # 如果本地已有该镜像则不会拉取，适合用本地 ctr 加载进来的场景。
+          imagePullPolicy: IfNotPresent
+        # 声明容器监听的端口，主要用于 Kubernetes Service 的端口映射。
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: env-config
+
+---
+# 创建一个 Service 资源，用于暴露 Deployment 中的 Pod。
+apiVersion: v1
+kind: Service
+# Service 的名字
+metadata:
+  name: watermelon-service
+spec:
+  # Service 通过 label selector 选中对应的 Pod。要和 Deployment 中 Pod 的 app: watermelon 标签一致。
+  selector:
+    app: watermelon
+  # Service 类型为 NodePort，表示在每个 Node 上都暴露一个固定端口，外部可访问。
+  type: NodePort
+  ports:
+    - name: http
+      # Service 对外暴露的端口（集群内部访问）。http://watermelon-service:80 来访问这个服务。
+      port: 80
+      # 实际容器监听的端口。
+      targetPort: 8080
+      # 节点上的物理端口，范围是 30000-32767，用于外部访问。
+      nodePort: 30080
+      # 整个端口映射流程 NodeIP:30080 -> Service:80 -> Pod:8080
