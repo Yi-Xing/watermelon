@@ -1,4 +1,4 @@
-package top.fblue.watermelon.common.exception;
+package top.fblue.watermelon.infrastructure.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
