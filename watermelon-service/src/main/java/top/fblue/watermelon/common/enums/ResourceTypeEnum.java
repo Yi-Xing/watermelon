@@ -56,7 +56,7 @@ public enum ResourceTypeEnum {
      */
     public static String getDescByCode(Integer code) {
         ResourceTypeEnum type = fromCode(code);
-        return type != null ? type.getDesc() : null;
+        return type.getDesc();
     }
 
     /**

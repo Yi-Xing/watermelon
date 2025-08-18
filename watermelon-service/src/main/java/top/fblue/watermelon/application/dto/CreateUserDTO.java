@@ -37,7 +37,6 @@ public class CreateUserDTO {
     /**
      * 密码 - 非必填，8位数
      */
-    @Pattern(regexp = "^$|^\\d{8}$", message = "密码必须是8位数字")
     private String password;
     
     /**

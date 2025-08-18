@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.common.utils.StringUtil;
+import top.fblue.watermelon.common.utils.EncryptionUtil;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.repository.UserRepository;
@@ -32,8 +33,18 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 校验业务规则
         validateUser(user);
 
-        // 保存用户
-        return userRepository.save(user);
+        // 先保存用户获取ID，然后加密密码
+        User savedUser = userRepository.save(user);
+
+        // 如果密码不为空，则加密密码
+        if (StringUtil.isNotEmpty(user.getPassword())) {
+            String encodedPassword = EncryptionUtil.encode(user.getPassword(), savedUser.getId());
+            
+            // 更新加密后的密码
+            savedUser.setPassword(encodedPassword);
+            userRepository.resetPassword(savedUser.getId(), encodedPassword);
+        }
+        return savedUser;
     }
 
     @Override
@@ -139,8 +150,11 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 检查用户是否存在
         getUserById(userId);
 
+        // 加密密码
+        String encodedPassword = EncryptionUtil.encode(password, userId);
+
         // 重设密码
-        return userRepository.resetPassword(userId, password);
+        return userRepository.resetPassword(userId, encodedPassword);
     }
 
     @Override
@@ -156,8 +170,8 @@ public class UserDomainServiceImpl implements UserDomainService {
             throw new BusinessException("用户不存在");
         }
         
-        // 验证密码
-        if (!user.getPassword().equals(password)) {
+        // 验证密码（使用BCrypt验证）
+        if (StringUtil.isNotEmpty(user.getPassword()) && !EncryptionUtil.matches(password, user.getPassword(), user.getId())) {
             throw new BusinessException("密码错误");
         }
         
