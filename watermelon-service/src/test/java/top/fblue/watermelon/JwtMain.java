@@ -1,4 +1,4 @@
-package top.fblue.watermelon.common.utils;
+package top.fblue.watermelon;
 
 import java.util.Base64;
 

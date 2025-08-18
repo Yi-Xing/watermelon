@@ -68,7 +68,7 @@ public class ResourceNodeVO {
     /**
      * 创建人信息
      */
-    private UserInfoVO createdBy;
+    private UserBaseVO createdBy;
     
     /**
      * 创建时间（格式：yyyy-MM-dd HH:mm:ss）
@@ -78,7 +78,7 @@ public class ResourceNodeVO {
     /**
      * 更新人信息
      */
-    private UserInfoVO updatedBy;
+    private UserBaseVO updatedBy;
     
     /**
      * 更新时间（格式：yyyy-MM-dd HH:mm:ss）

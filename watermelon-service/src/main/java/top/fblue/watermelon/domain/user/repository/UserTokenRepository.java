@@ -6,11 +6,11 @@ import top.fblue.watermelon.domain.user.entity.UserToken;
  * 用户Token仓储接口
  */
 public interface UserTokenRepository {
-    
+
     /**
-     * 保存Token
+     * 创建Token
      */
-    void save(UserToken userToken);
+    String create(Long userId);
     
     /**
      * 根据Token查找
@@ -26,9 +26,4 @@ public interface UserTokenRepository {
      * 删除过期Token
      */
     void deleteExpiredTokens();
-    
-    /**
-     * 删除用户的所有Token
-     */
-    boolean deleteByUserId(Long userId);
-} 
+}

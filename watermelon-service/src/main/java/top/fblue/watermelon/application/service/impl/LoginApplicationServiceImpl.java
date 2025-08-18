@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.application.converter.UserConverter;
 import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
+import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.context.UserContext;
+import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.TokenDomainService;
@@ -73,12 +75,12 @@ public class LoginApplicationServiceImpl implements LoginApplicationService {
      * 获取当前登录用户信息
      */
     @Override
-    public UserVO getCurrentUser(){
+    public CurrentUserVO getCurrentUser(){
         // 通过UserContext获取当前登录用户
-        Long currentUserId = UserContext.getCurrentUserId();
+        UserTokenDTO userToken = UserContext.getCurrentUserInfo();
 
-        User user = userDomainService.getUserById(currentUserId);
+        User user = userDomainService.getUserById(userToken.getUserId());
         // 之后需要返回用户可使用的资源
-        return userConverter.toVO(user);
+        return userConverter.toVO(user,userToken);
     }
 }

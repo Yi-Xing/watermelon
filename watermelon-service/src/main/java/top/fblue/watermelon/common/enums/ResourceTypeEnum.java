@@ -1,6 +1,7 @@
 package top.fblue.watermelon.common.enums;
 
 import lombok.Getter;
+import top.fblue.watermelon.common.exception.BusinessException;
 
 /**
  * 资源类型枚举
@@ -25,14 +26,14 @@ public enum ResourceTypeEnum {
      */
     public static ResourceTypeEnum fromCode(Integer code) {
         if (code == null) {
-            throw new IllegalArgumentException("Invalid resource type code is null ");
+            throw new BusinessException("Invalid resource type code is null ");
         }
         for (ResourceTypeEnum type : values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Invalid resource type code: " + code);
+        throw new BusinessException("Invalid resource type code: " + code);
     }
 
     /**
@@ -40,14 +41,14 @@ public enum ResourceTypeEnum {
      */
     public static ResourceTypeEnum fromDesc(String desc) {
         if (desc == null) {
-            throw new IllegalArgumentException("Invalid resource type desc is null ");
+            throw new BusinessException("Invalid resource type desc is null ");
         }
         for (ResourceTypeEnum type : values()) {
             if (type.getDesc().equals(desc)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Invalid resource type desc: " + desc);
+        throw new BusinessException("Invalid resource type desc: " + desc);
     }
 
     /**

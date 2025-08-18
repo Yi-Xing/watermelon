@@ -5,6 +5,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.service.LoginApplicationService;
+import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.response.ApiResponse;
@@ -53,8 +54,8 @@ public class LoginController {
      * 获取当前登录用户信息
      */
     @GetMapping("/current")
-    public ApiResponse<UserVO> getCurrentUser() {
-        UserVO userVO = loginApplicationService.getCurrentUser();
+    public ApiResponse<CurrentUserVO> getCurrentUser() {
+        CurrentUserVO userVO = loginApplicationService.getCurrentUser();
         return ApiResponse.success(userVO, "获取当前用户信息成功");
     }
 }

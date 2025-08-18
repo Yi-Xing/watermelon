@@ -8,33 +8,31 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * JWT令牌信息DTO
- * 用于返回JWT令牌的详细信息
- * 作为通用DTO，可在各层之间使用
+ * 用户信息DTO
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JwtTokenInfoDTO {
-    
+public class UserTokenDTO {
+
     /**
      * 用户ID
      */
     private Long userId;
-    
+
     /**
-     * JWT令牌
+     * Token值
      */
     private String token;
-    
+
     /**
-     * 令牌创建时间
+     * 过期时间
      */
-    private LocalDateTime createdAt;
-    
+    private LocalDateTime expireTime;
+
     /**
-     * 令牌过期时间
+     * 创建时间
      */
-    private LocalDateTime expiresAt;
+    private LocalDateTime createdTime;
 }

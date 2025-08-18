@@ -6,29 +6,48 @@ import top.fblue.watermelon.domain.user.repository.UserTokenRepository;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 用户Token仓储实现类
- * 使用ConcurrentHashMap存储，支持后期迁移到Redis
+ * 使用ConcurrentHashMap存储，后期需要用 Redis，可以创建 UserTokenRedisRepositoryImpl
  */
 @Repository
 public class UserTokenRepositoryImpl implements UserTokenRepository {
 
     /**
-     * Token存储：token -> UserToken
+     * Token过期时间（天）
      */
-    private static final Map<String, UserToken> TOKEN_STORE = new ConcurrentHashMap<>();
+    private static final int TOKEN_EXPIRE_DAY = 7;
 
     /**
-     * 用户Token映射：userId -> token
+     * Token存储：token -> UserToken
      */
-    private static final Map<Long, String> USER_TOKEN_MAP = new ConcurrentHashMap<>();
+    private final Map<String, UserToken> TOKEN_STORE = new ConcurrentHashMap<>();
 
+    /**
+     * 创建Token
+     */
     @Override
-    public void save(UserToken userToken) {
+    public String create(Long userId) {
+        // 生成唯一token
+        String token = UUID.randomUUID().toString();
+
+        // 计算过期时间
+        LocalDateTime expireTime = LocalDateTime.now().plusDays(TOKEN_EXPIRE_DAY);
+
+        // 创建UserToken实体
+        UserToken userToken = UserToken.builder()
+                .userId(userId)
+                .token(token)
+                .expireTime(expireTime)
+                .createdTime(LocalDateTime.now())
+                .build();
+
+        // 存储token
         TOKEN_STORE.put(userToken.getToken(), userToken);
-        USER_TOKEN_MAP.put(userToken.getUserId(), userToken.getToken());
+        return token;
     }
 
     @Override
@@ -45,7 +64,6 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
 
         // 直接删除token
         TOKEN_STORE.remove(token);
-        USER_TOKEN_MAP.remove(userToken.getUserId());
     }
 
     @Override
@@ -55,23 +73,7 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
         // 遍历所有token，删除过期的
         TOKEN_STORE.entrySet().removeIf(entry -> {
             UserToken userToken = entry.getValue();
-            if (now.isAfter(userToken.getExpireTime())) {
-                USER_TOKEN_MAP.remove(userToken.getUserId());
-                return true;
-            }
-            return false;
+            return now.isAfter(userToken.getExpireTime());
         });
     }
-
-    @Override
-    public boolean deleteByUserId(Long userId) {
-        String token = USER_TOKEN_MAP.get(userId);
-        if (token == null) {
-            return false;
-        }
-
-        TOKEN_STORE.remove(token);
-        USER_TOKEN_MAP.remove(userId);
-        return true;
-    }
-} 
+}

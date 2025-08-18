@@ -3,6 +3,7 @@ package top.fblue.watermelon.domain.user.service.impl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.user.entity.User;
@@ -39,7 +40,7 @@ public class UserDomainServiceImpl implements UserDomainService {
     public User getUserById(Long id) {
         User user = userRepository.findById(id);
         if (user == null) {
-            throw new IllegalArgumentException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
         return user;
     }
@@ -152,17 +153,17 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 根据账号查找用户
         User user = userRepository.findByAccount(account);
         if (user == null) {
-            throw new IllegalArgumentException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
         
         // 验证密码
         if (!user.getPassword().equals(password)) {
-            throw new IllegalArgumentException("密码错误");
+            throw new BusinessException("密码错误");
         }
         
         // 检查用户状态
         if (!StateEnum.ENABLE.getCode().equals(user.getState())) {
-            throw new IllegalArgumentException("用户已被禁用");
+            throw new BusinessException("用户已被禁用");
         }
         
         return user;
@@ -175,14 +176,14 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 检查邮箱是否已存在（如果邮箱不为空）
         if (StringUtil.isNotEmpty(user.getEmail())) {
             if (userRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("邮箱已存在");
+                throw new BusinessException("邮箱已存在");
             }
         }
 
         // 检查手机号是否已存在（如果手机号不为空）
         if (StringUtil.isNotEmpty(user.getPhone())) {
             if (userRepository.existsByPhone(user.getPhone())) {
-                throw new IllegalArgumentException("手机号已存在");
+                throw new BusinessException("手机号已存在");
             }
         }
     }
@@ -197,14 +198,14 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 检查邮箱是否已存在（如果修改了邮箱且不为空）
         if (StringUtil.isNotEmpty(user.getEmail()) && !user.getEmail().equals(existingUser.getEmail())) {
             if (userRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("邮箱已存在");
+                throw new BusinessException("邮箱已存在");
             }
         }
 
         // 检查手机号是否已存在（如果修改了手机号且不为空）
         if (StringUtil.isNotEmpty(user.getPhone()) && !user.getPhone().equals(existingUser.getPhone())) {
             if (userRepository.existsByPhone(user.getPhone())) {
-                throw new IllegalArgumentException("手机号已存在");
+                throw new BusinessException("手机号已存在");
             }
         }
     }

@@ -2,6 +2,7 @@ package top.fblue.watermelon.common.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
+import top.fblue.watermelon.common.exception.BusinessException;
 
 /**
  * Token工具类
@@ -29,7 +30,7 @@ public class TokenUtil {
             token = authHeader.trim();
         }
         if (token.isEmpty()) {
-            throw new IllegalArgumentException("Token不能为空");
+            throw new BusinessException("Token不能为空");
         }
         return token;
     }

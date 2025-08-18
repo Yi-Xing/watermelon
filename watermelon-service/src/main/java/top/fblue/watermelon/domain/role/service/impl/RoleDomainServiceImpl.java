@@ -2,6 +2,7 @@ package top.fblue.watermelon.domain.role.service.impl;
 
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.domain.role.repository.RoleRepository;
 import top.fblue.watermelon.domain.role.repository.RoleResourceRepository;
@@ -29,7 +30,7 @@ public class RoleDomainServiceImpl implements RoleDomainService {
     public Role createRole(Role role) {
         // 1. 检查角色名称是否已存在
         if (existsByName(role.getName())) {
-            throw new IllegalArgumentException("角色名称已存在");
+            throw new BusinessException("角色名称已存在");
         }
         
         // 2. 保存角色
@@ -39,12 +40,12 @@ public class RoleDomainServiceImpl implements RoleDomainService {
     @Override
     public Role getRoleById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("角色ID不能为空");
+            throw new BusinessException("角色ID不能为空");
         }
         
         Role role = roleRepository.findById(id);
         if (role == null) {
-            throw new IllegalArgumentException("角色不存在");
+            throw new BusinessException("角色不存在");
         }
         
         return role;
@@ -75,7 +76,7 @@ public class RoleDomainServiceImpl implements RoleDomainService {
                 .toList();
         if (!notExistRoleIds.isEmpty()) {
             String ids = notExistRoleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-            throw new IllegalArgumentException("以下角色ID不存在: " + ids);
+            throw new BusinessException("以下角色ID不存在: " + ids);
         }
     }
 
@@ -97,7 +98,7 @@ public class RoleDomainServiceImpl implements RoleDomainService {
         // 2. 如果修改了名称，检查新名称是否已存在
         if (!existingRole.getName().equals(role.getName())) {
             if (existsByName(role.getName())) {
-                throw new IllegalArgumentException("角色名称已存在");
+                throw new BusinessException("角色名称已存在");
             }
         }
         

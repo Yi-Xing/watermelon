@@ -6,7 +6,7 @@ import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
-import top.fblue.watermelon.application.vo.UserInfoVO;
+import top.fblue.watermelon.application.vo.UserBaseVO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
@@ -156,12 +156,12 @@ public class ResourceConverter {
     /**
      * User转换为UserInfoVO
      */
-    private UserInfoVO toUserInfoVO(User user) {
+    private UserBaseVO toUserInfoVO(User user) {
         if (user == null) {
             return null;
         }
 
-        return UserInfoVO.builder()
+        return UserBaseVO.builder()
                 .id(user.getId())
                 .name(user.getUsername())
                 .build();

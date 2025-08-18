@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import top.fblue.watermelon.application.dto.CreateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleDTO;
 import top.fblue.watermelon.application.vo.RoleVO;
-import top.fblue.watermelon.application.vo.UserInfoVO;
+import top.fblue.watermelon.application.vo.UserBaseVO;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
@@ -119,12 +119,12 @@ public class RoleConverter {
     /**
      * User转换为UserInfoVO
      */
-    private UserInfoVO toUserInfoVO(User user) {
+    private UserBaseVO toUserInfoVO(User user) {
         if (user == null) {
             return null;
         }
         
-        return UserInfoVO.builder()
+        return UserBaseVO.builder()
                 .id(user.getId())
                 .name(user.getUsername())
                 .build();

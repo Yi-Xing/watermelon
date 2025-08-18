@@ -13,6 +13,7 @@ import top.fblue.watermelon.application.vo.ResourceImportResultVO;
 import top.fblue.watermelon.application.dto.ResourceImportDTO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
@@ -255,7 +256,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 // 数据库存在，Excel存在 -> 更新
                 resourceNode.setId(existingResource.getId());
                 if (!resourceRepository.update(resourceNode)) {
-                    throw new IllegalArgumentException(String.format("%s 资源更新失败", importDTO.getName()));
+                    throw new BusinessException(String.format("%s 资源更新失败", importDTO.getName()));
                 }
                 updatedRows++;
             } else {
@@ -281,7 +282,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             // 批量删除资源
             int deleteCount = resourceRepository.batchDelete(deleteIds);
             if (deleteCount != deleteIds.size()) {
-                throw new IllegalArgumentException(String.format("资源删除失败，失败 %d 个", deleteIds.size() - deleteCount));
+                throw new BusinessException(String.format("资源删除失败，失败 %d 个", deleteIds.size() - deleteCount));
             }
             deletedRows = deleteIds.size();
         }

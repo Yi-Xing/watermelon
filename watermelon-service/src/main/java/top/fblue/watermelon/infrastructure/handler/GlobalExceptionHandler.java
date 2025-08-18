@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.common.response.ApiResponse;
 
 import jakarta.validation.ConstraintViolation;
@@ -27,8 +28,8 @@ public class GlobalExceptionHandler {
     /**
      * 处理业务异常
      */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ApiResponse<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+    @ExceptionHandler(BusinessException.class)
+    public ApiResponse<Object> handleBusinessException(BusinessException e) {
         log.warn("业务异常: {}", e.getMessage());
 
         return ApiResponse.error(500, e.getMessage());

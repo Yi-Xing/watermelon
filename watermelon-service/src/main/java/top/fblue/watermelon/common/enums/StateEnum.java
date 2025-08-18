@@ -1,6 +1,7 @@
 package top.fblue.watermelon.common.enums;
 
 import lombok.Getter;
+import top.fblue.watermelon.common.exception.BusinessException;
 
 /**
  * 状态枚举
@@ -30,7 +31,7 @@ public enum StateEnum {
                 return state;
             }
         }
-        throw new IllegalArgumentException("Invalid state code: " + code);
+        throw new BusinessException("Invalid state code: " + code);
     }
 
     /**
@@ -38,14 +39,14 @@ public enum StateEnum {
      */
     public static StateEnum fromDesc(String desc) {
         if (desc == null) {
-            throw new IllegalArgumentException("Invalid state type desc is null ");
+            throw new BusinessException("Invalid state type desc is null ");
         }
         for (StateEnum type : values()) {
             if (type.getDesc().equals(desc)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Invalid state type desc: " + desc);
+        throw new BusinessException("Invalid state type desc: " + desc);
     }
 
     /**

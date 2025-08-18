@@ -3,9 +3,11 @@ package top.fblue.watermelon.application.converter;
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
+import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.UserVO;
-import top.fblue.watermelon.application.vo.UserInfoVO;
+import top.fblue.watermelon.application.vo.UserBaseVO;
 import top.fblue.watermelon.application.vo.RoleInfoVO;
+import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.user.entity.User;
@@ -111,12 +113,12 @@ public class UserConverter {
     /**
      * User转换为UserInfoVO
      */
-    private UserInfoVO convertToUserInfoVO(User user) {
+    private UserBaseVO convertToUserInfoVO(User user) {
         if (user == null) {
             return null;
         }
 
-        return UserInfoVO.builder()
+        return UserBaseVO.builder()
                 .id(user.getId())
                 .name(user.getUsername())
                 .build();
@@ -150,4 +152,25 @@ public class UserConverter {
                 .stateDesc(StateEnum.fromCode(role.getState()).getDesc())
                 .build();
     }
+
+    /**
+     * User转换为UserVO
+     */
+    public CurrentUserVO toVO(User user, UserTokenDTO userToken) {
+        if (user == null) {
+            return null;
+        }
+
+        return CurrentUserVO.builder()
+                .id(user.getId())
+                .name(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .remark(user.getRemark())
+                .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
+                .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
+                .expireTime(DateTimeUtil.formatDateTime(userToken.getExpireTime()))
+                .build();
+    }
+
 }

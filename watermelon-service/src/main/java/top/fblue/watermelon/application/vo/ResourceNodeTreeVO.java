@@ -64,7 +64,7 @@ public class ResourceNodeTreeVO {
     /**
      * 创建人信息
      */
-    private UserInfoVO createdBy;
+    private UserBaseVO createdBy;
     
     /**
      * 创建时间
@@ -74,7 +74,7 @@ public class ResourceNodeTreeVO {
     /**
      * 更新人信息
      */
-    private UserInfoVO updatedBy;
+    private UserBaseVO updatedBy;
     
     /**
      * 更新时间

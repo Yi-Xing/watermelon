@@ -3,6 +3,7 @@ package top.fblue.watermelon.domain.resource.service.impl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
@@ -34,12 +35,12 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     @Override
     public ResourceNode getResourceById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("资源ID不能为空");
+            throw new BusinessException("资源ID不能为空");
         }
 
         ResourceNode resource = resourceRepository.findById(id);
         if (resource == null) {
-            throw new IllegalArgumentException("资源不存在");
+            throw new BusinessException("资源不存在");
         }
 
         return resource;
@@ -113,7 +114,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         // 2. 检查是否有子资源
         List<ResourceNode> children = resourceRepository.findByParentId(id);
         if (!children.isEmpty()) {
-            throw new IllegalArgumentException("该资源下有子资源，无法删除");
+            throw new BusinessException("该资源下有子资源，无法删除");
         }
 
         // 3. 删除资源
@@ -141,7 +142,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
                 .toList();
         if (!notExistResourceIds.isEmpty()) {
             String ids = notExistResourceIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-            throw new IllegalArgumentException("以下资源ID不存在: " + ids);
+            throw new BusinessException("以下资源ID不存在: " + ids);
         }
     }
 
@@ -197,7 +198,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         while (currentNodeId != null) {
             // 如果当前节点已经访问过，说明存在环形引用
             if (visitedNodes.contains(currentNodeId)) {
-                throw new IllegalArgumentException("检测到环形引用，无法创建资源");
+                throw new BusinessException("检测到环形引用，无法创建资源");
             }
 
             // 将当前节点加入已访问集合
@@ -213,7 +214,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
 
             // 防止无限循环，设置最大深度限制
             if (visitedNodes.size() > 100) {
-                throw new IllegalArgumentException("资源层级过深，可能存在环形引用");
+                throw new BusinessException("资源层级过深，可能存在环形引用");
             }
         }
     }
@@ -224,7 +225,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     private void validateSiblingResourceNameExists(String name, Long parentId) {
         boolean exists = resourceRepository.existsByNameAndParentId(name, parentId);
         if (exists) {
-            throw new IllegalArgumentException("同级资源名称不能重复");
+            throw new BusinessException("同级资源名称不能重复");
         }
     }
 
@@ -234,7 +235,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     private void validateResourceCodeUnique(String code) {
         boolean exists = resourceRepository.existsByCode(code);
         if (exists) {
-            throw new IllegalArgumentException("资源code已存在");
+            throw new BusinessException("资源code已存在");
         }
     }
 
@@ -245,11 +246,11 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         if (parentId != null && parentId != 0) {
             ResourceNode parentResource = resourceRepository.findById(parentId);
             if (parentResource == null) {
-                throw new IllegalArgumentException("上级资源不存在");
+                throw new BusinessException("上级资源不存在");
             }
             // 检查上级资源是否启用
             if (!StateEnum.ENABLE.equals(StateEnum.fromCode(parentResource.getState()))) {
-                throw new IllegalArgumentException("上级资源已禁用，无法编辑子资源");
+                throw new BusinessException("上级资源已禁用，无法编辑子资源");
             }
         }
     }
@@ -259,7 +260,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
      */
     private void validateSelfAsParent(Long resourceId, Long parentId) {
         if (resourceId != null && resourceId.equals(parentId)) {
-            throw new IllegalArgumentException("自己不能为自己的父节点");
+            throw new BusinessException("自己不能为自己的父节点");
         }
     }
 }

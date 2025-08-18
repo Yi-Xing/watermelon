@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class UserInfoVO {
+public class UserBaseVO {
     
     /**
      * 用户ID
