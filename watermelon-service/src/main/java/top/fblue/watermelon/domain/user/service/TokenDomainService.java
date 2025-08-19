@@ -15,7 +15,7 @@ public interface TokenDomainService {
     String generateToken(User user);
     
     /**
-     * 验证token有效性
+     * 验证token有效性并获取 UserToken
      */
     UserToken validateToken(String token);
     

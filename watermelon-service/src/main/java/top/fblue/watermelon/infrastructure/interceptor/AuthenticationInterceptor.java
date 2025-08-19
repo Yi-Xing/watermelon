@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import top.fblue.watermelon.application.service.AuthApplicationService;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.UserToken;
-import top.fblue.watermelon.domain.user.service.TokenDomainService;
 
 import static top.fblue.watermelon.common.constant.UserConst.CURRENT_USER_KEY;
 
@@ -22,7 +22,7 @@ import static top.fblue.watermelon.common.constant.UserConst.CURRENT_USER_KEY;
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Resource
-    private TokenDomainService tokenDomainService;
+    private AuthApplicationService authApplicationService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -35,12 +35,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         try {
             token = TokenUtil.extractTokenFromRequest(request);
             // 验证token
-            userToken = tokenDomainService.validateToken(token);
+            userToken = authApplicationService.validateToken(token);
         } catch (Exception e) {
             log.warn("请求token不合法: {}，{}", requestURI, token);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
+        log.debug("Token验证成功，用户ID: {}", userToken.getUserId());
+        // 判断用户是否有请求接口的权限
+
+
         UserTokenDTO tokenDTO = UserTokenDTO
                 .builder()
                 .userId(userToken.getUserId())
@@ -50,7 +54,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 .build();
         // 将用户信息存储到请求属性中，供后续使用
         request.setAttribute(CURRENT_USER_KEY, tokenDTO);
-        log.debug("Token验证成功，用户ID: {}", userToken.getUserId());
         return true;
     }
 

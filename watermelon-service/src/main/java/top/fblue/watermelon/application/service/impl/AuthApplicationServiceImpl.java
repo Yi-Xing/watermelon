@@ -4,7 +4,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.application.converter.UserConverter;
 import top.fblue.watermelon.application.dto.LoginDTO;
-import top.fblue.watermelon.application.service.LoginApplicationService;
+import top.fblue.watermelon.application.service.AuthApplicationService;
 import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
@@ -12,6 +12,7 @@ import top.fblue.watermelon.common.context.UserContext;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
+import top.fblue.watermelon.domain.user.entity.UserToken;
 import top.fblue.watermelon.domain.user.service.TokenDomainService;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 
@@ -19,7 +20,7 @@ import top.fblue.watermelon.domain.user.service.UserDomainService;
  * 登录应用服务实现类
  */
 @Service
-public class LoginApplicationServiceImpl implements LoginApplicationService {
+public class AuthApplicationServiceImpl implements AuthApplicationService {
 
     @Resource
     private UserDomainService userDomainService;
@@ -82,5 +83,13 @@ public class LoginApplicationServiceImpl implements LoginApplicationService {
         User user = userDomainService.getUserById(userToken.getUserId());
         // 之后需要返回用户可使用的资源
         return userConverter.toVO(user,userToken);
+    }
+
+    /**
+     * 验证token有效性并获取 UserToken
+     */
+    @Override
+    public UserToken validateToken(String token){
+        return tokenDomainService.validateToken(token);
     }
 }
