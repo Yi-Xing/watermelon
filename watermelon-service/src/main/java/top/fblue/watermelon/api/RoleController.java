@@ -46,8 +46,8 @@ public class RoleController {
     /**
      * 根据ID获取角色详情（包含关联资源）
      */
-    @GetMapping("/{id}")
-    public ApiResponse<RoleVO> getRoleById(@PathVariable Long id) {
+    @GetMapping
+    public ApiResponse<RoleVO> getRoleById(@RequestParam Long id) {
         RoleVO role = roleApplicationService.getRoleDetailById(id);
         return ApiResponse.success(role, "获取角色详情成功");
     }
@@ -81,8 +81,8 @@ public class RoleController {
     /**
      * 删除角色
      */
-    @DeleteMapping("/{id}")
-    public ApiResponse<Boolean> deleteRole(@PathVariable Long id) {
+    @DeleteMapping
+    public ApiResponse<Boolean> deleteRole(@RequestParam Long id) {
         boolean result = roleApplicationService.deleteRole(id);
         if (result) {
             return ApiResponse.success(true, "角色删除成功");

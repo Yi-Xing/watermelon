@@ -46,8 +46,8 @@ public class UserController {
     /**
      * 根据ID获取用户详情（包含关联角色）
      */
-    @GetMapping("/{id}")
-    public ApiResponse<UserVO> getUserById(@PathVariable Long id) {
+    @GetMapping
+    public ApiResponse<UserVO> getUserById(@RequestParam Long id) {
         UserVO user = userApplicationService.getUserDetailById(id);
         return ApiResponse.success(user, "获取用户详情成功");
     }
@@ -81,8 +81,8 @@ public class UserController {
     /**
      * 删除用户
      */
-    @DeleteMapping("/{id}")
-    public ApiResponse<Boolean> deleteUser(@PathVariable Long id) {
+    @DeleteMapping
+    public ApiResponse<Boolean> deleteUser(@RequestParam Long id) {
         boolean result = userApplicationService.deleteUser(id);
         if (result) {
             return ApiResponse.success(true, "用户删除成功");
