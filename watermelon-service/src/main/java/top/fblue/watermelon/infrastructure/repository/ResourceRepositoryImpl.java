@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
 import top.fblue.watermelon.infrastructure.converter.ResourceNodePOConverter;
@@ -70,7 +71,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     public boolean delete(Long id) {
         return resourceNodeMapper.deleteById(id) > 0;
     }
-    
+
     @Override
     public int batchDelete(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
@@ -118,5 +119,19 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsByIdsAndTypeAndStateCode(List<Long> resourceIds, Integer type, Integer state, String code) {
+        if (StringUtil.isEmpty(code) || resourceIds == null || resourceIds.isEmpty()) {
+            return false;
+        }
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", resourceIds)
+                .eq("type", type)
+                .eq("state", state)
+                .eq("code", code);
+
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
     }
 }

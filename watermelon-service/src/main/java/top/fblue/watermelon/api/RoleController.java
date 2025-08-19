@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
  * 角色管理
  */
 @RestController
-@RequestMapping("/api/role")
+@RequestMapping("/api/admin/role")
 @Validated
 public class RoleController {
     

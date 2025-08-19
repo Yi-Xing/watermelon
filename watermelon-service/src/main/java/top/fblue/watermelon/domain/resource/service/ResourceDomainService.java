@@ -1,28 +1,29 @@
 package top.fblue.watermelon.domain.resource.service;
 
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
+
 import java.util.List;
 
 /**
  * 资源领域服务接口
  */
 public interface ResourceDomainService {
-    
+
     /**
      * 创建资源节点
      */
     ResourceNode createResourceNode(ResourceNode resourceNode);
-    
+
     /**
      * 根据ID获取资源
      */
     ResourceNode getResourceById(Long id);
-    
+
     /**
      * 根据条件查询资源列表
      */
     List<ResourceNode> getResourceList(String name, String code, Integer state);
-    
+
     /**
      * 根据ID列表查询资源列表
      */
@@ -32,12 +33,12 @@ public interface ResourceDomainService {
      * 根据 resources 返回其全路径的节点
      */
     List<ResourceNode> buildFullPathNodes(List<ResourceNode> resources);
-    
+
     /**
      * 更新资源
      */
     boolean updateResource(ResourceNode resource);
-    
+
     /**
      * 删除资源
      */
@@ -47,4 +48,10 @@ public interface ResourceDomainService {
      * 校验资源IDs是否合法
      */
     void validateResourceIds(List<Long> resourceIds);
+
+    /**
+     * 检查指定资源代码是否存在于指定的资源ID列表中
+     * 只查询接口类型和启用状态的资源
+     */
+    boolean existsAPIResourceByCodeAndIds(String resourceCode, List<Long> resourceIds);
 } 

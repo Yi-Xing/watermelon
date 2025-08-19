@@ -8,6 +8,7 @@ import top.fblue.watermelon.infrastructure.converter.RoleResourceNodePOConverter
 import top.fblue.watermelon.infrastructure.mapper.RoleResourceNodeMapper;
 import top.fblue.watermelon.infrastructure.po.RoleResourceNodePO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +33,14 @@ public class RoleResourceRepositoryImpl implements RoleResourceRepository {
     @Override
     public List<Long> findResourceIdsByRoleId(Long roleId) {
         return roleResourceNodeMapper.selectResourceIdsByRoleId(roleId);
+    }
+
+    @Override
+    public List<Long> findResourceIdsByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return roleResourceNodeMapper.selectResourceIdsByRoleIds(roleIds);
     }
     
     @Override

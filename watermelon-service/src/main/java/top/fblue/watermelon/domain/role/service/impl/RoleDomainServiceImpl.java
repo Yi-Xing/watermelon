@@ -143,6 +143,14 @@ public class RoleDomainServiceImpl implements RoleDomainService {
     }
 
     @Override
+    public List<Long> getRoleResourceIdsByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return roleResourceRepository.findResourceIdsByRoleIds(roleIds);
+    }
+
+    @Override
     public boolean deleteRole(Long id) {
         // 1. 检查角色是否存在
         getRoleById(id);

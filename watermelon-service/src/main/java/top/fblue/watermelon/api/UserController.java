@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
  * 用户管理
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/admin/user")
 @Validated
 public class UserController {
     

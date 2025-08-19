@@ -23,7 +23,7 @@ import java.util.List;
  * 资源管理
  */
 @RestController
-@RequestMapping("/api/resource")
+@RequestMapping("/api/admin/resource")
 @Validated
 public class ResourceController {
 

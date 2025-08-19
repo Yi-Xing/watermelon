@@ -57,4 +57,9 @@ public interface ResourceRepository {
      * 检查同级资源名称是否存在
      */
     boolean existsByNameAndParentId(String name, Long parentId);
+
+    /**
+     * 检查指定资源代码是否存在于指定的资源ID列表中
+     */
+    boolean existsByIdsAndTypeAndStateCode(List<Long> resourceIds, Integer type, Integer state, String code);
 } 

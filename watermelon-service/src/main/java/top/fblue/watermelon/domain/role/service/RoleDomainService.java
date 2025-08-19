@@ -52,6 +52,12 @@ public interface RoleDomainService {
      * 获取角色关联的资源ID列表
      */
     List<Long> getRoleResourceIds(Long roleId);
+
+    /**
+     * 批量获取角色关联的资源ID列表
+     * 用于权限验证，一次查询获取所有角色的资源权限
+     */
+    List<Long> getRoleResourceIdsByRoleIds(List<Long> roleIds);
     
     /**
      * 删除角色

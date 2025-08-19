@@ -2,8 +2,10 @@ package top.fblue.watermelon.domain.resource.service.impl;
 
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.exception.BusinessException;
+import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
@@ -262,5 +264,21 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         if (resourceId != null && resourceId.equals(parentId)) {
             throw new BusinessException("自己不能为自己的父节点");
         }
+    }
+
+    /**
+     * 检查指定资源代码是否存在于指定的资源ID列表中
+     * 只查询接口类型和启用状态的资源
+     */
+    @Override
+    public boolean existsAPIResourceByCodeAndIds(String resourceCode, List<Long> resourceIds) {
+        if (StringUtil.isEmpty(resourceCode) || resourceIds == null || resourceIds.isEmpty()) {
+            return false;
+        }
+        return resourceRepository.existsByIdsAndTypeAndStateCode(
+                resourceIds,
+                ResourceTypeEnum.API.getCode(),
+                StateEnum.ENABLE.getCode(),
+                resourceCode);
     }
 }

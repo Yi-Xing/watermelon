@@ -16,6 +16,11 @@ public interface RoleResourceRepository {
      * 根据角色ID查询资源ID列表
      */
     List<Long> findResourceIdsByRoleId(Long roleId);
+
+    /**
+     * 根据角色ID列表批量查询资源ID列表
+     */
+    List<Long> findResourceIdsByRoleIds(List<Long> roleIds);
     
     /**
      * 批量删除角色资源关系
