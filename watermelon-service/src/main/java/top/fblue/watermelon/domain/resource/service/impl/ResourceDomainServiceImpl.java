@@ -99,10 +99,10 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     @Override
     public boolean updateResource(ResourceNode resource) {
         // 1. 检查资源是否存在
-        ResourceNode existingResource = getResourceById(resource.getId());
+        getResourceById(resource.getId());
 
         // 2. 校验业务规则（更新时的特殊校验）
-        validateResourceNodeForUpdate(resource, existingResource);
+        validateResourceNodeForUpdate(resource);
 
         // 3. 更新资源
         return resourceRepository.update(resource);
@@ -165,7 +165,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     /**
      * 更新时校验资源节点的业务规则
      */
-    private void validateResourceNodeForUpdate(ResourceNode resourceNode, ResourceNode existingResource) {
+    private void validateResourceNodeForUpdate(ResourceNode resourceNode) {
         // 1. 校验自己不能为自己的父节点
         validateSelfAsParent(resourceNode.getId(), resourceNode.getParentId());
 
