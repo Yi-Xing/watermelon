@@ -57,6 +57,32 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
+    public boolean existsByNameAndParentIdExcludeId(String name, Long parentId, Long excludeId) {
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("name", name);
+        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
+        queryWrapper.ne("id", excludeId);
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public boolean existsByCodeAndParentId(String code, Long parentId) {
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code", code);
+        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public boolean existsByCodeAndParentIdExcludeId(String code, Long parentId, Long excludeId) {
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code", code);
+        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
+        queryWrapper.ne("id", excludeId);
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
     public List<ResourceNode> findByParentId(Long parentId) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("parent_id", parentId);

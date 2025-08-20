@@ -60,8 +60,8 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         List<String> errors = new ArrayList<>();
         // 用于同级 name 去重校验
         Map<String, Set<String>> nameMap = new HashMap<>();
-        // code 去重校验
-        Set<String> codeSet = new HashSet<>();
+        // 用于同级 code 去重校验
+        Map<String, Set<String>> codeMap = new HashMap<>();
         // 构建 code 到 ResourceExcelVO 的映射，检测是否存在环
         Map<String, ResourceExcelVO> codeToResourceMap = new HashMap<>();
         // 用于校验父级是否存在
@@ -94,8 +94,8 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             // 校验 code 是否为空 和 是否已存在
             if (data.getCode() == null || data.getCode().isEmpty()) {
                 errors.add(String.format("第%d行: 资源code不能为空", rowNumber));
-            } else if (codeSet.contains(data.getCode())) {
-                errors.add(String.format("第%d行: 资源code已存在", rowNumber));
+            } else if (codeMap.get(data.getParentCode()) != null && codeMap.get(data.getParentCode()).contains(data.getCode())) {
+                errors.add(String.format("第%d行: 同级中资源code已存在", rowNumber));
             }
 
             // 校验类型
@@ -120,7 +120,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
 
             // 收集数据，用于去重校验
             nameMap.computeIfAbsent(data.getParentCode(), k -> new HashSet<>()).add(data.getName());
-            codeSet.add(data.getCode());
+            codeMap.computeIfAbsent(data.getParentCode(), k -> new HashSet<>()).add(data.getCode());
         }
 
         // 检测是否存在环

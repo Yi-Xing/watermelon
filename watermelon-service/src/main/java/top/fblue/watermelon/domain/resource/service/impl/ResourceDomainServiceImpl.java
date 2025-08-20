@@ -158,8 +158,8 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         // 2. 校验同级资源名称是否已存在
         validateSiblingResourceNameExists(resourceNode.getName(), resourceNode.getParentId());
 
-        // 3. 校验资源code唯一性
-        validateResourceCodeUnique(resourceNode.getCode());
+        // 3. 校验同级资源Code是否已存在
+        validateSiblingResourceCodeExists(resourceNode.getCode(), resourceNode.getParentId());
     }
 
     /**
@@ -176,15 +176,10 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         validateCircularReference(resourceNode);
 
         // 4. 校验同级资源名称是否已存在（过滤掉自己）
+        validateSiblingResourceNameExistsExcludeId(resourceNode.getName(), resourceNode.getParentId(), resourceNode.getId());
 
-        if (!existingResource.getName().equals(resourceNode.getName())) {
-            validateSiblingResourceNameExists(resourceNode.getName(), resourceNode.getParentId());
-        }
-
-        // 5. 校验资源code唯一性（过滤掉自己）
-        if (!existingResource.getCode().equals(resourceNode.getCode())) {
-            validateResourceCodeUnique(resourceNode.getCode());
-        }
+        // 5. 校验同级资源Code是否已存在（过滤掉自己）
+        validateSiblingResourceCodeExistsExcludeId(resourceNode.getCode(), resourceNode.getParentId(), resourceNode.getId());
     }
 
     /**
@@ -232,12 +227,32 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     }
 
     /**
-     * 校验资源code唯一性
+     * 校验同级资源Code是否已存在
      */
-    private void validateResourceCodeUnique(String code) {
-        boolean exists = resourceRepository.existsByCode(code);
+    private void validateSiblingResourceCodeExists(String code, Long parentId) {
+        boolean exists = resourceRepository.existsByCodeAndParentId(code, parentId);
         if (exists) {
-            throw new BusinessException("资源code已存在");
+            throw new BusinessException("同级资源code已存在");
+        }
+    }
+
+    /**
+     * 校验同级资源名称是否已存在（排除指定ID）
+     */
+    private void validateSiblingResourceNameExistsExcludeId(String name, Long parentId, Long excludeId) {
+        boolean exists = resourceRepository.existsByNameAndParentIdExcludeId(name, parentId, excludeId);
+        if (exists) {
+            throw new BusinessException("同级资源名称不能重复");
+        }
+    }
+
+    /**
+     * 校验同级资源Code是否已存在（排除指定ID）
+     */
+    private void validateSiblingResourceCodeExistsExcludeId(String code, Long parentId, Long excludeId) {
+        boolean exists = resourceRepository.existsByCodeAndParentIdExcludeId(code, parentId, excludeId);
+        if (exists) {
+            throw new BusinessException("同级资源code已存在");
         }
     }
 
