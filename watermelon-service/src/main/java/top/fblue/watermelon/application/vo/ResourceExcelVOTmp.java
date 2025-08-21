@@ -2,8 +2,8 @@ package top.fblue.watermelon.application.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 /**
@@ -13,7 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceExcelVO {
+public class ResourceExcelVOTmp {
+    
+    /**
+     * 上级资源code
+     */
+    @ExcelProperty("上级资源")
+    private String parentCode;
     
     /**
      * 资源名称
@@ -32,7 +38,13 @@ public class ResourceExcelVO {
      */
     @ExcelProperty("类型")
     private String type;
-
+    
+    /**
+     * 显示顺序
+     */
+    @ExcelProperty("显示顺序")
+    private Integer orderNum;
+    
     /**
      * 状态
      */

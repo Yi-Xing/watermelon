@@ -4,9 +4,9 @@ import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
-import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
+import top.fblue.watermelon.common.response.Page;
 
 import java.util.List;
 
@@ -16,22 +16,19 @@ import java.util.List;
 public interface ResourceApplicationService {
 
     /**
-     * 根据ID获取资源详情（包含父资源名称）
-     */
-    ResourceNodeVO getResourceDetailById(Long id);
-    
-    /**
      * 创建资源
-     *
-     * @param createResourceDTO 创建资源DTO
-     * @return 资源视图对象
      */
     ResourceNodeVO createResource(CreateResourceDTO createResourceDTO);
     
     /**
-     * 查询资源树
+     * 分页查询资源列表
      */
-    List<ResourceNodeTreeVO> getResourceTree(ResourceQueryDTO queryDTO);
+    Page<ResourceNodeVO> getResourceList(ResourceQueryDTO queryDTO);
+    
+    /**
+     * 根据ID获取资源详情
+     */
+    ResourceNodeVO getResourceDetailById(Long id);
 
     /**
      * 更新资源

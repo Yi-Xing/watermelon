@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS resource_node(
     `id` INT AUTO_INCREMENT COMMENT '资源ID',
     `name` VARCHAR(20) NOT NULL COMMENT '资源名称',
-    `type` TINYINT NOT NULL COMMENT '资源类型;1页面 2按钮 3接口',
+    `type` TINYINT NOT NULL COMMENT '资源类型;1页面 2按钮 3接口 4目录',
     `code` VARCHAR(255) NOT NULL COMMENT '资源code',
     `order_num` INT NOT NULL DEFAULT 0 COMMENT '显示顺序',
     `parent_id` INT NOT NULL DEFAULT 0 COMMENT '父级ID',

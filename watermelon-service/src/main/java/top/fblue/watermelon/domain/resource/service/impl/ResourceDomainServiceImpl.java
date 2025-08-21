@@ -8,13 +8,14 @@ import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
+import top.fblue.watermelon.domain.resource.repository.ResourceRelationRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.stream.Collectors;
+import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 
 /**
  * 资源领域服务实现
@@ -24,6 +25,9 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
 
     @Resource
     private ResourceRepository resourceRepository;
+    
+    @Resource
+    private ResourceRelationRepository resourceRelationRepository;
 
     @Override
     public ResourceNode createResourceNode(ResourceNode resourceNode) {
@@ -36,21 +40,26 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
 
     @Override
     public ResourceNode getResourceById(Long id) {
-        if (id == null) {
-            throw new BusinessException("资源ID不能为空");
-        }
-
         ResourceNode resource = resourceRepository.findById(id);
         if (resource == null) {
             throw new BusinessException("资源不存在");
         }
-
         return resource;
     }
 
     @Override
     public List<ResourceNode> getResourceList(String name, String code, Integer state) {
         return resourceRepository.findByCondition(name, code, state);
+    }
+    
+    @Override
+    public List<ResourceNode> getResourceList(String name, String code, Integer state, int pageNum, int pageSize) {
+        return resourceRepository.findByCondition(name, code, state, pageNum, pageSize);
+    }
+    
+    @Override
+    public Long countResources(String name, String code, Integer state) {
+        return resourceRepository.countByCondition(name, code, state);
     }
 
     @Override
@@ -63,63 +72,34 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
 
     @Override
     public List<ResourceNode> buildFullPathNodes(List<ResourceNode> resources) {
-        Set<Long> resourceIds = new HashSet<>();
-        // 收集所有资源的ID
-        for (ResourceNode resource : resources) {
-            resourceIds.add(resource.getId());
-        }
-
-        // 收集所有资源父ID
-        for (ResourceNode resource : resources) {
-            // 递归收集所有父节点ID
-            collectParentIds(resource.getParentId(), resourceIds);
-        }
-
-        // 查询所有需要的资源
-        return this.getResourceListByIds(new ArrayList<>(resourceIds));
-    }
-
-    /**
-     * 递归收集父节点ID
-     */
-    private void collectParentIds(Long parentId, Set<Long> parentIds) {
-        if (parentId == null || parentId == 0 || parentIds.contains(parentId)) {
-            return;
-        }
-
-        parentIds.add(parentId);
-
-        // 获取父节点信息
-        ResourceNode parent = this.getResourceById(parentId);
-        if (parent != null && parent.getParentId() != null && parent.getParentId() != 0) {
-            collectParentIds(parent.getParentId(), parentIds);
-        }
+        // 新架构下，这个方法不再需要，因为树形结构通过ResourceRelation管理
+        // 直接返回传入的资源列表
+        return resources != null ? resources : new ArrayList<>();
     }
 
     @Override
     public boolean updateResource(ResourceNode resource) {
-        // 1. 检查资源是否存在
-        getResourceById(resource.getId());
+        // 1. 校验业务规则
+        validateResourceNodeUpdate(resource);
 
-        // 2. 校验业务规则（更新时的特殊校验）
-        validateResourceNodeForUpdate(resource);
-
-        // 3. 更新资源
+        // 2. 更新资源
         return resourceRepository.update(resource);
     }
 
     @Override
     public boolean deleteResource(Long id) {
-        // 1. 检查资源是否存在
-        getResourceById(id);
-
-        // 2. 检查是否有子资源
-        List<ResourceNode> children = resourceRepository.findByParentId(id);
-        if (!children.isEmpty()) {
-            throw new BusinessException("该资源下有子资源，无法删除");
+        // 校验资源是否存在
+        ResourceNode resource = resourceRepository.findById(id);
+        if (resource == null) {
+            throw new BusinessException("资源不存在");
         }
 
-        // 3. 删除资源
+        // 检查是否有资源关联关系（作为父级或子级）
+        if (resourceRelationRepository.hasAnyRelation(id)) {
+            throw new BusinessException("该资源存在关联关系，无法删除");
+        }
+
+        // 删除资源
         return resourceRepository.delete(id);
     }
 
@@ -148,143 +128,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         }
     }
 
-    /**
-     * 校验资源节点的业务规则
-     */
-    private void validateResourceNode(ResourceNode resourceNode) {
-        // 1. 校验父级资源
-        validateParentResource(resourceNode.getParentId());
-
-        // 2. 校验同级资源名称是否已存在
-        validateSiblingResourceNameExists(resourceNode.getName(), resourceNode.getParentId());
-
-        // 3. 校验同级资源Code是否已存在
-        validateSiblingResourceCodeExists(resourceNode.getCode(), resourceNode.getParentId());
-    }
-
-    /**
-     * 更新时校验资源节点的业务规则
-     */
-    private void validateResourceNodeForUpdate(ResourceNode resourceNode) {
-        // 1. 校验自己不能为自己的父节点
-        validateSelfAsParent(resourceNode.getId(), resourceNode.getParentId());
-
-        // 2. 校验父级资源
-        validateParentResource(resourceNode.getParentId());
-
-        // 3. 校验环形引用
-        validateCircularReference(resourceNode);
-
-        // 4. 校验同级资源名称是否已存在（过滤掉自己）
-        validateSiblingResourceNameExistsExcludeId(resourceNode.getName(), resourceNode.getParentId(), resourceNode.getId());
-
-        // 5. 校验同级资源Code是否已存在（过滤掉自己）
-        validateSiblingResourceCodeExistsExcludeId(resourceNode.getCode(), resourceNode.getParentId(), resourceNode.getId());
-    }
-
-    /**
-     * 校验环形引用
-     */
-    private void validateCircularReference(ResourceNode resourceNode) {
-
-        // 使用Set记录已访问的节点，检测环形引用
-        Set<Long> visitedNodes = new HashSet<>();
-        visitedNodes.add(resourceNode.getId());
-        Long currentNodeId = resourceNode.getParentId();
-
-        while (currentNodeId != null) {
-            // 如果当前节点已经访问过，说明存在环形引用
-            if (visitedNodes.contains(currentNodeId)) {
-                throw new BusinessException("检测到环形引用，无法创建资源");
-            }
-
-            // 将当前节点加入已访问集合
-            visitedNodes.add(currentNodeId);
-
-            // 查询当前节点的父节点
-            ResourceNode currentResource = resourceRepository.findById(currentNodeId);
-            if (currentResource == null) {
-                break; // 父节点不存在，结束检查
-            }
-
-            currentNodeId = currentResource.getParentId();
-
-            // 防止无限循环，设置最大深度限制
-            if (visitedNodes.size() > 100) {
-                throw new BusinessException("资源层级过深，可能存在环形引用");
-            }
-        }
-    }
-
-    /**
-     * 校验同级资源名称是否已存在
-     */
-    private void validateSiblingResourceNameExists(String name, Long parentId) {
-        boolean exists = resourceRepository.existsByNameAndParentId(name, parentId);
-        if (exists) {
-            throw new BusinessException("同级资源名称不能重复");
-        }
-    }
-
-    /**
-     * 校验同级资源Code是否已存在
-     */
-    private void validateSiblingResourceCodeExists(String code, Long parentId) {
-        boolean exists = resourceRepository.existsByCodeAndParentId(code, parentId);
-        if (exists) {
-            throw new BusinessException("同级资源code已存在");
-        }
-    }
-
-    /**
-     * 校验同级资源名称是否已存在（排除指定ID）
-     */
-    private void validateSiblingResourceNameExistsExcludeId(String name, Long parentId, Long excludeId) {
-        boolean exists = resourceRepository.existsByNameAndParentIdExcludeId(name, parentId, excludeId);
-        if (exists) {
-            throw new BusinessException("同级资源名称不能重复");
-        }
-    }
-
-    /**
-     * 校验同级资源Code是否已存在（排除指定ID）
-     */
-    private void validateSiblingResourceCodeExistsExcludeId(String code, Long parentId, Long excludeId) {
-        boolean exists = resourceRepository.existsByCodeAndParentIdExcludeId(code, parentId, excludeId);
-        if (exists) {
-            throw new BusinessException("同级资源code已存在");
-        }
-    }
-
-    /**
-     * 校验父级资源
-     */
-    private void validateParentResource(Long parentId) {
-        if (parentId != null && parentId != 0) {
-            ResourceNode parentResource = resourceRepository.findById(parentId);
-            if (parentResource == null) {
-                throw new BusinessException("上级资源不存在");
-            }
-            // 检查上级资源是否启用
-            if (!StateEnum.ENABLE.equals(StateEnum.fromCode(parentResource.getState()))) {
-                throw new BusinessException("上级资源已禁用，无法编辑子资源");
-            }
-        }
-    }
-
-    /**
-     * 校验自己不能为自己的父节点
-     */
-    private void validateSelfAsParent(Long resourceId, Long parentId) {
-        if (resourceId != null && resourceId.equals(parentId)) {
-            throw new BusinessException("自己不能为自己的父节点");
-        }
-    }
-
-    /**
-     * 检查指定资源代码是否存在于指定的资源ID列表中
-     * 只查询接口类型和启用状态的资源
-     */
     @Override
     public boolean existsAPIResourceByCodeAndIds(String resourceCode, List<Long> resourceIds) {
         if (StringUtil.isEmpty(resourceCode) || resourceIds == null || resourceIds.isEmpty()) {
@@ -295,5 +138,32 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
                 ResourceTypeEnum.API.getCode(),
                 StateEnum.ENABLE.getCode(),
                 resourceCode);
+    }
+
+    /**
+     * 校验资源节点（新增时）
+     */
+    private void validateResourceNode(ResourceNode resourceNode) {
+        // 校验Code唯一性
+        if (resourceRepository.existsByCode(resourceNode.getCode())) {
+            throw new BusinessException("资源Code已存在");
+        }
+    }
+
+    /**
+     * 校验资源节点（更新时）
+     */
+    private void validateResourceNodeUpdate(ResourceNode resourceNode) {
+        // 1. 校验资源是否存在
+        ResourceNode existingResource = resourceRepository.findById(resourceNode.getId());
+        if (existingResource == null) {
+            throw new BusinessException("资源不存在");
+        }
+        // 2. 如果code有变化，校验新code的唯一性
+        if (!existingResource.getCode().equals(resourceNode.getCode())) {
+            if (resourceRepository.existsByCodeExcludeId(resourceNode.getCode(), resourceNode.getId())) {
+                throw new BusinessException("资源Code已存在");
+            }
+        }
     }
 }

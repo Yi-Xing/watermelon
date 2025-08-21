@@ -5,13 +5,14 @@ import top.fblue.watermelon.common.exception.BusinessException;
 
 /**
  * 资源类型枚举
- * 1 页面，2 按钮，3 接口
+ * 1 页面，2 按钮，3 接口，4 目录
  */
 @Getter
 public enum ResourceTypeEnum {
     PAGE(1, "页面"),
     BUTTON(2, "按钮"),
-    API(3, "接口");
+    API(3, "接口"),
+    DIRECTORY(4, "目录");
 
     private final Integer code;
     private final String desc;

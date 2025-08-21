@@ -23,6 +23,16 @@ public interface ResourceDomainService {
      * 根据条件查询资源列表
      */
     List<ResourceNode> getResourceList(String name, String code, Integer state);
+    
+    /**
+     * 分页查询资源列表
+     */
+    List<ResourceNode> getResourceList(String name, String code, Integer state, int pageNum, int pageSize);
+    
+    /**
+     * 统计资源总数
+     */
+    Long countResources(String name, String code, Integer state);
 
     /**
      * 根据ID列表查询资源列表

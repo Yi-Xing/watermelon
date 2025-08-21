@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
+import top.fblue.watermelon.application.vo.ResourceExcelVOTmp;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
 import top.fblue.watermelon.application.dto.ResourceImportDTO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
@@ -55,7 +56,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     }
 
     @Override
-    public List<String> validateExcelData(List<ResourceExcelVO> dataList) {
+    public List<String> validateExcelData(List<ResourceExcelVOTmp> dataList) {
         // 记录错误信息
         List<String> errors = new ArrayList<>();
         // 用于同级 name 去重校验
@@ -63,17 +64,17 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         // 用于同级 code 去重校验
         Map<String, Set<String>> codeMap = new HashMap<>();
         // 构建 code 到 ResourceExcelVO 的映射，检测是否存在环
-        Map<String, ResourceExcelVO> codeToResourceMap = new HashMap<>();
+        Map<String, ResourceExcelVOTmp> codeToResourceMap = new HashMap<>();
         // 用于校验父级是否存在
         Set<String> allCodeSet = new HashSet<>();
 
-        for (ResourceExcelVO data : dataList) {
+        for (ResourceExcelVOTmp data : dataList) {
             allCodeSet.add(data.getCode());
             codeToResourceMap.put(data.getCode(), data);
         }
 
         for (int i = 0; i < dataList.size(); i++) {
-            ResourceExcelVO data = dataList.get(i);
+            ResourceExcelVOTmp data = dataList.get(i);
             int rowNumber = i + 2; // Excel行号从2开始（第1行是标题）
 
             // 校验父级 code 是否存在
@@ -155,7 +156,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
      * @param codeToResourceMap code到资源的映射
      * @return 存在环，则返回资源的code
      */
-    private String hasCycle(List<ResourceExcelVO> dataList, Map<String, ResourceExcelVO> codeToResourceMap) {
+    private String hasCycle(List<ResourceExcelVOTmp> dataList, Map<String, ResourceExcelVOTmp> codeToResourceMap) {
 
         // 记录已访问的节点
         Set<String> visited = new HashSet<>();
@@ -163,7 +164,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         Set<String> path = new HashSet<>();
 
         // 对每个节点进行DFS检测
-        for (ResourceExcelVO resource : dataList) {
+        for (ResourceExcelVOTmp resource : dataList) {
             if (!visited.contains(resource.getCode())) {
                 if (dfsHasCycle(resource.getCode(), codeToResourceMap, visited, path)) {
                     return resource.getCode();
@@ -183,7 +184,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
      * @param path              当前路径中的节点集合
      * @return true 如果检测到环，false 如果没有环
      */
-    private boolean dfsHasCycle(String currentCode, Map<String, ResourceExcelVO> codeToResourceMap,
+    private boolean dfsHasCycle(String currentCode, Map<String, ResourceExcelVOTmp> codeToResourceMap,
                                 Set<String> visited, Set<String> path) {
         // 如果当前节点已在当前路径中，说明存在环
         if (path.contains(currentCode)) {
@@ -200,7 +201,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         path.add(currentCode);
 
         // 获取当前资源
-        ResourceExcelVO currentResource = codeToResourceMap.get(currentCode);
+        ResourceExcelVOTmp currentResource = codeToResourceMap.get(currentCode);
         if (currentResource != null && currentResource.getParentCode() != null && !currentResource.getParentCode().isEmpty()) {
             // 检查父节点是否存在
             if (codeToResourceMap.containsKey(currentResource.getParentCode())) {
@@ -249,9 +250,8 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         for (ResourceImportDTO importDTO : importDTOs) {
             ResourceNode existingResource = existingCodeToResource.get(importDTO.getCode());
 
-            // 根据 parentCode 查找父节点ID 并转为 ResourceNode
-            Long parentId = codeToIdMap.get(importDTO.getParentCode());
-            ResourceNode resourceNode = resourceConverter.toResourceNode(importDTO, parentId);
+            // 转为 ResourceNode
+            ResourceNode resourceNode = resourceConverter.toResourceNode(importDTO);
             if (existingResource != null) {
                 // 数据库存在，Excel存在 -> 更新
                 resourceNode.setId(existingResource.getId());
@@ -305,30 +305,32 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .collect(Collectors.toMap(ResourceExcelVO::getCode, data -> data));
 
         // 2. 拓扑排序，确保父节点在子节点之前
-        List<ResourceExcelVO> sortedDataList = topologicalSort(excelDataList, codeToExcelMap);
+//        List<ResourceExcelVOTmp> sortedDataList = topologicalSort(excelDataList, codeToExcelMap);
 
         // 3. 转换为导入VO
-        return sortedDataList.stream()
-                .map(resourceConverter::toImportDTO)
-                .collect(Collectors.toList());
+//        return sortedDataList.stream()
+//                .map(resourceConverter::toImportDTO)
+//                .collect(Collectors.toList());
+        // todo 暂存
+        return null;
     }
 
     /**
      * 拓扑排序，确保父节点在子节点之前处理
      */
-    private List<ResourceExcelVO> topologicalSort(List<ResourceExcelVO> dataList, Map<String, ResourceExcelVO> codeToExcelMap) {
+    private List<ResourceExcelVOTmp> topologicalSort(List<ResourceExcelVOTmp> dataList, Map<String, ResourceExcelVOTmp> codeToExcelMap) {
         // 构建邻接表
         Map<String, List<String>> adjacencyList = new HashMap<>();
         Map<String, Integer> inDegree = new HashMap<>();
 
         // 初始化
-        for (ResourceExcelVO data : dataList) {
+        for (ResourceExcelVOTmp data : dataList) {
             adjacencyList.put(data.getCode(), new ArrayList<>());
             inDegree.put(data.getCode(), 0);
         }
 
         // 构建依赖关系
-        for (ResourceExcelVO data : dataList) {
+        for (ResourceExcelVOTmp data : dataList) {
             if (data.getParentCode() != null && !data.getParentCode().isEmpty()
                     && codeToExcelMap.containsKey(data.getParentCode())) {
                 // 如果父节点也在Excel中，建立依赖关系
@@ -338,7 +340,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         }
 
         // 拓扑排序
-        List<ResourceExcelVO> result = new ArrayList<>();
+        List<ResourceExcelVOTmp> result = new ArrayList<>();
         Queue<String> queue = new LinkedList<>();
 
         // 将所有入度为0的节点加入队列
@@ -351,7 +353,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         // 处理队列中的节点
         while (!queue.isEmpty()) {
             String currentCode = queue.poll();
-            ResourceExcelVO currentData = codeToExcelMap.get(currentCode);
+            ResourceExcelVOTmp currentData = codeToExcelMap.get(currentCode);
             result.add(currentData);
 
             // 减少所有邻居的入度

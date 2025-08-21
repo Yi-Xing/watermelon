@@ -10,9 +10,9 @@ import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
+import top.fblue.watermelon.application.vo.ResourceExcelVOTmp;
 import top.fblue.watermelon.application.service.ResourceApplicationService;
 import top.fblue.watermelon.application.service.ResourceExcelService;
-import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
@@ -22,9 +22,8 @@ import top.fblue.watermelon.domain.user.entity.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.springframework.util.StringUtils;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
+import top.fblue.watermelon.common.response.Page;
 
 /**
  * 资源应用服务实现
@@ -51,7 +50,7 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
         // 1. 转换DTO为Domain实体
         ResourceNode resourceNode = resourceConverter.toResourceNode(createResourceDTO);
 
-        // 2. 通过领域服务创建资源（包含所有业务校验）
+        // 2. 通过领域服务创建资源
         ResourceNode createdResourceNode = resourceDomainService.createResourceNode(resourceNode);
 
         // 3. 转换为VO并返回
@@ -59,48 +58,48 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
-    public ResourceNodeVO getResourceDetailById(Long id) {
-        // 1. 获取资源基本信息
-        ResourceNode resource = resourceDomainService.getResourceById(id);
-
-        // 2. 获取父节点信息
-        ResourceNode parebtResourceNode = null;
-        if (resource.getParentId() != null && resource.getParentId() != 0) {
-            parebtResourceNode = resourceDomainService.getResourceById(resource.getParentId());
-        }
-        
-        // 3. 获取关联的用户信息
-        List<Long> userIds = List.of(resource.getCreatedBy(), resource.getUpdatedBy());
-        Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
-        
-        // 4. 转换为VO
-        return resourceConverter.toVO(resource, parebtResourceNode, userMap);
-    }
-
-    @Override
-    public List<ResourceNodeTreeVO> getResourceTree(ResourceQueryDTO queryDTO) {
-        // 1. 查询所有资源
+    public Page<ResourceNodeVO> getResourceList(ResourceQueryDTO queryDTO) {
+        // 1. 分页查询资源列表
         List<ResourceNode> resources = resourceDomainService.getResourceList(
+                queryDTO.getName(),
+                queryDTO.getCode(),
+                queryDTO.getState(),
+                queryDTO.getPageNum(),
+                queryDTO.getPageSize()
+        );
+        
+        // 2. 统计总数
+        Long total = resourceDomainService.countResources(
                 queryDTO.getName(),
                 queryDTO.getCode(),
                 queryDTO.getState()
         );
         
-        // 2. 如果有搜索条件，需要包含父节点
-        if (StringUtils.hasText(queryDTO.getName()) || StringUtils.hasText(queryDTO.getCode()) || queryDTO.getState() != null) {
-            resources = resourceDomainService.buildFullPathNodes(resources);
-        }
+        // 3. 转换为VO
+        List<ResourceNodeVO> resourceVOs = resources.stream()
+                .map(resourceConverter::toVO)
+                .collect(Collectors.toList());
         
-        // 3. 获取所有关联的用户信息
-        Set<Long> userIds = resources.stream()
-                .flatMap(resource -> Stream.of(resource.getCreatedBy(), resource.getUpdatedBy()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        // 4. 构建分页响应
+        return new Page<>(
+                resourceVOs,
+                total,
+                queryDTO.getPageNum(),
+                queryDTO.getPageSize()
+        );
+    }
 
-        Map<Long, User> userMap = userDomainService.getUserMapByIds(new ArrayList<>(userIds));
+    @Override
+    public ResourceNodeVO getResourceDetailById(Long id) {
+        // 1. 获取资源基本信息
+        ResourceNode resource = resourceDomainService.getResourceById(id);
         
-        // 4. 转换为树形结构
-        return resourceConverter.buildResourceTree(resources, userMap);
+        // 2. 获取关联的用户信息
+        List<Long> userIds = List.of(resource.getCreatedBy(), resource.getUpdatedBy());
+        Map<Long, User> userMap = userDomainService.getUserMapByIds(userIds);
+        
+        // 3. 转换为VO
+        return resourceConverter.toVO(resource, userMap);
     }
 
     @Override
@@ -116,7 +115,6 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteResource(Long id) {
-        // 通过领域服务删除资源
         return resourceDomainService.deleteResource(id);
     }
 
@@ -151,8 +149,8 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
         // 1. 获取所有资源
         List<ResourceNode> resources = resourceDomainService.getResourceList(null, null, null);
         
-        // 2. 构建层级Excel数据
-        List<ResourceExcelVO> excelData = resourceConverter.buildHierarchicalExcelData(resources);
+        // 2. 构建Excel数据
+        List<ResourceExcelVO> excelData = resourceConverter.buildExcelData(resources);
         
         // 3. 生成Excel文件
         return resourceExcelService.writeExcel(excelData);

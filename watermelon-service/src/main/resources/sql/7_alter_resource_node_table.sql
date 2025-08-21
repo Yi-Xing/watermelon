@@ -1,0 +1,1 @@
+ALTER TABLE resource_node DROP COLUMN parent_id, DROP COLUMN order_num;

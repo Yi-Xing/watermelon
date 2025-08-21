@@ -1,6 +1,8 @@
 package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -13,7 +15,6 @@ import top.fblue.watermelon.infrastructure.po.ResourceNodePO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -49,44 +50,17 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public boolean existsByNameAndParentId(String name, Long parentId) {
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", name);
-        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
-        return resourceNodeMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
-    public boolean existsByNameAndParentIdExcludeId(String name, Long parentId, Long excludeId) {
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", name);
-        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
-        queryWrapper.ne("id", excludeId);
-        return resourceNodeMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
-    public boolean existsByCodeAndParentId(String code, Long parentId) {
+    public boolean existsByCodeExcludeId(String code, Long id) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", code);
-        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
+        queryWrapper.ne("id", id);
         return resourceNodeMapper.selectCount(queryWrapper) > 0;
     }
 
     @Override
-    public boolean existsByCodeAndParentIdExcludeId(String code, Long parentId, Long excludeId) {
+    public List<ResourceNode> findAll() {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("code", code);
-        queryWrapper.eq("parent_id", Objects.requireNonNullElse(parentId, 0));
-        queryWrapper.ne("id", excludeId);
-        return resourceNodeMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
-    public List<ResourceNode> findByParentId(Long parentId) {
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("parent_id", parentId);
-        queryWrapper.orderByAsc("order_num");
+        queryWrapper.orderByDesc("updated_time");
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)
@@ -114,6 +88,37 @@ public class ResourceRepositoryImpl implements ResourceRepository {
 
     @Override
     public List<ResourceNode> findByCondition(String name, String code, Integer state) {
+        QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(name, code, state);
+        queryWrapper.orderByDesc("updated_time");
+        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
+        return poList.stream()
+                .map(resourceNodePOConverter::toDomain)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<ResourceNode> findByCondition(String name, String code, Integer state, int pageNum, int pageSize) {
+        QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(name, code, state);
+        queryWrapper.orderByDesc("updated_time");
+        
+        Page<ResourceNodePO> page = new Page<>(pageNum, pageSize);
+        IPage<ResourceNodePO> pageResult = resourceNodeMapper.selectPage(page, queryWrapper);
+        
+        return pageResult.getRecords().stream()
+                .map(resourceNodePOConverter::toDomain)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public Long countByCondition(String name, String code, Integer state) {
+        QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(name, code, state);
+        return resourceNodeMapper.selectCount(queryWrapper);
+    }
+    
+    /**
+     * 构建查询条件
+     */
+    private QueryWrapper<ResourceNodePO> buildQueryWrapper(String name, String code, Integer state) {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
 
         if (StringUtils.hasText(name)) {
@@ -127,11 +132,8 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         if (state != null) {
             queryWrapper.eq("state", state);
         }
-
-        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
-        return poList.stream()
-                .map(resourceNodePOConverter::toDomain)
-                .collect(Collectors.toList());
+        
+        return queryWrapper;
     }
 
     @Override
@@ -145,6 +147,36 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsByNameAndParentIdExcludeId(String name, Long parentId, Long excludeId) {
+        // 新架构下不再有parentId字段，这个方法返回false或根据实际业务需要调整
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("name", name);
+        if (excludeId != null) {
+            queryWrapper.ne("id", excludeId);
+        }
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public boolean existsByCodeAndParentId(String code, Long parentId) {
+        // 新架构下不再有parentId字段，这个方法只检查code是否存在
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code", code);
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public boolean existsByCodeAndParentIdExcludeId(String code, Long parentId, Long excludeId) {
+        // 新架构下不再有parentId字段，这个方法只检查code是否存在（排除指定ID）
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code", code);
+        if (excludeId != null) {
+            queryWrapper.ne("id", excludeId);
+        }
+        return resourceNodeMapper.selectCount(queryWrapper) > 0;
     }
 
     @Override

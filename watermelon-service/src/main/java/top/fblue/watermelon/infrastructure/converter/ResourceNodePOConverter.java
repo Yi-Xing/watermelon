@@ -22,8 +22,6 @@ public class ResourceNodePOConverter {
                 .name(po.getName())
                 .type(po.getType())
                 .code(po.getCode())
-                .orderNum(po.getOrderNum())
-                .parentId(po.getParentId())
                 .state(po.getState())
                 .remark(po.getRemark())
                 .createdBy(po.getCreatedBy())
@@ -43,8 +41,6 @@ public class ResourceNodePOConverter {
                 .name(domain.getName())
                 .type(domain.getType())
                 .code(domain.getCode())
-                .orderNum(domain.getOrderNum())
-                .parentId(domain.getParentId())
                 .state(domain.getState())
                 .remark(domain.getRemark())
                 .build();

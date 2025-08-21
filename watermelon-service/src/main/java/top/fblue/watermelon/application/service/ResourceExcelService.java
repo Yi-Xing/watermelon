@@ -2,8 +2,8 @@ package top.fblue.watermelon.application.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
+import top.fblue.watermelon.application.vo.ResourceExcelVOTmp;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public interface ResourceExcelService {
     /**
      * 校验Excel数据
      */
-    List<String> validateExcelData(List<ResourceExcelVO> dataList);
+    List<String> validateExcelData(List<ResourceExcelVOTmp> dataList);
     
     /**
      * 写入Excel文件

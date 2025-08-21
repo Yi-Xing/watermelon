@@ -24,14 +24,19 @@ public interface ResourceRepository {
     List<ResourceNode> findByCondition(String name, String code, Integer state);
     
     /**
+     * 分页查询资源列表
+     */
+    List<ResourceNode> findByCondition(String name, String code, Integer state, int pageNum, int pageSize);
+    
+    /**
+     * 根据条件统计资源总数
+     */
+    Long countByCondition(String name, String code, Integer state);
+    
+    /**
      * 根据ID列表查询资源列表
      */
     List<ResourceNode> findByIds(List<Long> ids);
-    
-    /**
-     * 根据父级ID查找子资源
-     */
-    List<ResourceNode> findByParentId(Long parentId);
     
     /**
      * 更新资源
@@ -54,9 +59,14 @@ public interface ResourceRepository {
     boolean existsByCode(String code);
     
     /**
-     * 检查同级资源名称是否存在
+     * 检查资源code是否存在（排除指定ID）
      */
-    boolean existsByNameAndParentId(String name, Long parentId);
+    boolean existsByCodeExcludeId(String code, Long id);
+    
+    /**
+     * 获取所有资源
+     */
+    List<ResourceNode> findAll();
 
     /**
      * 检查同级资源名称是否存在（排除指定ID）

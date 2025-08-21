@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,6 +34,21 @@ public class GlobalExceptionHandler {
         log.warn("业务异常: {}", e.getMessage());
 
         return ApiResponse.error(500, e.getMessage());
+    }
+
+    /**
+     * 处理缺少必需参数异常 (400 Bad Request)
+     * 处理@RequestParam(required = true)但参数缺失的情况
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Object> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        log.warn("缺少必需参数: {}", e.getMessage());
+        
+        String parameterName = e.getParameterName();
+        String parameterType = e.getParameterType();
+        
+        return ApiResponse.error(400, "缺少必需的参数: " + parameterName + " (" + parameterType + "类型)");
     }
 
     /**

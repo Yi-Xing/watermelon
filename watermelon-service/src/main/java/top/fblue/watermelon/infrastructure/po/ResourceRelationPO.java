@@ -8,46 +8,36 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 资源持久化对象
- * 对应数据库表 resource
+ * 资源关系持久化对象
+ * 对应数据库表 resource_relation
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("resource_node")
-public class ResourceNodePO {
+@TableName("resource_relation")
+public class ResourceRelationPO {
     
     /**
-     * 资源ID
+     * 关系ID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     
     /**
-     * 资源名称
+     * 父级资源ID
      */
-    private String name;
+    private Long parentId;
     
     /**
-     * 资源类型：1页面 2按钮 3接口 4目录
+     * 子级资源ID
      */
-    private Integer type;
+    private Long childId;
     
     /**
-     * 资源code
+     * 显示顺序
      */
-    private String code;
-    
-    /**
-     * 状态：1 启用 2 禁用
-     */
-    private Integer state;
-    
-    /**
-     * 备注
-     */
-    private String remark;
+    private Integer orderNum;
     
     /**
      * 创建人
@@ -78,4 +68,4 @@ public class ResourceNodePO {
      */
     @TableLogic
     private Integer isDeleted;
-} 
+}

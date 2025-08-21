@@ -12,10 +12,10 @@ import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.service.ResourceApplicationService;
-import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
 import top.fblue.watermelon.common.response.ApiResponse;
+import top.fblue.watermelon.common.response.Page;
 
 import java.util.List;
 
@@ -32,9 +32,6 @@ public class ResourceController {
 
     /**
      * 新增资源
-     *
-     * @param createResourceDTO 创建资源DTO
-     * @return 资源基本信息
      */
     @PostMapping
     public ApiResponse<ResourceNodeVO> createResource(@Valid @RequestBody CreateResourceDTO createResourceDTO) {
@@ -43,16 +40,16 @@ public class ResourceController {
     }
 
     /**
-     * 查询资源树
+     * 分页查询资源列表
      */
-    @GetMapping("/tree")
-    public ApiResponse<List<ResourceNodeTreeVO>> getResourceTree(@Valid ResourceQueryDTO queryDTO) {
-        List<ResourceNodeTreeVO> tree = resourceApplicationService.getResourceTree(queryDTO);
-        return ApiResponse.success(tree, "获取资源树成功");
+    @GetMapping("/list")
+    public ApiResponse<Page<ResourceNodeVO>> getResourceList(@Valid ResourceQueryDTO queryDTO) {
+        Page<ResourceNodeVO> page = resourceApplicationService.getResourceList(queryDTO);
+        return ApiResponse.success(page, "获取资源列表成功");
     }
 
     /**
-     * 根据ID获取资源详情（包含父资源名称）
+     * 根据ID获取资源详情
      */
     @GetMapping
     public ApiResponse<ResourceNodeVO> getResourceById(@RequestParam Long id) {
@@ -106,7 +103,7 @@ public class ResourceController {
      * 导入Excel
      */
     @PostMapping("/import")
-    public ApiResponse<ResourceImportResultVO> importExcel(@RequestParam("file") MultipartFile file) {
+    public ApiResponse<ResourceImportResultVO> importExcel(@RequestParam(value = "file") MultipartFile file) {
         ResourceImportResultVO result = resourceApplicationService.importExcel(file);
         return ApiResponse.success(result, "导入Excel完成");
     }

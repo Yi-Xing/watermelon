@@ -7,43 +7,33 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 资源节点领域实体
+ * 资源关系领域实体
  */
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceNode {
+public class ResourceRelation {
     
     /**
-     * 资源ID
+     * 关系ID
      */
     private Long id;
     
     /**
-     * 资源名称
+     * 父级资源ID
      */
-    private String name;
+    private Long parentId;
     
     /**
-     * 资源类型：1 页面，2 按钮，3 接口，4 目录
+     * 子级资源ID
      */
-    private Integer type;
+    private Long childId;
     
     /**
-     * 资源code
+     * 显示顺序
      */
-    private String code;
-    
-    /**
-     * 状态：1 启用 2 禁用
-     */
-    private Integer state;
-    
-    /**
-     * 备注
-     */
-    private String remark;
+    private Integer orderNum;
     
     /**
      * 创建人
@@ -64,4 +54,4 @@ public class ResourceNode {
      * 更新时间
      */
     private LocalDateTime updatedTime;
-} 
+}

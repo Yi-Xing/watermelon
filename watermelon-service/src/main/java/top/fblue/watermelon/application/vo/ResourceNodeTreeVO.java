@@ -22,7 +22,7 @@ public class ResourceNodeTreeVO {
     private String name;
     
     /**
-     * 资源类型：1 页面，2 按钮，3 接口
+     * 资源类型：1 页面，2 按钮，3 接口，4 目录
      */
     private Integer type;
     
@@ -35,16 +35,6 @@ public class ResourceNodeTreeVO {
      * 资源code
      */
     private String code;
-    
-    /**
-     * 显示顺序
-     */
-    private Integer orderNum;
-    
-    /**
-     * 父级ID
-     */
-    private Long parentId;
     
     /**
      * 状态：1 启用 2 禁用
