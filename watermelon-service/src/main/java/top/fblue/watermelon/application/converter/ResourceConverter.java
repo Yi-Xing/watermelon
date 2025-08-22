@@ -202,18 +202,6 @@ public class ResourceConverter {
 
         return rootNodes;
     }
-
-
-
-    /**
-     * 构建Excel数据
-     */
-    public List<ResourceExcelVO> buildExcelData(List<ResourceNode> resources) {
-        return resources.stream()
-                .sorted(Comparator.comparing(ResourceNode::getUpdatedTime).reversed())
-                .map(this::convertToExcelVO)
-                .collect(Collectors.toList());
-    }
     
     /**
      * 转换资源为Excel VO
@@ -231,7 +219,7 @@ public class ResourceConverter {
     /**
      * 从ResourceExcelVO转换为ResourceImportDTO
      */
-    public ResourceImportDTO toImportDTO(ResourceExcelVOTmp excelVO) {
+    public ResourceImportDTO toImportDTO(ResourceExcelVO excelVO) {
         return ResourceImportDTO.builder()
                 .name(excelVO.getName())
                 .code(excelVO.getCode())

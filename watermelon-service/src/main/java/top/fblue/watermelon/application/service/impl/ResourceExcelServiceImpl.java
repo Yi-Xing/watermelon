@@ -56,57 +56,35 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     }
 
     @Override
-    public List<String> validateExcelData(List<ResourceExcelVOTmp> dataList) {
+    public List<String> validateExcelData(List<ResourceExcelVO> dataList) {
         // 记录错误信息
         List<String> errors = new ArrayList<>();
-        // 用于同级 name 去重校验
-        Map<String, Set<String>> nameMap = new HashMap<>();
-        // 用于同级 code 去重校验
-        Map<String, Set<String>> codeMap = new HashMap<>();
-        // 构建 code 到 ResourceExcelVO 的映射，检测是否存在环
-        Map<String, ResourceExcelVOTmp> codeToResourceMap = new HashMap<>();
-        // 用于校验父级是否存在
-        Set<String> allCodeSet = new HashSet<>();
+        // 用于 code 去重校验
+        Set<String> codeSet = new HashSet<>();
 
-        for (ResourceExcelVOTmp data : dataList) {
-            allCodeSet.add(data.getCode());
-            codeToResourceMap.put(data.getCode(), data);
-        }
 
         for (int i = 0; i < dataList.size(); i++) {
-            ResourceExcelVOTmp data = dataList.get(i);
+            ResourceExcelVO data = dataList.get(i);
             int rowNumber = i + 2; // Excel行号从2开始（第1行是标题）
-
-            // 校验父级 code 是否存在
-            if (data.getParentCode() != null && !data.getParentCode().isEmpty() && !allCodeSet.contains(data.getParentCode())) {
-                errors.add(String.format("第%d行: 上级资源code不存在", rowNumber));
-            }
 
             // 校验 name 是否为空 和 同级是否已存在
             if (data.getName() == null || data.getName().isEmpty()) {
                 errors.add(String.format("第%d行: 资源名称不能为空", rowNumber));
-            } else {
-                Set<String> nameSet = nameMap.get(data.getParentCode());
-                if (nameSet != null && nameSet.contains(data.getName())) {
-                    errors.add(String.format("第%d行: 同级中资源名称已存在", rowNumber));
-                }
+            } else if (data.getName().contains("/")) {
+                errors.add(String.format("第%d行: 资源名称不能包含'/'字符", rowNumber));
+
             }
 
             // 校验 code 是否为空 和 是否已存在
             if (data.getCode() == null || data.getCode().isEmpty()) {
                 errors.add(String.format("第%d行: 资源code不能为空", rowNumber));
-            } else if (codeMap.get(data.getParentCode()) != null && codeMap.get(data.getParentCode()).contains(data.getCode())) {
-                errors.add(String.format("第%d行: 同级中资源code已存在", rowNumber));
+            } else if (codeSet.contains(data.getCode())) {
+                errors.add(String.format("第%d行: 资源code已存在", rowNumber));
             }
 
             // 校验类型
             if (!ResourceTypeEnum.isValidDesc(data.getType())) {
-                errors.add(String.format("第%d行: 资源类型无效，只能是'页面'、'按钮'、'接口'", rowNumber));
-            }
-
-            // 校验显示顺序
-            if (data.getOrderNum() == null || data.getOrderNum() < 0) {
-                errors.add(String.format("第%d行: 显示顺序不合法", rowNumber));
+                errors.add(String.format("第%d行: 资源类型无效，只能是'页面'、'按钮'、'接口、目录'", rowNumber));
             }
 
             // 校验状态
@@ -120,31 +98,25 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             }
 
             // 收集数据，用于去重校验
-            nameMap.computeIfAbsent(data.getParentCode(), k -> new HashSet<>()).add(data.getName());
-            codeMap.computeIfAbsent(data.getParentCode(), k -> new HashSet<>()).add(data.getCode());
-        }
-
-        // 检测是否存在环
-        String resourceCode = hasCycle(dataList, codeToResourceMap);
-        if (resourceCode != null) {
-            errors.add(String.format("资源树中存在循环引用，请检查上级资源设置，资源code:%s", resourceCode));
+            codeSet.add(data.getCode());
         }
 
         return errors;
     }
 
     @Override
-    public byte[] writeExcel(List<ResourceExcelVO> data) {
+    public <T> byte[] writeExcel(List<T> data, String sheetName, Class<T> clazz) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            EasyExcel.write(outputStream, ResourceExcelVO.class)
+            EasyExcel.write(outputStream, clazz)
                     .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 列宽自适应
-                    .sheet("资源列表")
+                    .sheet(sheetName)
                     .doWrite(data);
-
             return outputStream.toByteArray();
         } catch (Exception e) {
-            throw new RuntimeException("写入Excel文件失败: " + e.getMessage());
+            log.error("Excel导出失败，数据类型: {}, sheet名称: {}, 错误信息: {}",
+                    clazz.getSimpleName(), sheetName, e.getMessage(), e);
+            throw new RuntimeException("导出Excel文件失败: " + e.getMessage());
         }
     }
 
@@ -227,7 +199,9 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         return batchImportResources(importDTOs);
     }
 
-    private ResourceImportResultVO batchImportResources(List<ResourceImportDTO> importDTOs) {
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResourceImportResultVO batchImportResources(List<ResourceImportDTO> importDTOs) {
         int totalRows = importDTOs.size();
         int insertedRows = 0;
         int updatedRows = 0;
@@ -243,10 +217,6 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .collect(Collectors.toMap(ResourceNode::getCode, resource -> resource));
 
         // 3. 批量新增和更新
-        // 记录 code 和 id 的映射，用于填充 parentId
-        Map<String, Long> codeToIdMap = new HashMap<>();
-
-        // 处理Excel中的资源
         for (ResourceImportDTO importDTO : importDTOs) {
             ResourceNode existingResource = existingCodeToResource.get(importDTO.getCode());
 
@@ -261,11 +231,9 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 updatedRows++;
             } else {
                 // 数据库不存在，Excel存在 -> 新增
-                resourceNode = resourceRepository.save(resourceNode);
+                resourceRepository.save(resourceNode);
                 insertedRows++;
             }
-            // 记录code到真实ID的映射
-            codeToIdMap.put(importDTO.getCode(), resourceNode.getId());
         }
 
 

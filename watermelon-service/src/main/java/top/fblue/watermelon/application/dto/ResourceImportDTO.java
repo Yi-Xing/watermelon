@@ -12,11 +12,6 @@ import lombok.Data;
 public class ResourceImportDTO {
 
     /**
-     * 上级资源code
-     */
-    private String parentCode;
-
-    /**
      * 资源名称
      */
     private String name;
@@ -30,11 +25,6 @@ public class ResourceImportDTO {
      * 资源code
      */
     private String code;
-
-    /**
-     * 显示顺序
-     */
-    private Integer orderNum;
 
     /**
      * 状态
