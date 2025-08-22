@@ -45,11 +45,6 @@ public interface ResourceRelationDomainService {
     List<ResourceRelation> getAllResourceRelations();
     
     /**
-     * 构建树形结构的资源ID列表
-     */
-    List<Long> buildTreeResourceIds(List<Long> filteredResourceIds);
-    
-    /**
      * 根据过滤后的资源和关联关系构建完整的资源列表
      * 包含构建树形结构所需的所有父级节点
      */

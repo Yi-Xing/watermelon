@@ -35,7 +35,12 @@ public class ResourceNodeTreeVO {
      * 资源code
      */
     private String code;
-    
+
+    /**
+     * 显示顺序
+     */
+    private Integer orderNum;
+
     /**
      * 状态：1 启用 2 禁用
      */

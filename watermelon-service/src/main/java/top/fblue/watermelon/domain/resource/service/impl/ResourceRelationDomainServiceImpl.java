@@ -134,75 +134,33 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
     }
 
     @Override
-    public List<Long> buildTreeResourceIds(List<Long> filteredResourceIds) {
-        if (filteredResourceIds == null || filteredResourceIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // 获取所有资源关联
-        List<ResourceRelation> allRelations = resourceRelationRepository.findAll();
-
-        // 构建父子关系映射
-        Map<Long, List<Long>> childToParentsMap = allRelations.stream()
-                .collect(Collectors.groupingBy(
-                        ResourceRelation::getChildId,
-                        Collectors.mapping(ResourceRelation::getParentId, Collectors.toList())
-                ));
-
-        Set<Long> resultIds = new HashSet<>(filteredResourceIds);
-
-        // 对每个过滤出的资源，递归添加其所有父级资源
-        for (Long resourceId : filteredResourceIds) {
-            addParentResourceIds(resourceId, childToParentsMap, resultIds);
-        }
-
-        return new ArrayList<>(resultIds);
-    }
-
-    @Override
     public List<Long> buildCompleteResourceIds(List<ResourceNode> filteredResources, List<ResourceRelation> relations) {
-        if (filteredResources == null || filteredResources.isEmpty()) {
-            // 如果没有过滤条件，返回所有参与关联的资源ID
-            if (relations != null && !relations.isEmpty()) {
-                Set<Long> allResourceIds = new HashSet<>();
-                for (ResourceRelation relation : relations) {
-                    if (relation.getParentId() != null) {
-                        allResourceIds.add(relation.getParentId());
-                    }
-                    allResourceIds.add(relation.getChildId());
-                }
-                return new ArrayList<>(allResourceIds);
-            }
+        if (filteredResources.isEmpty() || relations.isEmpty()) {
+            // 如果没有 满足条件的资源 或者 关联关系，则返回空集合
             return new ArrayList<>();
         }
 
-        // 有过滤条件时，构建完整的树形结构所需的资源ID
+        // 构建完整的树形结构所需的资源ID
         Set<Long> resultIds = new HashSet<>();
-        
+
         // 添加过滤出的资源ID
         for (ResourceNode resource : filteredResources) {
             resultIds.add(resource.getId());
         }
 
-        // 构建父子关系映射
+        // 构建父子关系映射，k：子，v：父
         Map<Long, List<Long>> childToParentsMap = new HashMap<>();
-        if (relations != null) {
-            for (ResourceRelation relation : relations) {
-                Long childId = relation.getChildId();
-                Long parentId = relation.getParentId();
-                if (parentId != null) {
-                    childToParentsMap.computeIfAbsent(childId, k -> new ArrayList<>()).add(parentId);
-                }
+        for (ResourceRelation relation : relations) {
+            Long childId = relation.getChildId();
+            Long parentId = relation.getParentId();
+            if (parentId != null) {
+                childToParentsMap.computeIfAbsent(childId, k -> new ArrayList<>()).add(parentId);
             }
         }
 
         // 对每个过滤出的资源，递归添加其所有父级资源
-        List<Long> filteredIds = filteredResources.stream()
-                .map(ResourceNode::getId)
-                .toList();
-                
-        for (Long resourceId : filteredIds) {
-            addParentResourceIds(resourceId, childToParentsMap, resultIds);
+        for (ResourceNode resourceNode : filteredResources) {
+            addParentResourceIds(resourceNode.getId(), childToParentsMap, resultIds);
         }
 
         return new ArrayList<>(resultIds);
@@ -276,13 +234,13 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
                                       Map<Long, List<Long>> childToParentsMap,
                                       Set<Long> resultIds) {
         List<Long> parentIds = childToParentsMap.get(resourceId);
-        if (parentIds != null) {
-            for (Long parentId : parentIds) {
-                if (parentId != null && resultIds.add(parentId)) {
-                    // 递归添加父级的父级
-                    addParentResourceIds(parentId, childToParentsMap, resultIds);
-                }
-            }
+        if (parentIds == null) {
+            return;
+        }
+        for (Long parentId : parentIds) {
+            resultIds.add(parentId);
+            // 递归添加父级的父级
+            addParentResourceIds(parentId, childToParentsMap, resultIds);
         }
     }
 }
