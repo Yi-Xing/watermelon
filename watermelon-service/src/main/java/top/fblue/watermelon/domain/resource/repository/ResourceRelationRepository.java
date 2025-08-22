@@ -64,12 +64,4 @@ public interface ResourceRelationRepository {
      * 获取所有资源关系
      */
     List<ResourceRelation> findAll();
-    
-    /**
-     * 检查是否存在环形依赖
-     * @param parentId 父级ID
-     * @param childId 子级ID
-     * @return true表示会形成环，false表示不会形成环
-     */
-    boolean hasCyclicDependency(Long parentId, Long childId);
 }

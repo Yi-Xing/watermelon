@@ -23,7 +23,6 @@ import java.util.Map;
  * 使用ConcurrentHashMap存储，支持后期迁移到Redis
  */
 @Slf4j
-@Repository
 public class UserTokenJwtRepositoryImpl implements UserTokenRepository {
 
     @Resource

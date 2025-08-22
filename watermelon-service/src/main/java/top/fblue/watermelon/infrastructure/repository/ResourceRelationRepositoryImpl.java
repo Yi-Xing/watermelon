@@ -128,13 +128,4 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
                 .map(ResourceRelationPOConverter::toDomain)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public boolean hasCyclicDependency(Long parentId, Long childId) {
-        // 如果父级ID为空，表示顶级资源，不存在环形依赖
-        if (parentId == null) {
-            return false;
-        }
-        return resourceRelationMapper.hasCyclicDependency(parentId, childId);
-    }
 }

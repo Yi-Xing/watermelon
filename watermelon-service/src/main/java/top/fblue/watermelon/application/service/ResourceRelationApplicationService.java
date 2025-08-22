@@ -21,7 +21,7 @@ public interface ResourceRelationApplicationService {
     /**
      * 新增资源关联
      */
-    boolean createResourceRelation(CreateResourceRelationDTO createResourceRelationDTO);
+    ResourceRelationVO createResourceRelation(CreateResourceRelationDTO createResourceRelationDTO);
     
     /**
      * 查询资源关联详情

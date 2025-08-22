@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * 用户Token仓储实现类
  * 使用ConcurrentHashMap存储，后期需要用 Redis，可以创建 UserTokenRedisRepositoryImpl
  */
-@Repository
 public class UserTokenRepositoryImpl implements UserTokenRepository {
 
     /**

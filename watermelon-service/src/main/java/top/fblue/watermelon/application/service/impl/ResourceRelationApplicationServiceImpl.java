@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import top.fblue.watermelon.application.converter.ResourceConverter;
+import top.fblue.watermelon.application.converter.ResourceRelationConverter;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
@@ -41,6 +42,20 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
     
     @Resource
     private ResourceConverter resourceConverter;
+    
+    @Resource
+    private ResourceRelationConverter resourceRelationConverter;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResourceRelationVO createResourceRelation(CreateResourceRelationDTO createResourceRelationDTO) {
+        // 转换DTO为领域实体
+        ResourceRelation resourceRelation = resourceRelationConverter.toResourceRelation(createResourceRelationDTO);
+
+        // 通过领域服务创建关联关系
+        ResourceRelation created = resourceRelationDomainService.createResourceRelation(resourceRelation);
+        return resourceRelationConverter.toVO(created);
+    }
 
     @Override
     public List<ResourceNodeTreeVO> getResourceTree(ResourceQueryDTO queryDTO) {
@@ -86,52 +101,25 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean createResourceRelation(CreateResourceRelationDTO createResourceRelationDTO) {
-        // 转换DTO为领域实体
-        ResourceRelation resourceRelation = ResourceRelation.builder()
-                .parentId(createResourceRelationDTO.getParentId())
-                .childId(createResourceRelationDTO.getChildId())
-                .orderNum(createResourceRelationDTO.getOrderNum())
-                .build();
-        
-        // 通过领域服务创建关联关系
-        ResourceRelation created = resourceRelationDomainService.createResourceRelation(resourceRelation);
-        return created.getId() != null;
-    }
-
-    @Override
     public ResourceRelationVO getResourceRelationById(Long id) {
         // 获取资源关联
         ResourceRelation resourceRelation = resourceRelationDomainService.getResourceRelationById(id);
         
-        // 获取父级和子级资源信息
-        ResourceNode parentResource = resourceDomainService.getResourceById(resourceRelation.getParentId());
-        ResourceNode childResource = resourceDomainService.getResourceById(resourceRelation.getChildId());
+        // 收集需要查询的资源ID
+        List<Long> resourceIds = resourceRelationConverter.collectResourceIds(resourceRelation);
         
-        // 转换为VO
-        return ResourceRelationVO.builder()
-                .id(resourceRelation.getId())
-                .parentId(resourceRelation.getParentId())
-                .parentName(parentResource.getName())
-                .parentCode(parentResource.getCode())
-                .childId(resourceRelation.getChildId())
-                .childName(childResource.getName())
-                .childCode(childResource.getCode())
-                .orderNum(resourceRelation.getOrderNum())
-                .build();
+        // 批量查询资源并获取映射
+        Map<Long, ResourceNode> resourceMap = resourceDomainService.getResourceMapByIds(resourceIds);
+        
+        // 使用转换器转换为VO
+        return resourceRelationConverter.toVO(resourceRelation, resourceMap);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateResourceRelation(UpdateResourceRelationDTO updateResourceRelationDTO) {
         // 转换DTO为领域实体
-        ResourceRelation resourceRelation = ResourceRelation.builder()
-                .id(updateResourceRelationDTO.getId())
-                .parentId(updateResourceRelationDTO.getParentId())
-                .childId(updateResourceRelationDTO.getChildId())
-                .orderNum(updateResourceRelationDTO.getOrderNum())
-                .build();
+        ResourceRelation resourceRelation = resourceRelationConverter.toResourceRelation(updateResourceRelationDTO);
         
         // 通过领域服务更新关联关系
         return resourceRelationDomainService.updateResourceRelation(resourceRelation);

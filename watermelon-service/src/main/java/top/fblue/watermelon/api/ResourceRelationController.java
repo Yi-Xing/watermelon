@@ -18,12 +18,22 @@ import java.util.List;
  * 资源关联管理
  */
 @RestController
-@RequestMapping("/api/admin/resource-relation")
+@RequestMapping("/api/admin/resource/relation")
 @Validated
 public class ResourceRelationController {
 
     @Resource
     private ResourceRelationApplicationService resourceRelationApplicationService;
+
+
+    /**
+     * 新增资源关联
+     */
+    @PostMapping
+    public ApiResponse<ResourceRelationVO> createResourceRelation(@Valid @RequestBody CreateResourceRelationDTO createResourceRelationDTO) {
+        ResourceRelationVO resourceRelationVO = resourceRelationApplicationService.createResourceRelation(createResourceRelationDTO);
+        return ApiResponse.success(resourceRelationVO, "资源关联创建成功");
+    }
 
     /**
      * 查询资源树
@@ -34,18 +44,6 @@ public class ResourceRelationController {
         return ApiResponse.success(tree, "获取资源树成功");
     }
 
-    /**
-     * 新增资源关联
-     */
-    @PostMapping
-    public ApiResponse<Boolean> createResourceRelation(@Valid @RequestBody CreateResourceRelationDTO createResourceRelationDTO) {
-        boolean result = resourceRelationApplicationService.createResourceRelation(createResourceRelationDTO);
-        if (result) {
-            return ApiResponse.success(true, "资源关联创建成功");
-        } else {
-            return ApiResponse.error("资源关联创建失败", false);
-        }
-    }
 
     /**
      * 查询资源关联详情

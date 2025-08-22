@@ -13,6 +13,9 @@ import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
@@ -68,6 +71,18 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
             return new ArrayList<>();
         }
         return resourceRepository.findByIds(ids);
+    }
+    
+    @Override
+    public Map<Long, ResourceNode> getResourceMapByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        List<ResourceNode> resources = resourceRepository.findByIds(ids);
+        return resources.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(ResourceNode::getId, resource -> resource));
     }
 
     @Override
