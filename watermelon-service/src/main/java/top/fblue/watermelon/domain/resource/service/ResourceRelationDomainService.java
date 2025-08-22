@@ -1,5 +1,6 @@
 package top.fblue.watermelon.domain.resource.service;
 
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 import java.util.List;
 
@@ -47,4 +48,10 @@ public interface ResourceRelationDomainService {
      * 构建树形结构的资源ID列表
      */
     List<Long> buildTreeResourceIds(List<Long> filteredResourceIds);
+    
+    /**
+     * 根据过滤后的资源和关联关系构建完整的资源列表
+     * 包含构建树形结构所需的所有父级节点
+     */
+    List<Long> buildCompleteResourceIds(List<ResourceNode> filteredResources, List<ResourceRelation> relations);
 }

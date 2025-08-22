@@ -113,7 +113,7 @@ public class ResourceConverter {
     /**
      * ResourceNode转换为ResourceNodeTreeVO
      */
-    public ResourceNodeTreeVO toTreeVO(ResourceNode resource, Map<Long, User> userMap) {
+    public ResourceNodeTreeVO toTreeVO(ResourceNode resource) {
         if (resource == null) {
             return null;
         }
@@ -127,9 +127,7 @@ public class ResourceConverter {
                 .state(resource.getState())
                 .stateDesc(StateEnum.fromCode(resource.getState()).getDesc())
                 .remark(resource.getRemark())
-                .createdBy(toUserInfoVO(userMap.get(resource.getCreatedBy())))
                 .createdTime(DateTimeUtil.formatDateTime(resource.getCreatedTime()))
-                .updatedBy(toUserInfoVO(userMap.get(resource.getUpdatedBy())))
                 .updatedTime(DateTimeUtil.formatDateTime(resource.getUpdatedTime()))
                 .build();
     }
@@ -152,13 +150,12 @@ public class ResourceConverter {
      * 构建基于ResourceRelation的资源树形结构
      */
     public List<ResourceNodeTreeVO> buildResourceTree(List<ResourceNode> resources, 
-                                                     List<ResourceRelation> relations,
-                                                     Map<Long, User> userMap) {
+                                                     List<ResourceRelation> relations) {
         // 1. 转换为VO并构建映射
         Map<Long, ResourceNodeTreeVO> resourceMap = resources.stream()
                 .collect(Collectors.toMap(
                     ResourceNode::getId,
-                    resource -> toTreeVO(resource, userMap)
+                        this::toTreeVO
                 ));
 
         // 2. 构建父子关系映射（按显示顺序排序）

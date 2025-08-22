@@ -52,19 +52,9 @@ public class ResourceNodeTreeVO {
     private String remark;
     
     /**
-     * 创建人信息
-     */
-    private UserBaseVO createdBy;
-    
-    /**
      * 创建时间
      */
     private String createdTime;
-    
-    /**
-     * 更新人信息
-     */
-    private UserBaseVO updatedBy;
     
     /**
      * 更新时间

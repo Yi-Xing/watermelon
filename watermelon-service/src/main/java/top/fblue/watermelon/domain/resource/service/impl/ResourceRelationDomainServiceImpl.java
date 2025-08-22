@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.common.exception.BusinessException;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 import top.fblue.watermelon.domain.resource.repository.ResourceRelationRepository;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
@@ -84,7 +85,7 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
         }
 
         // 2. 如果父子关系有变化，需要重新校验
-        boolean parentChanged = !java.util.Objects.equals(existingRelation.getParentId(), resourceRelation.getParentId());
+        boolean parentChanged = !Objects.equals(existingRelation.getParentId(), resourceRelation.getParentId());
         boolean childChanged = !existingRelation.getChildId().equals(resourceRelation.getChildId());
 
         if (parentChanged || childChanged) {
@@ -152,6 +153,55 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
 
         // 对每个过滤出的资源，递归添加其所有父级资源
         for (Long resourceId : filteredResourceIds) {
+            addParentResourceIds(resourceId, childToParentsMap, resultIds);
+        }
+
+        return new ArrayList<>(resultIds);
+    }
+
+    @Override
+    public List<Long> buildCompleteResourceIds(List<ResourceNode> filteredResources, List<ResourceRelation> relations) {
+        if (filteredResources == null || filteredResources.isEmpty()) {
+            // 如果没有过滤条件，返回所有参与关联的资源ID
+            if (relations != null && !relations.isEmpty()) {
+                Set<Long> allResourceIds = new HashSet<>();
+                for (ResourceRelation relation : relations) {
+                    if (relation.getParentId() != null) {
+                        allResourceIds.add(relation.getParentId());
+                    }
+                    allResourceIds.add(relation.getChildId());
+                }
+                return new ArrayList<>(allResourceIds);
+            }
+            return new ArrayList<>();
+        }
+
+        // 有过滤条件时，构建完整的树形结构所需的资源ID
+        Set<Long> resultIds = new HashSet<>();
+        
+        // 添加过滤出的资源ID
+        for (ResourceNode resource : filteredResources) {
+            resultIds.add(resource.getId());
+        }
+
+        // 构建父子关系映射
+        Map<Long, List<Long>> childToParentsMap = new HashMap<>();
+        if (relations != null) {
+            for (ResourceRelation relation : relations) {
+                Long childId = relation.getChildId();
+                Long parentId = relation.getParentId();
+                if (parentId != null) {
+                    childToParentsMap.computeIfAbsent(childId, k -> new ArrayList<>()).add(parentId);
+                }
+            }
+        }
+
+        // 对每个过滤出的资源，递归添加其所有父级资源
+        List<Long> filteredIds = filteredResources.stream()
+                .map(ResourceNode::getId)
+                .toList();
+                
+        for (Long resourceId : filteredIds) {
             addParentResourceIds(resourceId, childToParentsMap, resultIds);
         }
 
