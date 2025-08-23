@@ -9,6 +9,7 @@ import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.converter.ResourceRelationConverter;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
+import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.service.ResourceRelationApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
@@ -21,6 +22,7 @@ import top.fblue.watermelon.domain.resource.service.ResourceRelationDomainServic
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -52,23 +54,25 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ResourceRelationVO createResourceRelation(CreateResourceRelationDTO createResourceRelationDTO) {
-        if (!resourceRelationLock.tryLock()) {
-            throw new BusinessException("系统繁忙，请稍后重试");
-        }
         try {
+            if (!resourceRelationLock.tryLock(1, TimeUnit.SECONDS)) {
+                throw new BusinessException("系统繁忙，请稍后重试");
+            }
             // 转换DTO为领域实体
             ResourceRelation resourceRelation = resourceRelationConverter.toResourceRelation(createResourceRelationDTO);
 
             // 通过领域服务创建关联关系
             ResourceRelation created = resourceRelationDomainService.createResourceRelation(resourceRelation);
             return resourceRelationConverter.toVO(created);
+        } catch (InterruptedException e) {
+            throw new BusinessException("系统繁忙，请稍后重试");
         } finally {
             resourceRelationLock.unlock();
         }
     }
 
     @Override
-    public List<ResourceNodeTreeVO> getResourceTree(ResourceQueryDTO queryDTO) {
+    public List<ResourceNodeTreeVO> getResourceTree(ResourceTreeQueryDTO queryDTO) {
         // 1. 查询符合条件的资源
         List<ResourceNode> allResources = resourceDomainService.getResourceList(
                 queryDTO.getName(),
@@ -110,16 +114,18 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateResourceRelation(UpdateResourceRelationDTO updateResourceRelationDTO) {
-        if (!resourceRelationLock.tryLock()) {
-            throw new BusinessException("系统繁忙，请稍后重试");
-        }
         try {
+            if (!resourceRelationLock.tryLock(1, TimeUnit.SECONDS)) {
+                throw new BusinessException("系统繁忙，请稍后重试");
+            }
             // 转换DTO为领域实体
             ResourceRelation resourceRelation = resourceRelationConverter.toResourceRelation(updateResourceRelationDTO);
 
             // 通过领域服务更新关联关系
             return resourceRelationDomainService.updateResourceRelation(resourceRelation);
 
+        } catch (InterruptedException e) {
+            throw new BusinessException("系统繁忙，请稍后重试");
         } finally {
             resourceRelationLock.unlock();
         }
@@ -128,12 +134,14 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteResourceRelation(Long id) {
-        if (!resourceRelationLock.tryLock()) {
-            throw new BusinessException("系统繁忙，请稍后重试");
-        }
         try {
+            if (!resourceRelationLock.tryLock(1, TimeUnit.SECONDS)) {
+                throw new BusinessException("系统繁忙，请稍后重试");
+            }
             // 通过领域服务删除关联关系
             return resourceRelationDomainService.deleteResourceRelation(id);
+        } catch (InterruptedException e) {
+            throw new BusinessException("系统繁忙，请稍后重试");
         } finally {
             resourceRelationLock.unlock();
         }

@@ -56,8 +56,7 @@ public class ResourceRelationConverter {
             return null;
         }
 
-        ResourceNode parentResource = resourceRelation.getParentId() != null ? 
-                resourceMap.get(resourceRelation.getParentId()) : null;
+        ResourceNode parentResource = resourceMap.get(resourceRelation.getParentId());
         ResourceNode childResource = resourceMap.get(resourceRelation.getChildId());
 
         return ResourceRelationVO.builder()
@@ -87,9 +86,10 @@ public class ResourceRelationConverter {
                 .orderNum(resourceRelation.getOrderNum())
                 .build();
     }
-    
+
     /**
      * 从单个ResourceRelation中收集相关的资源ID
+     *
      * @param resourceRelation 资源关联
      * @return 资源ID列表
      */
@@ -97,9 +97,9 @@ public class ResourceRelationConverter {
         if (resourceRelation == null) {
             return List.of();
         }
-        
+
         List<Long> ids = new ArrayList<>();
-        if (resourceRelation.getParentId() != null) {
+        if (resourceRelation.getParentId() != 0) {
             ids.add(resourceRelation.getParentId());
         }
         ids.add(resourceRelation.getChildId());

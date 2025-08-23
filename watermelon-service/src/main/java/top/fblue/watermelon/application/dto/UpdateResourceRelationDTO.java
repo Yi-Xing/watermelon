@@ -16,8 +16,9 @@ public class UpdateResourceRelationDTO {
     private Long id;
     
     /**
-     * 父级资源ID（可为空，表示顶级资源）
+     * 父级资源ID（0 表示顶级资源）
      */
+    @NotNull(message = "父级资源ID不能为空")
     private Long parentId;
     
     /**

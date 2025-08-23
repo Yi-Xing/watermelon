@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
+import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.service.ResourceRelationApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
@@ -39,7 +40,7 @@ public class ResourceRelationController {
      * 查询资源树
      */
     @GetMapping("/tree")
-    public ApiResponse<List<ResourceNodeTreeVO>> getResourceTree(@Valid ResourceQueryDTO queryDTO) {
+    public ApiResponse<List<ResourceNodeTreeVO>> getResourceTree(@Valid ResourceTreeQueryDTO queryDTO) {
         List<ResourceNodeTreeVO> tree = resourceRelationApplicationService.getResourceTree(queryDTO);
         return ApiResponse.success(tree, "获取资源树成功");
     }

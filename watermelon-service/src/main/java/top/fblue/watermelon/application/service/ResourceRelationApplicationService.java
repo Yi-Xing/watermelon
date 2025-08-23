@@ -2,6 +2,7 @@ package top.fblue.watermelon.application.service;
 
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
+import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
@@ -16,7 +17,7 @@ public interface ResourceRelationApplicationService {
     /**
      * 查询资源树
      */
-    List<ResourceNodeTreeVO> getResourceTree(ResourceQueryDTO queryDTO);
+    List<ResourceNodeTreeVO> getResourceTree(ResourceTreeQueryDTO queryDTO);
 
     /**
      * 新增资源关联

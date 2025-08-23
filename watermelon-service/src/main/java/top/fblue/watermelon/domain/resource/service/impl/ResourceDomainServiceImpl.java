@@ -81,7 +81,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
         
         List<ResourceNode> resources = resourceRepository.findByIds(ids);
         return resources.stream()
-                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(ResourceNode::getId, resource -> resource));
     }
 

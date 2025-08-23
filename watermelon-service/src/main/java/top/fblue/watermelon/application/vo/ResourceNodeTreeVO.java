@@ -10,12 +10,17 @@ import java.util.List;
 @Data
 @Builder
 public class ResourceNodeTreeVO {
-    
+
     /**
      * 资源ID
      */
     private Long id;
-    
+
+    /**
+     * 资源关联ID
+     */
+    private Long resourceRelationId;
+
     /**
      * 资源名称
      */

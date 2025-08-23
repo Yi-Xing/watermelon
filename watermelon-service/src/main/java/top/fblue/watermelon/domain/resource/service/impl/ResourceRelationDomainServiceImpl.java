@@ -36,7 +36,7 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
         }
 
         // 2. 校验父级资源（如果不为空）
-        if (resourceRelation.getParentId() != null) {
+        if (resourceRelation.getParentId() != 0) {
             if (resourceRepository.findById(resourceRelation.getParentId()) == null) {
                 throw new BusinessException("父级资源不存在");
             }
@@ -96,7 +96,7 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
             }
 
             // 校验父级资源（如果不为空）
-            if (resourceRelation.getParentId() != null) {
+            if (resourceRelation.getParentId() != 0) {
                 if (resourceRepository.findById(resourceRelation.getParentId()) == null) {
                     throw new BusinessException("父级资源不存在");
                 }
@@ -153,7 +153,7 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
         for (ResourceRelation relation : relations) {
             Long childId = relation.getChildId();
             Long parentId = relation.getParentId();
-            if (parentId != null) {
+            if (parentId != 0) {
                 childToParentsMap.computeIfAbsent(childId, k -> new ArrayList<>()).add(parentId);
             }
         }
@@ -168,8 +168,8 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
 
     /**
      * 在已有 DAG 中新增一条边（父->子）时，判断是否会形成环
-     * 这种场景不需要每次遍历整个图，只需要检查新增的这条边是否会导致 子节点可以回到父节点。
-     * 换句话说，如果从 子节点出发能够到达父节点，再新增父->子这条边就会形成环。
+     * 这种场景不需要每次遍历整个图，只需要检查 子节点是否可以到达父节点。
+     * 换句话说，如果从子节点出发能够到达父节点，再新增父->子这条边就会形成环。
      *
      * @param parentId 新增父节点ID
      * @param childId  新增子节点ID

@@ -159,15 +159,7 @@ public class ResourceConverter {
                         this::toTreeVO
                 ));
 
-        // 2. 构建关联关系映射（包含父子关系和显示顺序）
-        Map<Long, Integer> relationOrderMap = relations.stream()
-                .collect(Collectors.toMap(
-                    ResourceRelation::getChildId,
-                    ResourceRelation::getOrderNum,
-                    (existing, replacement) -> existing // 如果有重复key，保留第一个
-                ));
-
-        // 3. 构建父子关系映射（按显示顺序排序）
+        // 2. 构建父子关系映射（按显示顺序排序）
         Map<Long, List<ResourceRelation>> parentChildMap = relations.stream()
                 .collect(Collectors.groupingBy(
                     ResourceRelation::getParentId,
@@ -179,22 +171,23 @@ public class ResourceConverter {
                     )
                 ));
 
-        // 4. 构建树形结构并设置显示顺序
-        Set<Long> childIds = relations.stream()
-                .map(ResourceRelation::getChildId)
-                .collect(Collectors.toSet());
+        // 3. 构建树形结构并设置显示顺序
+        // 获取所有根节点的资源 ID，以及其对应的 资源关联关系
+        Map<Long,ResourceRelation> rootNodeMap = relations.stream()
+                .filter(relation -> relation.getParentId() == 0)
+                .collect(Collectors.toMap(
+                        ResourceRelation::getChildId,resourceRelation -> resourceRelation
+                ));
 
         List<ResourceNodeTreeVO> rootNodes = new ArrayList<>();
         
         for (ResourceNodeTreeVO vo : resourceMap.values()) {
-            // 为子节点设置资源关联关系中的显示顺序
-            Integer relationOrder = relationOrderMap.get(vo.getId());
-            if (relationOrder != null) {
-                vo.setOrderNum(relationOrder);
-            }
-            
-            if (!childIds.contains(vo.getId())) {
-                // 这是根节点
+            // 存储根节点
+            if (rootNodeMap.containsKey(vo.getId())) {
+                ResourceRelation relation = rootNodeMap.get(vo.getId());
+                // 使用关联关系中的显示顺序
+                vo.setOrderNum(relation.getOrderNum());
+                vo.setResourceRelationId(relation.getId());
                 rootNodes.add(vo);
             }
             
@@ -207,6 +200,7 @@ public class ResourceConverter {
                             if (child != null) {
                                 // 使用关联关系中的显示顺序
                                 child.setOrderNum(relation.getOrderNum());
+                                child.setResourceRelationId(relation.getId());
                             }
                             return child;
                         })
@@ -216,8 +210,8 @@ public class ResourceConverter {
             }
         }
 
-        // 5. 根节点排序：如果有orderNum则按orderNum升序，否则按更新时间倒序
-        rootNodes.sort((a, b) -> a.getOrderNum().compareTo(b.getOrderNum()));
+        // 4. 根节点排序：按orderNum升序
+        rootNodes.sort(Comparator.comparing(ResourceNodeTreeVO::getOrderNum));
 
         return rootNodes;
     }
