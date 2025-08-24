@@ -7,7 +7,6 @@ import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
 import top.fblue.watermelon.application.dto.ResourceRelationExcelDTO;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.vo.ExcelImportResultVO;
-import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 
 import java.util.List;
 import java.util.Map;

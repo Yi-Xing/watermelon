@@ -120,7 +120,7 @@ public class RoleDomainServiceImpl implements RoleDomainService {
                 .filter(id -> !resourceIdSet.contains(id))
                 .collect(Collectors.toList());
         
-        List<Long> toInsert = resourceIds.stream()
+        List<Long> toInsert = resourceIdSet.stream()
                 .filter(id -> !existingResourceIds.contains(id))
                 .collect(Collectors.toList());
 

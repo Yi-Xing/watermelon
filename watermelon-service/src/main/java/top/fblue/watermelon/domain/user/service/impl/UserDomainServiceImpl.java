@@ -39,7 +39,7 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 如果密码不为空，则加密密码
         if (StringUtil.isNotEmpty(user.getPassword())) {
             String encodedPassword = EncryptionUtil.encode(user.getPassword(), savedUser.getId());
-            
+
             // 更新加密后的密码
             savedUser.setPassword(encodedPassword);
             userRepository.resetPassword(savedUser.getId(), encodedPassword);
@@ -107,7 +107,7 @@ public class UserDomainServiceImpl implements UserDomainService {
                 .filter(id -> !roleIdSet.contains(id))
                 .collect(Collectors.toList());
 
-        List<Long> toInsert = roleIds.stream()
+        List<Long> toInsert = roleIdSet.stream()
                 .filter(id -> !existingRoleIds.contains(id))
                 .collect(Collectors.toList());
 
@@ -127,7 +127,12 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 1. 检查用户是否存在
         getUserById(userId);
 
-        // 2. 创建用户角色关系
+        // 2. 角色id去重
+        roleIds = roleIds.stream()
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 3. 创建用户角色关系
         userRoleRepository.insertBatch(userId, roleIds);
     }
 
@@ -169,17 +174,17 @@ public class UserDomainServiceImpl implements UserDomainService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        
+
         // 验证密码（使用BCrypt验证）
         if (StringUtil.isNotEmpty(user.getPassword()) && !EncryptionUtil.matches(password, user.getPassword(), user.getId())) {
             throw new BusinessException("密码错误");
         }
-        
+
         // 检查用户状态
         if (!StateEnum.ENABLE.getCode().equals(user.getState())) {
             throw new BusinessException("用户已被禁用");
         }
-        
+
         return user;
     }
 
