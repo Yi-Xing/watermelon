@@ -12,8 +12,8 @@ import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.service.ResourceApplicationService;
+import top.fblue.watermelon.application.vo.ExcelImportResultVO;
 import top.fblue.watermelon.application.vo.ResourceNodeVO;
-import top.fblue.watermelon.application.vo.ResourceImportResultVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 import top.fblue.watermelon.common.response.Page;
 
@@ -103,8 +103,8 @@ public class ResourceController {
      * 导入Excel
      */
     @PostMapping("/import")
-    public ApiResponse<ResourceImportResultVO> importExcel(@RequestParam(value = "file") MultipartFile file) {
-        ResourceImportResultVO result = resourceApplicationService.importExcel(file);
+    public ApiResponse<ExcelImportResultVO> importExcel(@RequestParam(value = "file") MultipartFile file) {
+        ExcelImportResultVO result = resourceApplicationService.importExcel(file);
         return ApiResponse.success(result, "导入Excel完成");
     }
 } 

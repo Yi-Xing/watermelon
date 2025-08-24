@@ -4,6 +4,7 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 资源领域服务接口
@@ -24,12 +25,12 @@ public interface ResourceDomainService {
      * 根据条件查询资源列表
      */
     List<ResourceNode> getResourceList(String name, String code, Integer state);
-    
+
     /**
      * 分页查询资源列表
      */
     List<ResourceNode> getResourceList(String name, String code, Integer state, int pageNum, int pageSize);
-    
+
     /**
      * 统计资源总数
      */
@@ -39,9 +40,10 @@ public interface ResourceDomainService {
      * 根据ID列表查询资源列表
      */
     List<ResourceNode> getResourceListByIds(List<Long> ids);
-    
+
     /**
      * 根据ID列表查询资源并返回Map映射
+     *
      * @param ids 资源ID列表
      * @return 资源ID到ResourceNode的映射
      */
@@ -72,4 +74,14 @@ public interface ResourceDomainService {
      * 只查询接口类型和启用状态的资源
      */
     boolean existsAPIResourceByCodeAndIds(String resourceCode, List<Long> resourceIds);
+
+    /**
+     * 获取全部资源的 code 到 ResourceNodeID 的映射
+     */
+    Map<String, Long> getResourceMapByCodes();
+
+    /**
+     * 获取所有资源
+     */
+    List<ResourceNode> findAll();
 } 

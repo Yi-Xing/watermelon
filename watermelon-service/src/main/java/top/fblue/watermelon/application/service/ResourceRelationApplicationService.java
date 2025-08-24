@@ -1,11 +1,13 @@
 package top.fblue.watermelon.application.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
 import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
+import top.fblue.watermelon.application.vo.ExcelImportResultVO;
 
 import java.util.List;
 
@@ -43,4 +45,9 @@ public interface ResourceRelationApplicationService {
      * 导出资源关系树Excel
      */
     byte[] exportResourceTreeExcel();
+
+    /**
+     * 导入资源关联关系Excel
+     */
+    ExcelImportResultVO importResourceRelationExcel(MultipartFile file);
 }

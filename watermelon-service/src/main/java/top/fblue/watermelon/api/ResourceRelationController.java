@@ -7,13 +7,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
-import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.service.ResourceRelationApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
+import top.fblue.watermelon.application.vo.ExcelImportResultVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 
 import java.util.List;
@@ -98,5 +99,15 @@ public class ResourceRelationController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(excelBytes);
+    }
+
+    /**
+     * 导入Excel
+     */
+    @PostMapping("/import")
+    public ApiResponse<ExcelImportResultVO> importResourceRelationExcel(
+            @RequestParam("file") MultipartFile file) {
+        ExcelImportResultVO result = resourceRelationApplicationService.importResourceRelationExcel(file);
+        return ApiResponse.success(result, "资源关联关系导入成功");
     }
 }

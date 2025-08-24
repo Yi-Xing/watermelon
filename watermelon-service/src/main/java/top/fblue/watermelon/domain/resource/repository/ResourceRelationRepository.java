@@ -64,4 +64,14 @@ public interface ResourceRelationRepository {
      * 获取所有资源关系
      */
     List<ResourceRelation> findAll();
+
+    /**
+     * 批量删除资源关系
+     */
+    int deleteByIds(List<Long> ids);
+
+    /**
+     * 删除所有资源关系
+     */
+    boolean deleteAll();
 }

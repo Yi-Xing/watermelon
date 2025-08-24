@@ -128,4 +128,17 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
                 .map(ResourceRelationPOConverter::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public int deleteByIds(List<Long> ids) {
+        return resourceRelationMapper.deleteByIds(ids);
+    }
+
+    @Override
+    public boolean deleteAll() {
+        LambdaUpdateWrapper<ResourceRelationPO> updateWrapper = new LambdaUpdateWrapper<>();
+        // 删除所有记录，不设置任何条件
+        int deletedCount = resourceRelationMapper.delete(updateWrapper);
+        return deletedCount >= 0; // 即使删除0条记录也算成功
+    }
 }

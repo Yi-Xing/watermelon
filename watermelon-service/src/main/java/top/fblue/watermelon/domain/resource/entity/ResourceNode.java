@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 资源节点领域实体
@@ -64,4 +65,23 @@ public class ResourceNode {
      * 更新时间
      */
     private LocalDateTime updatedTime;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        ResourceNode that = (ResourceNode) o;
+        
+        return Objects.equals(name, that.name) &&
+               Objects.equals(type, that.type) &&
+               Objects.equals(code, that.code) &&
+               Objects.equals(state, that.state) &&
+               Objects.equals(remark, that.remark);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, code, state, remark);
+    }
 } 

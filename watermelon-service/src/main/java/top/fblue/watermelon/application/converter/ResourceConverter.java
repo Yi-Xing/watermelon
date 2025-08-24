@@ -2,6 +2,7 @@ package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.application.dto.ResourceImportDTO;
+import top.fblue.watermelon.application.dto.ResourceRelationImportDTO;
 import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.CreateResourceDTO;
@@ -250,7 +251,7 @@ public class ResourceConverter {
         ResourceTreeExcelDTO currentRow = ResourceTreeExcelDTO.builder()
                 .orderNum(node.getOrderNum())
                 .state(node.getStateDesc()) // 添加状态信息
-                .column(level)
+                .depth(level)
                 .resourceInfo(resourceInfo)
                 .build();
 
@@ -289,5 +290,38 @@ public class ResourceConverter {
                 .state(StateEnum.fromDesc(excelVO.getState()).getCode())
                 .remark(excelVO.getRemark())
                 .build();
+    }
+
+    /**
+     * 转换导入数据为资源关联关系列表
+     */
+    public List<ResourceRelation> convertToResourceRelations(List<ResourceRelationImportDTO> importData, Map<String, Long> codeToIdMap) {
+        List<ResourceRelation> relations = new ArrayList<>();
+
+        // 构建层级关系
+        // k：深度，v:深度对应的资源ID
+        Map<Integer, Long> parentDepthMap = new HashMap<>();
+        // 初始化顶级
+        parentDepthMap.put(0, 0L);
+
+        for (ResourceRelationImportDTO dto : importData) {
+            // 获取父级ID
+            Long parentId = parentDepthMap.get(dto.getResourcePath().size() - 1);
+
+            String resourceInfo = dto.getResourcePath().getLast();
+            String code = resourceInfo.substring(resourceInfo.indexOf('/') + 1);
+            Long childId = codeToIdMap.get(code);
+
+            ResourceRelation relation = ResourceRelation.builder()
+                    .parentId(parentId)
+                    .childId(childId)
+                    .orderNum(dto.getOrderNum())
+                    .build();
+            relations.add(relation);
+            // 用于下级获取父级ID
+            parentDepthMap.put(dto.getResourcePath().size(), childId);
+        }
+
+        return relations;
     }
 }

@@ -15,10 +15,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 
 /**
  * 资源领域服务实现
@@ -179,5 +177,19 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
                 throw new BusinessException("资源Code已存在");
             }
         }
+    }
+
+    @Override
+    public Map<String, Long> getResourceMapByCodes() {
+        List<ResourceNode> resources = resourceRepository.findAll();
+        return resources.stream().collect(Collectors.toMap(ResourceNode::getCode, ResourceNode::getId));
+    }
+
+    /**
+     * 获取所有资源
+     */
+    @Override
+    public List<ResourceNode> findAll(){
+        return resourceRepository.findAll();
     }
 }

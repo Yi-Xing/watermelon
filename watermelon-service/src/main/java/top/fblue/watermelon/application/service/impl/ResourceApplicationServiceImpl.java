@@ -101,7 +101,7 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     }
 
     @Override
-    public ResourceImportResultVO importExcel(MultipartFile file) {
+    public ExcelImportResultVO importExcel(MultipartFile file) {
         try {
             // 1. 读取Excel数据
             List<ResourceExcelVO> excelDataList = resourceExcelService.readExcel(file);
@@ -109,7 +109,7 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
             // 2. 数据校验
             List<String> validationErrors = resourceExcelService.validateExcelData(excelDataList);
             if (!validationErrors.isEmpty()) {
-                return ResourceImportResultVO.builder().success(false).errors(validationErrors).build();
+                return ExcelImportResultVO.builder().success(false).errors(validationErrors).build();
             }
 
             // 3. 转换为导入DTO
@@ -119,14 +119,14 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
             return resourceExcelService.batchImportResources(importDTOs);
         } catch (Exception e) {
             log.error("导入Excel失败", e);
-            return ResourceImportResultVO.builder().success(false).errors(List.of("导入Excel失败: " + e.getMessage())).build();
+            return ExcelImportResultVO.builder().success(false).errors(List.of("导入Excel失败: " + e.getMessage())).build();
         }
     }
 
     @Override
     public byte[] exportExcel() {
         // 1. 获取所有资源
-        List<ResourceNode> resources = resourceDomainService.getResourceList(null, null, null);
+        List<ResourceNode> resources = resourceDomainService.findAll();
 
         // 2. 构建Excel数据
         List<ResourceExcelVO> excelData = resources.stream().map(resourceConverter::convertToExcelVO).collect(Collectors.toList());

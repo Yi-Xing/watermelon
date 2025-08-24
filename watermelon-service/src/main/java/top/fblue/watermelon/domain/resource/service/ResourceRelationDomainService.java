@@ -49,4 +49,24 @@ public interface ResourceRelationDomainService {
      * 包含构建树形结构所需的所有父级节点
      */
     List<Long> buildCompleteResourceIds(List<ResourceNode> filteredResources, List<ResourceRelation> relations);
+
+    /**
+     * 批量创建资源关联
+     */
+    List<ResourceRelation> batchCreateResourceRelations(List<ResourceRelation> resourceRelations);
+
+    /**
+     * 批量删除资源关联
+     */
+    int batchDelete(List<Long> ids);
+
+    /**
+     * 批量更新资源关联
+     */
+    boolean batchUpdateResourceRelations(List<ResourceRelation> resourceRelations);
+
+    /**
+     * 删除所有资源关联
+     */
+    boolean deleteAllResourceRelations();
 }

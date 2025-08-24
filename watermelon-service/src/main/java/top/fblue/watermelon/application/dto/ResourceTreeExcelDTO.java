@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 public class ResourceTreeExcelDTO {
 
     /**
-     * 动态列映射 - 资源信息所在的列数
+     * 资源层级深度
      */
-    private Integer column;
+    private Integer depth;
 
     /**
      * 资源信息：资源名称/资源code

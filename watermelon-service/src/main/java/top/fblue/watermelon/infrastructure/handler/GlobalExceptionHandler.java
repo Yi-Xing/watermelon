@@ -1,6 +1,7 @@
 package top.fblue.watermelon.infrastructure.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -100,6 +101,17 @@ public class GlobalExceptionHandler {
         response.setData(errors);
 
         return response;
+    }
+
+    /**
+     * 处理客户端断开连接异常
+     * 这种异常通常是用户刷新页面、关闭浏览器标签等操作导致的，不需要记录为错误
+     */
+    @ExceptionHandler(ClientAbortException.class)
+    public void handleClientAbortException(ClientAbortException e) {
+        // 只记录调试级别日志，避免日志污染
+        log.debug("客户端断开连接: {}", e.getMessage());
+        // 不返回响应，因为客户端已经断开连接
     }
 
     /**

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.converter.ResourceRelationConverter;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
@@ -14,16 +15,15 @@ import top.fblue.watermelon.application.service.ResourceRelationApplicationServi
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
 import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
+import top.fblue.watermelon.application.dto.ResourceRelationImportDTO;
+import top.fblue.watermelon.application.vo.ExcelImportResultVO;
 import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 import top.fblue.watermelon.domain.resource.service.ResourceRelationDomainService;
 import top.fblue.watermelon.application.service.ResourceExcelService;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -156,7 +156,7 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
     @Override
     public byte[] exportResourceTreeExcel() {
         // 1. 查询所有资源
-        List<ResourceNode> allResources = resourceDomainService.getResourceList(null, null, null);
+        List<ResourceNode> allResources = resourceDomainService.findAll();
 
         // 2. 获取所有资源关联关系
         List<ResourceRelation> relations = resourceRelationDomainService.getAllResourceRelations();
@@ -166,5 +166,40 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
 
         // 4. 根据动态列生成Excel
         return resourceExcelService.generateDynamicColumnExcel(excelData);
+    }
+
+    @Override
+    public ExcelImportResultVO importResourceRelationExcel(MultipartFile file) {
+        try {
+            if (!resourceRelationLock.tryLock(1, TimeUnit.SECONDS)) {
+                throw new BusinessException("系统繁忙，请稍后重试");
+            }
+
+            // 1. 读取Excel文件
+            List<ResourceRelationImportDTO> importData = resourceExcelService.readResourceRelationExcel(file);
+
+            // 2. 获取全部资源的 code 到 ResourceNodeID 的映射
+            Map<String, Long> codeToIdMap = resourceDomainService.getResourceMapByCodes();
+
+            // 2. 校验Excel数据
+            List<String> validationErrors = resourceExcelService.validateResourceRelationExcelData(importData, codeToIdMap);
+            if (!validationErrors.isEmpty()) {
+                return ExcelImportResultVO.builder().success(false).errors(validationErrors).build();
+            }
+
+            // 3. 转换为资源关联关系列表
+            List<ResourceRelation> resourceRelationList = resourceConverter.convertToResourceRelations(importData, codeToIdMap);
+
+            // 4. 批量处理资源关联关系（全量替换，带事务）
+            return resourceExcelService.batchProcessResourceRelations(resourceRelationList);
+
+        } catch (InterruptedException e) {
+            throw new BusinessException("系统繁忙，请稍后重试");
+        } catch (Exception e) {
+            log.error("导入资源关联关系失败", e);
+            throw new BusinessException("导入失败: " + e.getMessage());
+        } finally {
+            resourceRelationLock.unlock();
+        }
     }
 }
