@@ -11,7 +11,6 @@ import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
 import top.fblue.watermelon.domain.resource.service.ResourceRelationDomainService;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,16 +63,6 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
             throw new BusinessException("资源关联不存在");
         }
         return resourceRelation;
-    }
-
-    @Override
-    public List<ResourceRelation> getResourceRelationsByParentId(Long parentId) {
-        return resourceRelationRepository.findByParentId(parentId);
-    }
-
-    @Override
-    public List<ResourceRelation> getResourceRelationsByChildId(Long childId) {
-        return resourceRelationRepository.findByChildId(childId);
     }
 
     @Override
@@ -240,62 +229,6 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
             resultIds.add(parentId);
             // 递归添加父级的父级
             addParentResourceIds(parentId, childToParentsMap, resultIds);
-        }
-    }
-
-    @Override
-    public List<ResourceRelation> batchCreateResourceRelations(List<ResourceRelation> resourceRelations) {
-        if (resourceRelations == null || resourceRelations.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<ResourceRelation> createdRelations = new ArrayList<>();
-        for (ResourceRelation relation : resourceRelations) {
-            try {
-                ResourceRelation created = createResourceRelation(relation);
-                createdRelations.add(created);
-            } catch (Exception e) {
-                log.warn("创建资源关联失败: parent={}, child={}, error={}", 
-                        relation.getParentId(), relation.getChildId(), e.getMessage());
-                // 继续处理其他关联，不抛出异常
-            }
-        }
-        return createdRelations;
-    }
-
-    @Override
-    public int batchDelete(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return 0;
-        }
-        return resourceRelationRepository.deleteByIds(ids);
-    }
-
-    @Override
-    public boolean batchUpdateResourceRelations(List<ResourceRelation> resourceRelations) {
-        if (resourceRelations == null || resourceRelations.isEmpty()) {
-            return true;
-        }
-
-        try {
-            for (ResourceRelation relation : resourceRelations) {
-                updateResourceRelation(relation);
-            }
-            return true;
-        } catch (Exception e) {
-            log.error("批量更新资源关联失败", e);
-            return false;
-        }
-    }
-
-    @Override
-    public boolean deleteAllResourceRelations() {
-        try {
-            resourceRelationRepository.deleteAll();
-            return true;
-        } catch (Exception e) {
-            log.error("删除所有资源关联失败", e);
-            return false;
         }
     }
 }

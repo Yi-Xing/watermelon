@@ -1,7 +1,6 @@
 package top.fblue.watermelon.infrastructure.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
@@ -58,17 +57,6 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     }
 
     @Override
-    public List<ResourceRelation> findByChildId(Long childId) {
-        LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ResourceRelationPO::getChildId, childId);
-        
-        List<ResourceRelationPO> poList = resourceRelationMapper.selectList(queryWrapper);
-        return poList.stream()
-                .map(ResourceRelationPOConverter::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public boolean existsByParentIdAndChildId(Long parentId, Long childId) {
         LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
         
@@ -108,20 +96,6 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     }
 
     @Override
-    public int deleteByParentId(Long parentId) {
-        LambdaUpdateWrapper<ResourceRelationPO> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(ResourceRelationPO::getParentId, parentId);
-        return resourceRelationMapper.delete(updateWrapper);
-    }
-
-    @Override
-    public int deleteByChildId(Long childId) {
-        LambdaUpdateWrapper<ResourceRelationPO> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(ResourceRelationPO::getChildId, childId);
-        return resourceRelationMapper.delete(updateWrapper);
-    }
-
-    @Override
     public List<ResourceRelation> findAll() {
         List<ResourceRelationPO> poList = resourceRelationMapper.selectList(null);
         return poList.stream()
@@ -132,13 +106,5 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     @Override
     public int deleteByIds(List<Long> ids) {
         return resourceRelationMapper.deleteByIds(ids);
-    }
-
-    @Override
-    public boolean deleteAll() {
-        LambdaUpdateWrapper<ResourceRelationPO> updateWrapper = new LambdaUpdateWrapper<>();
-        // 删除所有记录，不设置任何条件
-        int deletedCount = resourceRelationMapper.delete(updateWrapper);
-        return deletedCount >= 0; // 即使删除0条记录也算成功
     }
 }

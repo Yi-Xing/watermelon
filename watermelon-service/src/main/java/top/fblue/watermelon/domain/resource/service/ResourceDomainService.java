@@ -4,7 +4,6 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 资源领域服务接口
@@ -48,11 +47,6 @@ public interface ResourceDomainService {
      * @return 资源ID到ResourceNode的映射
      */
     Map<Long, ResourceNode> getResourceMapByIds(List<Long> ids);
-
-    /**
-     * 根据 resources 返回其全路径的节点
-     */
-    List<ResourceNode> buildFullPathNodes(List<ResourceNode> resources);
 
     /**
      * 更新资源

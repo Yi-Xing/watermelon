@@ -6,16 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.converter.ResourceRelationConverter;
-import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
-import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
-import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
+import top.fblue.watermelon.application.dto.*;
 import top.fblue.watermelon.application.service.ResourceRelationApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
-import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
-import top.fblue.watermelon.application.dto.ResourceRelationImportDTO;
 import top.fblue.watermelon.application.vo.ExcelImportResultVO;
 import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
@@ -40,9 +35,6 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
 
     @Resource
     private ResourceDomainService resourceDomainService;
-
-    @Resource
-    private ResourceConverter resourceConverter;
 
     @Resource
     private ResourceRelationConverter resourceRelationConverter;
@@ -99,7 +91,7 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
         }
 
         // 4. 转换为树形结构
-        return resourceConverter.buildResourceTree(allResources, relations);
+        return resourceRelationConverter.buildResourceTree(allResources, relations);
     }
 
     @Override
@@ -162,10 +154,10 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
         List<ResourceRelation> relations = resourceRelationDomainService.getAllResourceRelations();
 
         // 3. 转换为Excel数据
-        List<ResourceTreeExcelDTO> excelData = resourceConverter.buildResourceTreeExcelData(allResources, relations);
+        List<ResourceTreeExcelDTO> excelData = resourceRelationConverter.buildResourceTreeExcelData(allResources, relations);
 
         // 4. 根据动态列生成Excel
-        return resourceExcelService.generateDynamicColumnExcel(excelData);
+        return resourceExcelService.writeResourceTreeExcel(excelData);
     }
 
     @Override
@@ -176,22 +168,22 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
             }
 
             // 1. 读取Excel文件
-            List<ResourceRelationImportDTO> importData = resourceExcelService.readResourceRelationExcel(file);
+            List<ResourceRelationExcelDTO> importData = resourceExcelService.readResourceRelationExcel(file);
 
             // 2. 获取全部资源的 code 到 ResourceNodeID 的映射
             Map<String, Long> codeToIdMap = resourceDomainService.getResourceMapByCodes();
 
-            // 2. 校验Excel数据
+            // 3. 校验Excel数据
             List<String> validationErrors = resourceExcelService.validateResourceRelationExcelData(importData, codeToIdMap);
             if (!validationErrors.isEmpty()) {
                 return ExcelImportResultVO.builder().success(false).errors(validationErrors).build();
             }
 
-            // 3. 转换为资源关联关系列表
-            List<ResourceRelation> resourceRelationList = resourceConverter.convertToResourceRelations(importData, codeToIdMap);
+            // 4. 转换为资源关联关系列表
+            List<ResourceRelationImportDTO> resourceRelationList = resourceRelationConverter.toResourceRelationList(importData, codeToIdMap);
 
-            // 4. 批量处理资源关联关系（全量替换，带事务）
-            return resourceExcelService.batchProcessResourceRelations(resourceRelationList);
+            // 5. 批量处理资源关联关系（全量替换，带事务）
+            return resourceExcelService.batchImportResourceRelations(resourceRelationList);
 
         } catch (InterruptedException e) {
             throw new BusinessException("系统繁忙，请稍后重试");

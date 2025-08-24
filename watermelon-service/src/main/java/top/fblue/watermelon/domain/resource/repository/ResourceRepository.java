@@ -51,7 +51,7 @@ public interface ResourceRepository {
     /**
      * 批量删除资源
      */
-    int batchDelete(List<Long> ids);
+    int deleteByIds(List<Long> ids);
     
     /**
      * 检查资源code是否存在
@@ -66,22 +66,7 @@ public interface ResourceRepository {
     /**
      * 获取所有资源
      */
-    List<ResourceNode> findAll();
-
-    /**
-     * 检查同级资源名称是否存在（排除指定ID）
-     */
-    boolean existsByNameAndParentIdExcludeId(String name, Long parentId, Long excludeId);
-
-    /**
-     * 检查同级资源Code是否存在
-     */
-    boolean existsByCodeAndParentId(String code, Long parentId);
-
-    /**
-     * 检查同级资源Code是否存在（排除指定ID）
-     */
-    boolean existsByCodeAndParentIdExcludeId(String code, Long parentId, Long excludeId);
+    List<ResourceNode> getAllResources();
 
     /**
      * 检查指定资源代码是否存在于指定的资源ID列表中

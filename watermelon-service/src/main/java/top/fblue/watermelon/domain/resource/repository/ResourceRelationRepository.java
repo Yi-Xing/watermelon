@@ -24,11 +24,6 @@ public interface ResourceRelationRepository {
     List<ResourceRelation> findByParentId(Long parentId);
     
     /**
-     * 根据子级ID查找父关系
-     */
-    List<ResourceRelation> findByChildId(Long childId);
-    
-    /**
      * 检查是否存在关系
      */
     boolean existsByParentIdAndChildId(Long parentId, Long childId);
@@ -51,16 +46,6 @@ public interface ResourceRelationRepository {
     boolean delete(Long id);
     
     /**
-     * 根据父级ID删除所有子关系
-     */
-    int deleteByParentId(Long parentId);
-    
-    /**
-     * 根据子级ID删除所有父关系
-     */
-    int deleteByChildId(Long childId);
-    
-    /**
      * 获取所有资源关系
      */
     List<ResourceRelation> findAll();
@@ -69,9 +54,4 @@ public interface ResourceRelationRepository {
      * 批量删除资源关系
      */
     int deleteByIds(List<Long> ids);
-
-    /**
-     * 删除所有资源关系
-     */
-    boolean deleteAll();
 }

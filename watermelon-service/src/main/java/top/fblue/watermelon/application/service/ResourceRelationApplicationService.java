@@ -2,7 +2,6 @@ package top.fblue.watermelon.application.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
-import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;

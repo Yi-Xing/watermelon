@@ -104,10 +104,10 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
     public ExcelImportResultVO importExcel(MultipartFile file) {
         try {
             // 1. 读取Excel数据
-            List<ResourceExcelVO> excelDataList = resourceExcelService.readExcel(file);
+            List<ResourceExcelVO> excelDataList = resourceExcelService.readResourceExcel(file);
 
             // 2. 数据校验
-            List<String> validationErrors = resourceExcelService.validateExcelData(excelDataList);
+            List<String> validationErrors = resourceExcelService.validateResourceExcelData(excelDataList);
             if (!validationErrors.isEmpty()) {
                 return ExcelImportResultVO.builder().success(false).errors(validationErrors).build();
             }

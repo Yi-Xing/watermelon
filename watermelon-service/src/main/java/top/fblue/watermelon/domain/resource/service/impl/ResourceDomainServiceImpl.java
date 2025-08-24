@@ -83,13 +83,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     }
 
     @Override
-    public List<ResourceNode> buildFullPathNodes(List<ResourceNode> resources) {
-        // 新架构下，这个方法不再需要，因为树形结构通过ResourceRelation管理
-        // 直接返回传入的资源列表
-        return resources != null ? resources : new ArrayList<>();
-    }
-
-    @Override
     public boolean updateResource(ResourceNode resource) {
         // 1. 校验业务规则
         validateResourceNodeUpdate(resource);
@@ -181,7 +174,7 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
 
     @Override
     public Map<String, Long> getResourceMapByCodes() {
-        List<ResourceNode> resources = resourceRepository.findAll();
+        List<ResourceNode> resources = resourceRepository.getAllResources();
         return resources.stream().collect(Collectors.toMap(ResourceNode::getCode, ResourceNode::getId));
     }
 
@@ -190,6 +183,6 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
      */
     @Override
     public List<ResourceNode> findAll(){
-        return resourceRepository.findAll();
+        return resourceRepository.getAllResources();
     }
 }

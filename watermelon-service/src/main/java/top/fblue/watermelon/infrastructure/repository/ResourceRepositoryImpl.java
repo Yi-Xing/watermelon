@@ -58,7 +58,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public List<ResourceNode> findAll() {
+    public List<ResourceNode> getAllResources() {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("updated_time");
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
@@ -73,7 +73,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public int batchDelete(List<Long> ids) {
+    public int deleteByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return 0;
         }
@@ -147,36 +147,6 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         return poList.stream()
                 .map(resourceNodePOConverter::toDomain)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existsByNameAndParentIdExcludeId(String name, Long parentId, Long excludeId) {
-        // 新架构下不再有parentId字段，这个方法返回false或根据实际业务需要调整
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", name);
-        if (excludeId != null) {
-            queryWrapper.ne("id", excludeId);
-        }
-        return resourceNodeMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
-    public boolean existsByCodeAndParentId(String code, Long parentId) {
-        // 新架构下不再有parentId字段，这个方法只检查code是否存在
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("code", code);
-        return resourceNodeMapper.selectCount(queryWrapper) > 0;
-    }
-
-    @Override
-    public boolean existsByCodeAndParentIdExcludeId(String code, Long parentId, Long excludeId) {
-        // 新架构下不再有parentId字段，这个方法只检查code是否存在（排除指定ID）
-        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("code", code);
-        if (excludeId != null) {
-            queryWrapper.ne("id", excludeId);
-        }
-        return resourceNodeMapper.selectCount(queryWrapper) > 0;
     }
 
     @Override

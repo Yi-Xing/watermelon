@@ -8,24 +8,18 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 资源关联导入DTO
+ * 资源关联ExcelDTO
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceRelationImportDTO {
+public class ResourceRelationExcelDTO {
 
     /**
-     * 父级资源ID
+     * 资源层级路径（从第一列到最后一列的资源信息）
      */
-    private Long parentId;
-
-    /**
-     * 子级资源ID
-     */
-    private Long childId;
-
+    private List<String> resourcePath;
     /**
      * 显示顺序
      */

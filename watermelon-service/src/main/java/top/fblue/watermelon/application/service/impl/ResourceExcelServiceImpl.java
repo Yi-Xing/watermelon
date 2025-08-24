@@ -12,11 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.converter.ResourceConverter;
-import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
+import top.fblue.watermelon.application.converter.ResourceRelationConverter;
 import top.fblue.watermelon.application.dto.ResourceRelationImportDTO;
+import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
+import top.fblue.watermelon.application.dto.ResourceRelationExcelDTO;
 import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
-import top.fblue.watermelon.application.vo.ResourceExcelVOTmp;
 import top.fblue.watermelon.application.vo.ExcelImportResultVO;
 import top.fblue.watermelon.application.dto.ResourceImportDTO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
@@ -24,9 +25,8 @@ import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
+import top.fblue.watermelon.domain.resource.repository.ResourceRelationRepository;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
-import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
-import top.fblue.watermelon.domain.resource.service.ResourceRelationDomainService;
 
 import jakarta.annotation.Resource;
 
@@ -40,18 +40,17 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ResourceExcelServiceImpl implements ResourceExcelService {
-
-    @Resource
-    private ResourceDomainService resourceDomainService;
     @Resource
     private ResourceConverter resourceConverter;
     @Resource
+    private ResourceRelationConverter resourceRelationConverter;
+    @Resource
     private ResourceRepository resourceRepository;
     @Resource
-    private ResourceRelationDomainService resourceRelationDomainService;
+    private ResourceRelationRepository resourceRelationRepository;
 
     @Override
-    public List<ResourceExcelVO> readExcel(MultipartFile file) {
+    public List<ResourceExcelVO> readResourceExcel(MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
             if (fileName == null || (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
@@ -71,7 +70,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     }
 
     @Override
-    public List<String> validateExcelData(List<ResourceExcelVO> dataList) {
+    public List<String> validateResourceExcelData(List<ResourceExcelVO> dataList) {
         // 记录错误信息
         List<String> errors = new ArrayList<>();
         // 用于 code 去重校验
@@ -135,85 +134,6 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         }
     }
 
-    /**
-     * 检测资源树中是否存在环
-     * 使用深度优先搜索（DFS）检测环
-     *
-     * @param dataList          资源数据列表
-     * @param codeToResourceMap code到资源的映射
-     * @return 存在环，则返回资源的code
-     */
-    private String hasCycle(List<ResourceExcelVOTmp> dataList, Map<String, ResourceExcelVOTmp> codeToResourceMap) {
-
-        // 记录已访问的节点
-        Set<String> visited = new HashSet<>();
-        // 记录当前路径中的节点（用于检测环）
-        Set<String> path = new HashSet<>();
-
-        // 对每个节点进行DFS检测
-        for (ResourceExcelVOTmp resource : dataList) {
-            if (!visited.contains(resource.getCode())) {
-                if (dfsHasCycle(resource.getCode(), codeToResourceMap, visited, path)) {
-                    return resource.getCode();
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 深度优先搜索检测环
-     *
-     * @param currentCode       当前节点code
-     * @param codeToResourceMap code到资源的映射
-     * @param visited           已访问的节点集合
-     * @param path              当前路径中的节点集合
-     * @return true 如果检测到环，false 如果没有环
-     */
-    private boolean dfsHasCycle(String currentCode, Map<String, ResourceExcelVOTmp> codeToResourceMap,
-                                Set<String> visited, Set<String> path) {
-        // 如果当前节点已在当前路径中，说明存在环
-        if (path.contains(currentCode)) {
-            return true;
-        }
-
-        // 如果当前节点已访问过，说明这个分支已经检查过，无环
-        if (visited.contains(currentCode)) {
-            return false;
-        }
-
-        // 将当前节点加入已访问和当前路径
-        visited.add(currentCode);
-        path.add(currentCode);
-
-        // 获取当前资源
-        ResourceExcelVOTmp currentResource = codeToResourceMap.get(currentCode);
-        if (currentResource != null && currentResource.getParentCode() != null && !currentResource.getParentCode().isEmpty()) {
-            // 检查父节点是否存在
-            if (codeToResourceMap.containsKey(currentResource.getParentCode())) {
-                // 递归检查父节点
-                if (dfsHasCycle(currentResource.getParentCode(), codeToResourceMap, visited, path)) {
-                    return true;
-                }
-            }
-        }
-
-        // 从当前路径中移除当前节点（回溯）
-        path.remove(currentCode);
-        return false;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public ExcelImportResultVO batchImportExcelData(List<ResourceExcelVO> excelDataList) {
-        // 1. 转换为导入VO
-        List<ResourceImportDTO> importDTOs = convertSortToImportDTOs(excelDataList);
-
-        // 2. 批量导入（带事务）
-        return batchImportResources(importDTOs);
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ExcelImportResultVO batchImportResources(List<ResourceImportDTO> importDTOs) {
@@ -227,7 +147,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .collect(Collectors.toSet());
 
         // 2. 获取数据库中所有资源
-        List<ResourceNode> existingResources = resourceDomainService.findAll();
+        List<ResourceNode> existingResources = resourceRepository.getAllResources();
         Map<String, ResourceNode> existingCodeToResource = existingResources.stream()
                 .collect(Collectors.toMap(ResourceNode::getCode, resource -> resource));
 
@@ -265,7 +185,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
 
         if (!deleteIds.isEmpty()) {
             // 批量删除资源
-            int deleteCount = resourceRepository.batchDelete(deleteIds);
+            int deleteCount = resourceRepository.deleteByIds(deleteIds);
             if (deleteCount != deleteIds.size()) {
                 throw new BusinessException(String.format("资源删除失败，失败 %d 个", deleteIds.size() - deleteCount));
             }
@@ -283,7 +203,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     }
 
     @Override
-    public byte[] generateDynamicColumnExcel(List<ResourceTreeExcelDTO> excelData) {
+    public byte[] writeResourceTreeExcel(List<ResourceTreeExcelDTO> excelData) {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("资源关系树");
 
@@ -359,86 +279,9 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .orElse(0) + 1; // +1 因为索引从0开始
     }
 
-    /**
-     * 转换为导入VO并进行拓扑排序
-     */
-    private List<ResourceImportDTO> convertSortToImportDTOs(List<ResourceExcelVO> excelDataList) {
-        // 1. 构建code到Excel数据的映射
-        Map<String, ResourceExcelVO> codeToExcelMap = excelDataList.stream()
-                .collect(Collectors.toMap(ResourceExcelVO::getCode, data -> data));
-
-        // 2. 拓扑排序，确保父节点在子节点之前
-//        List<ResourceExcelVOTmp> sortedDataList = topologicalSort(excelDataList, codeToExcelMap);
-
-        // 3. 转换为导入VO
-//        return sortedDataList.stream()
-//                .map(resourceConverter::toImportDTO)
-//                .collect(Collectors.toList());
-        // todo 暂存
-        return null;
-    }
-
-    /**
-     * 拓扑排序，确保父节点在子节点之前处理
-     */
-    private List<ResourceExcelVOTmp> topologicalSort(List<ResourceExcelVOTmp> dataList, Map<String, ResourceExcelVOTmp> codeToExcelMap) {
-        // 构建邻接表
-        Map<String, List<String>> adjacencyList = new HashMap<>();
-        Map<String, Integer> inDegree = new HashMap<>();
-
-        // 初始化
-        for (ResourceExcelVOTmp data : dataList) {
-            adjacencyList.put(data.getCode(), new ArrayList<>());
-            inDegree.put(data.getCode(), 0);
-        }
-
-        // 构建依赖关系
-        for (ResourceExcelVOTmp data : dataList) {
-            if (data.getParentCode() != null && !data.getParentCode().isEmpty()
-                    && codeToExcelMap.containsKey(data.getParentCode())) {
-                // 如果父节点也在Excel中，建立依赖关系
-                adjacencyList.get(data.getParentCode()).add(data.getCode());
-                inDegree.put(data.getCode(), inDegree.get(data.getCode()) + 1);
-            }
-        }
-
-        // 拓扑排序
-        List<ResourceExcelVOTmp> result = new ArrayList<>();
-        Queue<String> queue = new LinkedList<>();
-
-        // 将所有入度为0的节点加入队列
-        for (String code : inDegree.keySet()) {
-            if (inDegree.get(code) == 0) {
-                queue.offer(code);
-            }
-        }
-
-        // 处理队列中的节点
-        while (!queue.isEmpty()) {
-            String currentCode = queue.poll();
-            ResourceExcelVOTmp currentData = codeToExcelMap.get(currentCode);
-            result.add(currentData);
-
-            // 减少所有邻居的入度
-            for (String neighbor : adjacencyList.get(currentCode)) {
-                inDegree.put(neighbor, inDegree.get(neighbor) - 1);
-                if (inDegree.get(neighbor) == 0) {
-                    queue.offer(neighbor);
-                }
-            }
-        }
-
-        // 如果结果数量不等于输入数量，说明存在环
-        if (result.size() != dataList.size()) {
-            throw new BusinessException("资源树中存在循环引用");
-        }
-
-        return result;
-    }
-
     @Override
-    public List<ResourceRelationImportDTO> readResourceRelationExcel(MultipartFile file) {
-        List<ResourceRelationImportDTO> result = new ArrayList<>();
+    public List<ResourceRelationExcelDTO> readResourceRelationExcel(MultipartFile file) {
+        List<ResourceRelationExcelDTO> result = new ArrayList<>();
 
         String fileName = file.getOriginalFilename();
         if (fileName == null || (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
@@ -502,7 +345,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 Cell orderCell = row.getCell(orderColumnIndex);
                 Integer orderNum = getInteger(orderCell);
                 // 添加到结果中
-                ResourceRelationImportDTO dto = ResourceRelationImportDTO.builder()
+                ResourceRelationExcelDTO dto = ResourceRelationExcelDTO.builder()
                         .resourcePath(resourcePath)
                         .orderNum(orderNum)
                         .build();
@@ -526,7 +369,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         if (cell == null) {
             return "";
         }
-        String cellValue = "";
+        String cellValue;
         switch (cell.getCellType()) {
             case STRING:
                 cellValue = cell.getStringCellValue();
@@ -564,11 +407,11 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     }
 
     @Override
-    public List<String> validateResourceRelationExcelData(List<ResourceRelationImportDTO> dataList, Map<String, Long> existingResources) {
+    public List<String> validateResourceRelationExcelData(List<ResourceRelationExcelDTO> dataList, Map<String, Long> existingResources) {
         List<String> errors = new ArrayList<>();
 
         for (int i = 0; i < dataList.size(); i++) {
-            ResourceRelationImportDTO dto = dataList.get(i);
+            ResourceRelationExcelDTO dto = dataList.get(i);
             int rowNum = i + 2; // Excel行号（从第2行开始）
 
             // 验证资源路径
@@ -595,46 +438,21 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         return errors;
     }
 
-    /**
-     * 从资源信息中提取资源code
-     * 格式: 资源名称/资源code 或 资源名称/资源code:路径
-     */
-    private String extractResourceCode(String resourceInfo) {
-        if (resourceInfo == null || resourceInfo.trim().isEmpty()) {
-            return null;
-        }
-
-        String trimmed = resourceInfo.trim();
-        int slashIndex = trimmed.indexOf('/');
-        if (slashIndex == -1 || slashIndex == trimmed.length() - 1) {
-            return null;
-        }
-
-        String codePart = trimmed.substring(slashIndex + 1);
-        // 如果有冒号，取冒号前面的部分作为code
-        int colonIndex = codePart.indexOf(':');
-        if (colonIndex != -1) {
-            return codePart.substring(0, colonIndex);
-        }
-
-        return codePart;
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ExcelImportResultVO batchProcessResourceRelations(List<ResourceRelation> resourceRelationList) {
-        int totalCount = resourceRelationList.size();
+    public ExcelImportResultVO batchImportResourceRelations(List<ResourceRelationImportDTO> importList) {
+        int totalCount = importList.size();
         int addedCount = 0;
         int updatedCount = 0;
         int deletedCount = 0;
 
         // 1. 构建Excel中的关联关系映射（用parent-child作为唯一键）
-        Set<String> excelRelationKeys = resourceRelationList.stream()
+        Set<String> excelRelationKeys = importList.stream()
                 .map(relation -> relation.getParentId() + "-" + relation.getChildId())
                 .collect(Collectors.toSet());
 
         // 2. 获取数据库中所有的资源关联关系
-        List<ResourceRelation> existingRelations = resourceRelationDomainService.getAllResourceRelations();
+        List<ResourceRelation> existingRelations = resourceRelationRepository.findAll();
         Map<String, ResourceRelation> existingRelationMap = existingRelations.stream()
                 .collect(Collectors.toMap(
                         relation -> relation.getParentId() + "-" + relation.getChildId(),
@@ -642,23 +460,25 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 ));
 
         // 3. 批量新增和更新
-        for (ResourceRelation newRelation : resourceRelationList) {
-            String relationKey = newRelation.getParentId() + "-" + newRelation.getChildId();
+        for (ResourceRelationImportDTO importDTO : importList) {
+            String relationKey = importDTO.getParentId() + "-" + importDTO.getChildId();
             ResourceRelation existingRelation = existingRelationMap.get(relationKey);
 
+            // 转为 ResourceNode
+            ResourceRelation resourceRelation = resourceRelationConverter.toResourceRelation(importDTO);
             if (existingRelation != null) {
                 // 数据库存在，Excel存在 -> 检查是否需要更新
-                if (!existingRelation.getOrderNum().equals(newRelation.getOrderNum())) {
+                if (!existingRelation.getOrderNum().equals(resourceRelation.getOrderNum())) {
                     // 只有显示顺序不同才更新
-                    existingRelation.setOrderNum(newRelation.getOrderNum());
-                    if (!resourceRelationDomainService.updateResourceRelation(existingRelation)) {
+                    existingRelation.setOrderNum(resourceRelation.getOrderNum());
+                    if (!resourceRelationRepository.update(existingRelation)) {
                         throw new BusinessException(String.format("%s 资源关联关系更新失败", relationKey));
                     }
                     updatedCount++;
                 }
             } else {
                 // 数据库不存在，Excel存在 -> 新增
-                resourceRelationDomainService.createResourceRelation(newRelation);
+                resourceRelationRepository.save(resourceRelation);
                 addedCount++;
             }
         }
@@ -674,7 +494,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
 
         if (!deleteIds.isEmpty()) {
             // 批量删除资源
-            int deleteCount = resourceRelationDomainService.batchDelete(deleteIds);
+            int deleteCount = resourceRelationRepository.deleteByIds(deleteIds);
             if (deleteCount != deleteIds.size()) {
                 throw new BusinessException(String.format("资源关联关系删除失败，失败 %d 个", deleteIds.size() - deleteCount));
             }
