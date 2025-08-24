@@ -17,6 +17,12 @@ public class ResourceNodeTreeVO {
     private Long id;
 
     /**
+     * 资源树code，每个节点的唯一值
+     * 前端需要该值展示选中
+     */
+    private String treeCode;
+
+    /**
      * 资源关联ID
      */
     private Long resourceRelationId;
