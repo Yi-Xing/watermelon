@@ -85,11 +85,10 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
         }
 
         // 2. 如果父子关系有变化，需要重新校验
-        boolean parentChanged = !Objects.equals(existingRelation.getParentId(), resourceRelation.getParentId());
+        boolean parentChanged = !existingRelation.getParentId().equals(resourceRelation.getParentId());
         boolean childChanged = !existingRelation.getChildId().equals(resourceRelation.getChildId());
 
         if (parentChanged || childChanged) {
-
             // 校验子级资源是否存在
             if (resourceRepository.findById(resourceRelation.getChildId()) == null) {
                 throw new BusinessException("子级资源不存在");

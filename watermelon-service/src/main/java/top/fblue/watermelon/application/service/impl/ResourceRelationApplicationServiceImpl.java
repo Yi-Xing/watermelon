@@ -8,19 +8,22 @@ import org.springframework.util.StringUtils;
 import top.fblue.watermelon.application.converter.ResourceConverter;
 import top.fblue.watermelon.application.converter.ResourceRelationConverter;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
-import top.fblue.watermelon.application.dto.ResourceQueryDTO;
 import top.fblue.watermelon.application.dto.ResourceTreeQueryDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceRelationDTO;
 import top.fblue.watermelon.application.service.ResourceRelationApplicationService;
 import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
+import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
 import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 import top.fblue.watermelon.domain.resource.service.ResourceRelationDomainService;
-import top.fblue.watermelon.domain.user.service.UserDomainService;
+import top.fblue.watermelon.application.service.ResourceExcelService;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,6 +46,9 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
 
     @Resource
     private ResourceRelationConverter resourceRelationConverter;
+
+    @Resource
+    private ResourceExcelService resourceExcelService;
 
     /**
      * 资源关联操作锁
@@ -145,5 +151,20 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
         } finally {
             resourceRelationLock.unlock();
         }
+    }
+
+    @Override
+    public byte[] exportResourceTreeExcel() {
+        // 1. 查询所有资源
+        List<ResourceNode> allResources = resourceDomainService.getResourceList(null, null, null);
+
+        // 2. 获取所有资源关联关系
+        List<ResourceRelation> relations = resourceRelationDomainService.getAllResourceRelations();
+
+        // 3. 转换为Excel数据
+        List<ResourceTreeExcelDTO> excelData = resourceConverter.buildResourceTreeExcelData(allResources, relations);
+
+        // 4. 根据动态列生成Excel
+        return resourceExcelService.generateDynamicColumnExcel(excelData);
     }
 }

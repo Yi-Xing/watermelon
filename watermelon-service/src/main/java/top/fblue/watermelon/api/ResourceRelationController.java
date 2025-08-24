@@ -2,6 +2,9 @@ package top.fblue.watermelon.api;
 
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.fblue.watermelon.application.dto.CreateResourceRelationDTO;
@@ -79,5 +82,21 @@ public class ResourceRelationController {
         } else {
             return ApiResponse.error("资源关联删除失败", false);
         }
+    }
+
+    /**
+     * 导出Excel
+     */
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportResourceTreeExcel() {
+        byte[] excelBytes = resourceRelationApplicationService.exportResourceTreeExcel();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "resource_tree.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(excelBytes);
     }
 }

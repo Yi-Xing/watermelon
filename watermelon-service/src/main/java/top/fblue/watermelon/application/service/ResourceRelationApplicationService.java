@@ -38,4 +38,9 @@ public interface ResourceRelationApplicationService {
      * 删除资源关联
      */
     boolean deleteResourceRelation(Long id);
+    
+    /**
+     * 导出资源关系树Excel
+     */
+    byte[] exportResourceTreeExcel();
 }

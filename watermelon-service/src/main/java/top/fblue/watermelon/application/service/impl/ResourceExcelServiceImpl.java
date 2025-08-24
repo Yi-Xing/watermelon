@@ -3,10 +3,16 @@ package top.fblue.watermelon.application.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.converter.ResourceConverter;
+import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
 import top.fblue.watermelon.application.service.ResourceExcelService;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.vo.ResourceExcelVOTmp;
@@ -262,6 +268,83 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 .updatedRows(updatedRows)
                 .deletedRows(deletedRows)
                 .build();
+    }
+
+    @Override
+    public byte[] generateDynamicColumnExcel(List<ResourceTreeExcelDTO> excelData) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("资源关系树");
+
+            // 计算最大列数
+            int maxColumns = calculateMaxColumns(excelData);
+
+            // 创建表头行
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < maxColumns; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue("资源树");
+            }
+
+            // 添加固定列
+            Cell orderCell = headerRow.createCell(maxColumns);
+            orderCell.setCellValue("显示顺序");
+
+            Cell stateCell = headerRow.createCell(maxColumns + 1);
+            stateCell.setCellValue("状态");
+
+            // 创建数据行
+            for (int rowIndex = 0; rowIndex < excelData.size(); rowIndex++) {
+                ResourceTreeExcelDTO data = excelData.get(rowIndex);
+                Row dataRow = sheet.createRow(rowIndex + 1);
+
+                // 填充资源树列
+                for (int colIndex = 0; colIndex < maxColumns; colIndex++) {
+                    if (colIndex == data.getColumn()) {
+                        Cell cell = dataRow.createCell(colIndex);
+                        cell.setCellValue(data.getResourceInfo());
+                    }
+                }
+
+                // 填充固定列
+                Cell orderDataCell = dataRow.createCell(maxColumns);
+                if (data.getOrderNum() != null) {
+                    orderDataCell.setCellValue(data.getOrderNum());
+                }
+
+                Cell stateDataCell = dataRow.createCell(maxColumns + 1);
+                if (data.getState() != null) {
+                    stateDataCell.setCellValue(data.getState());
+                }
+            }
+
+            // 自动调整列宽
+            for (int i = 0; i < maxColumns + 2; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            // 输出到字节数组
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+            log.error("生成动态列Excel失败: {}", e.getMessage(), e);
+            throw new RuntimeException("生成Excel文件失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 计算最大列数
+     */
+    private int calculateMaxColumns(List<ResourceTreeExcelDTO> excelData) {
+        if (excelData == null || excelData.isEmpty()) {
+            return 0;
+        }
+
+        return excelData.stream()
+                .mapToInt(ResourceTreeExcelDTO::getColumn)
+                .max()
+                .orElse(0) + 1; // +1 因为索引从0开始
     }
 
     /**

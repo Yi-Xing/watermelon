@@ -3,6 +3,7 @@ package top.fblue.watermelon.application.service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import top.fblue.watermelon.application.dto.ResourceImportDTO;
+import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
 import top.fblue.watermelon.application.vo.ResourceExcelVO;
 import top.fblue.watermelon.application.vo.ResourceExcelVOTmp;
 import top.fblue.watermelon.application.vo.ResourceImportResultVO;
@@ -40,4 +41,9 @@ public interface ResourceExcelService {
      * 支持增删改操作，确保数据一致性
      */
     ResourceImportResultVO batchImportResources(List<ResourceImportDTO> importDTOs);
+
+    /**
+     * 根据动态列生成Excel
+     */
+    byte[] generateDynamicColumnExcel(List<ResourceTreeExcelDTO> excelData);
 }

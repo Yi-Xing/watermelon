@@ -2,6 +2,7 @@ package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
 import top.fblue.watermelon.application.dto.ResourceImportDTO;
+import top.fblue.watermelon.application.dto.ResourceTreeExcelDTO;
 import top.fblue.watermelon.application.dto.UpdateResourceDTO;
 import top.fblue.watermelon.application.dto.CreateResourceDTO;
 import top.fblue.watermelon.application.vo.*;
@@ -166,7 +167,7 @@ public class ResourceConverter {
                     Collectors.collectingAndThen(
                         Collectors.toList(),
                         list -> list.stream()
-                                .sorted(Comparator.comparing(ResourceRelation::getOrderNum))
+                                .sorted(Comparator.comparing(ResourceRelation::getOrderNum).reversed())
                                 .collect(Collectors.toList())
                     )
                 ));
@@ -210,12 +211,60 @@ public class ResourceConverter {
             }
         }
 
-        // 4. 根节点排序：按orderNum升序
-        rootNodes.sort(Comparator.comparing(ResourceNodeTreeVO::getOrderNum));
+        // 4. 根节点排序：按orderNum降序
+        rootNodes.sort(Comparator.comparing(ResourceNodeTreeVO::getOrderNum).reversed());
 
         return rootNodes;
     }
-    
+
+    /**
+     * 构建基于ResourceRelation的资源树形结构
+     */
+    public List<ResourceTreeExcelDTO> buildResourceTreeExcelData(List<ResourceNode> resources,
+                                                                 List<ResourceRelation> relations) {
+        // 将资源和资源关系，转为树结构
+        List<ResourceNodeTreeVO> resourceTree = buildResourceTree(resources, relations);
+
+        // 将资源树转换为Excel数据
+        List<ResourceTreeExcelDTO> excelData = new ArrayList<>();
+        for (ResourceNodeTreeVO rootNode : resourceTree) {
+            // 处理根节点
+            processNodeForExcel(rootNode, excelData, 0);
+        }
+
+        return excelData;
+    }
+
+
+    /**
+     * 递归处理节点，生成Excel数据
+     */
+    private void processNodeForExcel(ResourceNodeTreeVO node, List<ResourceTreeExcelDTO> excelData, int level) {
+        if (node == null) {
+            return;
+        }
+
+        String resourceInfo = node.getName() + "/" + node.getCode();
+
+        // 创建当前节点的Excel行
+        ResourceTreeExcelDTO currentRow = ResourceTreeExcelDTO.builder()
+                .orderNum(node.getOrderNum())
+                .state(node.getStateDesc()) // 添加状态信息
+                .column(level)
+                .resourceInfo(resourceInfo)
+                .build();
+
+        // 添加到Excel数据中
+        excelData.add(currentRow);
+
+        // 处理子节点
+        if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+            for (ResourceNodeTreeVO child : node.getChildren()) {
+                processNodeForExcel(child, excelData, level + 1);
+            }
+        }
+    }
+
     /**
      * 转换资源为Excel VO
      */
