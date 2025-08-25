@@ -29,6 +29,13 @@ public interface ResourceRelationRepository {
     boolean existsByParentIdAndChildId(Long parentId, Long childId);
     
     /**
+     * 检查资源是否作为子级存在于资源关系中
+     * @param childId 子级资源ID
+     * @return true表示存在，false表示不存在
+     */
+    boolean existsByChildId(Long childId);
+    
+    /**
      * 检查资源是否有任何关联关系（作为父级或子级）
      * @param resourceId 资源ID
      * @return true表示有关联关系，false表示没有关联关系

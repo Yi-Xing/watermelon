@@ -29,30 +29,15 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
 
     @Override
     public ResourceRelation createResourceRelation(ResourceRelation resourceRelation) {
-        // 1. 校验子级资源是否存在
-        if (resourceRepository.findById(resourceRelation.getChildId()) == null) {
-            throw new BusinessException("子级资源不存在");
-        }
-
-        // 2. 校验父级资源（如果不为空）
-        if (resourceRelation.getParentId() != 0) {
-            if (resourceRepository.findById(resourceRelation.getParentId()) == null) {
-                throw new BusinessException("父级资源不存在");
-            }
-        }
-
-        // 3. 校验是否已存在关联关系
+        // 1. 校验是否已存在关联关系
         if (resourceRelationRepository.existsByParentIdAndChildId(
                 resourceRelation.getParentId(), resourceRelation.getChildId())) {
             throw new BusinessException("关联关系已存在");
         }
+        // 2. 校验资源关联关系的基本信息
+        validateResourceRelationBasic(resourceRelation);
 
-        // 4. 校验是否会形成环形依赖（仅当父级资源不为空时）
-        if (hasCyclicDependency(resourceRelation.getParentId(), resourceRelation.getChildId())) {
-            throw new BusinessException("不能创建环形依赖关系");
-        }
-
-        // 5. 保存关联关系
+        // 3. 保存关联关系
         return resourceRelationRepository.save(resourceRelation);
     }
 
@@ -78,22 +63,8 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
         boolean childChanged = !existingRelation.getChildId().equals(resourceRelation.getChildId());
 
         if (parentChanged || childChanged) {
-            // 校验子级资源是否存在
-            if (resourceRepository.findById(resourceRelation.getChildId()) == null) {
-                throw new BusinessException("子级资源不存在");
-            }
-
-            // 校验父级资源（如果不为空）
-            if (resourceRelation.getParentId() != 0) {
-                if (resourceRepository.findById(resourceRelation.getParentId()) == null) {
-                    throw new BusinessException("父级资源不存在");
-                }
-            }
-
-            // 校验是否会形成环形依赖（仅当父级资源不为空时）
-            if (hasCyclicDependency(resourceRelation.getParentId(), resourceRelation.getChildId())) {
-                throw new BusinessException("不能创建环形依赖关系");
-            }
+            // 校验资源关联关系的基本信息
+            validateResourceRelationBasic(resourceRelation);
         }
 
         return resourceRelationRepository.update(resourceRelation);
@@ -165,7 +136,7 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
      */
     private boolean hasCyclicDependency(Long parentId, Long childId) {
         // 如果父级ID为空，表示顶级资源，不存在环形依赖
-        if (parentId == null) {
+        if (parentId == 0) {
             return false;
         }
         // 如果childId等于parentId，直接形成环
@@ -229,6 +200,34 @@ public class ResourceRelationDomainServiceImpl implements ResourceRelationDomain
             resultIds.add(parentId);
             // 递归添加父级的父级
             addParentResourceIds(parentId, childToParentsMap, resultIds);
+        }
+    }
+
+    /**
+     * 校验资源关联关系的基本信息
+     *
+     * @param resourceRelation 资源关联关系
+     */
+    private void validateResourceRelationBasic(ResourceRelation resourceRelation) {
+        // 校验子级资源是否存在
+        if (resourceRepository.findById(resourceRelation.getChildId()) == null) {
+            throw new BusinessException("子级资源不存在");
+        }
+
+        // 校验父级资源（如果不为空）
+        if (resourceRelation.getParentId() != 0) {
+            if (resourceRepository.findById(resourceRelation.getParentId()) == null) {
+                throw new BusinessException("父级资源不存在");
+            }
+            // 校验父级资源是否在资源树中（作为某个资源的子级，或者是根节点）
+            if (!resourceRelationRepository.existsByChildId(resourceRelation.getParentId())) {
+                throw new BusinessException("父级资源不在资源树中");
+            }
+        }
+
+        // 校验是否会形成环形依赖（仅当父级资源不为空时）
+        if (hasCyclicDependency(resourceRelation.getParentId(), resourceRelation.getChildId())) {
+            throw new BusinessException("不能创建环形依赖关系");
         }
     }
 }

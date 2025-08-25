@@ -41,15 +41,9 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     @Override
     public List<ResourceRelation> findByParentId(Long parentId) {
         LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
-        
-        if (parentId == null) {
-            queryWrapper.isNull(ResourceRelationPO::getParentId);
-        } else {
-            queryWrapper.eq(ResourceRelationPO::getParentId, parentId);
-        }
-        
+        queryWrapper.eq(ResourceRelationPO::getParentId, parentId);
         queryWrapper.orderByAsc(ResourceRelationPO::getOrderNum);
-        
+
         List<ResourceRelationPO> poList = resourceRelationMapper.selectList(queryWrapper);
         return poList.stream()
                 .map(ResourceRelationPOConverter::toDomain)
@@ -59,18 +53,19 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     @Override
     public boolean existsByParentIdAndChildId(Long parentId, Long childId) {
         LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
-        
-        if (parentId == null) {
-            queryWrapper.isNull(ResourceRelationPO::getParentId);
-        } else {
-            queryWrapper.eq(ResourceRelationPO::getParentId, parentId);
-        }
-        
+        queryWrapper.eq(ResourceRelationPO::getParentId, parentId);
         queryWrapper.eq(ResourceRelationPO::getChildId, childId);
-        
+
         return resourceRelationMapper.selectCount(queryWrapper) > 0;
     }
-    
+
+    @Override
+    public boolean existsByChildId(Long childId) {
+        LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ResourceRelationPO::getChildId, childId);
+        return resourceRelationMapper.selectCount(queryWrapper) > 0;
+    }
+
     @Override
     public boolean hasAnyRelation(Long resourceId) {
         // 检查资源是否作为父级或子级存在关联关系
@@ -80,7 +75,6 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
                 .or()
                 .eq(ResourceRelationPO::getChildId, resourceId)
         );
-        
         return resourceRelationMapper.selectCount(queryWrapper) > 0;
     }
 
