@@ -6,6 +6,7 @@ import top.fblue.watermelon.application.vo.ResourceNodeTreeVO;
 import top.fblue.watermelon.application.vo.ResourceRelationVO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.exception.BusinessException;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
@@ -141,17 +142,15 @@ public class ResourceRelationConverter {
 
         return relations;
     }
-
     /**
      * 构建基于ResourceRelation的资源树形结构
      */
     public List<ResourceNodeTreeVO> buildResourceTree(List<ResourceNode> resources,
                                                       List<ResourceRelation> relations) {
         // 1. 转换为VO并构建映射
-        Map<Long, ResourceNodeTreeVO> resourceMap = resources.stream()
+        Map<Long, ResourceNode> resourceMap = resources.stream()
                 .collect(Collectors.toMap(
-                        ResourceNode::getId,
-                        this::toTreeVO
+                        ResourceNode::getId, resource -> resource
                 ));
 
         // 2. 构建父子关系映射（按显示顺序排序）
@@ -166,72 +165,76 @@ public class ResourceRelationConverter {
                         )
                 ));
 
-        // 3. 构建树形结构并设置显示顺序
-        // 获取所有根节点的资源 ID，以及其对应的 资源关联关系
-        Map<Long, ResourceRelation> rootNodeMap = relations.stream()
+        // 4. 获取根节点（parentId = 0）
+        List<ResourceRelation> rootRelations = relations.stream()
                 .filter(relation -> relation.getParentId() == 0)
-                .collect(Collectors.toMap(
-                        ResourceRelation::getChildId, resourceRelation -> resourceRelation
-                ));
+                .sorted(Comparator.comparing(ResourceRelation::getOrderNum).reversed())
+                .toList();
 
+        // 5. 构建树形结构并填充 resourcePath
         List<ResourceNodeTreeVO> rootNodes = new ArrayList<>();
-
-        for (ResourceNodeTreeVO vo : resourceMap.values()) {
-            // 存储根节点
-            if (rootNodeMap.containsKey(vo.getResourceId())) {
-                ResourceRelation relation = rootNodeMap.get(vo.getResourceId());
-                // 使用关联关系中的显示顺序
-                vo.setOrderNum(relation.getOrderNum());
-                vo.setId(relation.getId());
-                rootNodes.add(vo);
-            }
-
-            // 构建子节点
-            List<ResourceRelation> childRelations = parentChildMap.get(vo.getResourceId());
-            if (childRelations != null) {
-                List<ResourceNodeTreeVO> children = childRelations.stream()
-                        .map(relation -> {
-                            ResourceNodeTreeVO child = resourceMap.get(relation.getChildId());
-                            if (child != null) {
-                                // 使用关联关系中的显示顺序
-                                child.setOrderNum(relation.getOrderNum());
-                                child.setId(relation.getId());
-                            }
-                            return child;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-                vo.setChildren(children);
+        
+        for (ResourceRelation rootRelation : rootRelations) {
+            ResourceNode rootResource = resourceMap.get(rootRelation.getChildId());
+            if (rootResource != null) {
+                ResourceNodeTreeVO rootNode = toTreeVO(rootResource, rootRelation.getId(), rootRelation.getOrderNum());
+                buildChildrenWithPath(rootNode, rootRelation.getChildId(), parentChildMap, resourceMap, "");
+                rootNodes.add(rootNode);
             }
         }
 
-        // 4. 根节点排序：按orderNum降序
-        rootNodes.sort(Comparator.comparing(ResourceNodeTreeVO::getOrderNum).reversed());
+        return rootNodes;
+    }
 
-        // 5. 填充 resourcePath
-        for (ResourceNodeTreeVO rootNode : rootNodes) {
-            fillResourcePath(rootNode, "");
+    /**
+     * 递归构建子节点并填充 resourcePath
+     */
+    private void buildChildrenWithPath(ResourceNodeTreeVO parentNode, Long parentId, 
+                                      Map<Long, List<ResourceRelation>> parentChildMap,
+                                      Map<Long, ResourceNode> resourceMap,
+                                      String parentPath) {
+        
+        // 构建当前节点的路径
+        String currentPath = parentPath + "/" + parentNode.getResourceId();
+        parentNode.setResourcePath(currentPath);
+        
+        List<ResourceRelation> childRelations = parentChildMap.get(parentId);
+        if (childRelations == null || childRelations.isEmpty()) {
+            return;
+        }
+
+        // 构建当前节点的子节点
+        List<ResourceNodeTreeVO> children = new ArrayList<>();
+        for (ResourceRelation childRelation : childRelations) {
+            ResourceNode childResource = resourceMap.get(childRelation.getChildId());
+            if (childResource != null) {
+                ResourceNodeTreeVO childNode = toTreeVO(childResource, childRelation.getId(), childRelation.getOrderNum());
+                // 递归构建子节点的子节点，传递当前路径
+                buildChildrenWithPath(childNode, childRelation.getChildId(), parentChildMap, resourceMap, currentPath);
+                children.add(childNode);
+            }
         }
         
-        return rootNodes;
+        parentNode.setChildren(children);
     }
 
 
     /**
      * ResourceNode转换为ResourceNodeTreeVO
      */
-    private ResourceNodeTreeVO toTreeVO(ResourceNode resource) {
+    private ResourceNodeTreeVO toTreeVO(ResourceNode resource, Long id, Integer orderNum) {
         if (resource == null) {
             return null;
         }
 
         return ResourceNodeTreeVO.builder()
+                .id(id)
                 .resourceId(resource.getId())
                 .name(resource.getName())
                 .type(resource.getType())
                 .typeDesc(ResourceTypeEnum.getDescByCode(resource.getType()))
                 .code(resource.getCode())
-                .orderNum(null) // 显示顺序将由资源关联关系设置
+                .orderNum(orderNum)
                 .state(resource.getState())
                 .stateDesc(StateEnum.fromCode(resource.getState()).getDesc())
                 .remark(resource.getRemark())
@@ -296,27 +299,5 @@ public class ResourceRelationConverter {
                 .childId(dto.getChildId())
                 .orderNum(dto.getOrderNum())
                 .build();
-    }
-
-    /**
-     * 递归填充资源路径
-     * @param node 当前节点
-     * @param parentPath 父级路径
-     */
-    private void fillResourcePath(ResourceNodeTreeVO node, String parentPath) {
-        if (node == null) {
-            return;
-        }
-
-        // 构建当前节点的路径
-        String currentPath = parentPath + "/" + node.getResourceId();
-        node.setResourcePath(currentPath);
-
-        // 递归处理子节点
-        if (node.getChildren() != null && !node.getChildren().isEmpty()) {
-            for (ResourceNodeTreeVO child : node.getChildren()) {
-                fillResourcePath(child, currentPath);
-            }
-        }
     }
 }
