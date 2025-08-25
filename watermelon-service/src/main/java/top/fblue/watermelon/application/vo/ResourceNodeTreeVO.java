@@ -12,20 +12,19 @@ import java.util.List;
 public class ResourceNodeTreeVO {
 
     /**
-     * 资源ID
+     * 资源关联ID
      */
     private Long id;
 
     /**
-     * 资源树code，每个节点的唯一值
-     * 前端需要该值展示选中
+     * 资源ID
      */
-    private String treeCode;
+    private Long resourceId;
 
     /**
-     * 资源关联ID
+     * 资源path
      */
-    private Long resourceRelationId;
+    private String resourcePath;
 
     /**
      * 资源名称

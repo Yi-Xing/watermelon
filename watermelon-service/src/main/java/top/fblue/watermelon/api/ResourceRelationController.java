@@ -49,7 +49,6 @@ public class ResourceRelationController {
         return ApiResponse.success(tree, "获取资源树成功");
     }
 
-
     /**
      * 查询资源关联详情
      */

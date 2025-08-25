@@ -178,16 +178,16 @@ public class ResourceRelationConverter {
 
         for (ResourceNodeTreeVO vo : resourceMap.values()) {
             // 存储根节点
-            if (rootNodeMap.containsKey(vo.getId())) {
-                ResourceRelation relation = rootNodeMap.get(vo.getId());
+            if (rootNodeMap.containsKey(vo.getResourceId())) {
+                ResourceRelation relation = rootNodeMap.get(vo.getResourceId());
                 // 使用关联关系中的显示顺序
                 vo.setOrderNum(relation.getOrderNum());
-                vo.setResourceRelationId(relation.getId());
+                vo.setId(relation.getId());
                 rootNodes.add(vo);
             }
 
             // 构建子节点
-            List<ResourceRelation> childRelations = parentChildMap.get(vo.getId());
+            List<ResourceRelation> childRelations = parentChildMap.get(vo.getResourceId());
             if (childRelations != null) {
                 List<ResourceNodeTreeVO> children = childRelations.stream()
                         .map(relation -> {
@@ -195,7 +195,7 @@ public class ResourceRelationConverter {
                             if (child != null) {
                                 // 使用关联关系中的显示顺序
                                 child.setOrderNum(relation.getOrderNum());
-                                child.setResourceRelationId(relation.getId());
+                                child.setId(relation.getId());
                             }
                             return child;
                         })
@@ -208,6 +208,11 @@ public class ResourceRelationConverter {
         // 4. 根节点排序：按orderNum降序
         rootNodes.sort(Comparator.comparing(ResourceNodeTreeVO::getOrderNum).reversed());
 
+        // 5. 填充 resourcePath
+        for (ResourceNodeTreeVO rootNode : rootNodes) {
+            fillResourcePath(rootNode, "");
+        }
+        
         return rootNodes;
     }
 
@@ -221,7 +226,7 @@ public class ResourceRelationConverter {
         }
 
         return ResourceNodeTreeVO.builder()
-                .id(resource.getId())
+                .resourceId(resource.getId())
                 .name(resource.getName())
                 .type(resource.getType())
                 .typeDesc(ResourceTypeEnum.getDescByCode(resource.getType()))
@@ -291,5 +296,27 @@ public class ResourceRelationConverter {
                 .childId(dto.getChildId())
                 .orderNum(dto.getOrderNum())
                 .build();
+    }
+
+    /**
+     * 递归填充资源路径
+     * @param node 当前节点
+     * @param parentPath 父级路径
+     */
+    private void fillResourcePath(ResourceNodeTreeVO node, String parentPath) {
+        if (node == null) {
+            return;
+        }
+
+        // 构建当前节点的路径
+        String currentPath = parentPath + "/" + node.getResourceId();
+        node.setResourcePath(currentPath);
+
+        // 递归处理子节点
+        if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+            for (ResourceNodeTreeVO child : node.getChildren()) {
+                fillResourcePath(child, currentPath);
+            }
+        }
     }
 }
