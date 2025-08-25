@@ -77,7 +77,20 @@ public class ResourceNode {
                Objects.equals(type, that.type) &&
                Objects.equals(code, that.code) &&
                Objects.equals(state, that.state) &&
-               Objects.equals(remark, that.remark);
+               equalsIgnoreEmpty(remark, that.remark);
+    }
+
+    /**
+     * 比较两个字符串，空字符串和null视为相等
+     */
+    private boolean equalsIgnoreEmpty(String str1, String str2) {
+        // 如果两个都是null或空字符串，则相等
+        if ((str1 == null || str1.trim().isEmpty()) && 
+            (str2 == null || str2.trim().isEmpty())) {
+            return true;
+        }
+        // 否则使用Objects.equals比较
+        return Objects.equals(str1, str2);
     }
 
     @Override

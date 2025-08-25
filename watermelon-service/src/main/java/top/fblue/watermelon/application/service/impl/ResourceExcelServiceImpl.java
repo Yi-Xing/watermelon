@@ -195,9 +195,9 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         return ExcelImportResultVO.builder()
                 .success(true)
                 .totalCount(totalRows)
-                .addedCount(insertedRows)
-                .updatedCount(updatedRows)
-                .deletedCount(deletedRows)
+                .insertCount(insertedRows)
+                .updateCount(updatedRows)
+                .deleteCount(deletedRows)
                 .errors(new ArrayList<>())
                 .build();
     }
@@ -504,9 +504,9 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         return ExcelImportResultVO.builder()
                 .success(true)
                 .totalCount(totalCount)
-                .addedCount(addedCount)
-                .updatedCount(updatedCount)
-                .deletedCount(deletedCount)
+                .insertCount(addedCount)
+                .updateCount(updatedCount)
+                .deleteCount(deletedCount)
                 .errors(new ArrayList<>())
                 .build();
     }

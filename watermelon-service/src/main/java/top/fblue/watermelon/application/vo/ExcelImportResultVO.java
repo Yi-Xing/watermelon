@@ -29,17 +29,17 @@ public class ExcelImportResultVO {
     /**
      * 新增数量
      */
-    private Integer addedCount;
+    private Integer insertCount;
     
     /**
      * 更新数量
      */
-    private Integer updatedCount;
+    private Integer updateCount;
     
     /**
      * 删除数量
      */
-    private Integer deletedCount;
+    private Integer deleteCount;
     
     /**
      * 错误信息列表
