@@ -159,7 +159,7 @@ public class ResourceRelationConverter {
                         Collectors.collectingAndThen(
                                 Collectors.toList(),
                                 list -> list.stream()
-                                        .sorted(Comparator.comparing(ResourceRelation::getOrderNum).reversed())
+                                        .sorted(Comparator.comparing(ResourceRelation::getOrderNum))
                                         .collect(Collectors.toList())
                         )
                 ));
@@ -167,7 +167,7 @@ public class ResourceRelationConverter {
         // 4. 获取根节点（parentId = 0）
         List<ResourceRelation> rootRelations = relations.stream()
                 .filter(relation -> relation.getParentId() == 0)
-                .sorted(Comparator.comparing(ResourceRelation::getOrderNum).reversed())
+                .sorted(Comparator.comparing(ResourceRelation::getOrderNum))
                 .toList();
 
         // 5. 构建树形结构并填充 resourcePath

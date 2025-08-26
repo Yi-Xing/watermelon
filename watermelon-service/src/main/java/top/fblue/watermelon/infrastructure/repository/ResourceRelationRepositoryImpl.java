@@ -42,7 +42,6 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     public List<ResourceRelation> findByParentId(Long parentId) {
         LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ResourceRelationPO::getParentId, parentId);
-        queryWrapper.orderByAsc(ResourceRelationPO::getOrderNum);
 
         List<ResourceRelationPO> poList = resourceRelationMapper.selectList(queryWrapper);
         return poList.stream()

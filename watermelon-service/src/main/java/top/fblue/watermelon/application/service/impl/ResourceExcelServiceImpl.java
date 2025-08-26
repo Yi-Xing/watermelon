@@ -415,20 +415,13 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         }
         String cellValue;
         switch (cell.getCellType()) {
-            case STRING:
-                cellValue = cell.getStringCellValue();
-                break;
-            case NUMERIC:
-                cellValue = String.valueOf((int) cell.getNumericCellValue());
-                break;
-            case BOOLEAN:
-                cellValue = String.valueOf(cell.getBooleanCellValue());
-                break;
-            case FORMULA:
-                cellValue = cell.getCellFormula();
-                break;
-            default:
+            case STRING -> cellValue = cell.getStringCellValue();
+            case NUMERIC -> cellValue = String.valueOf((int) cell.getNumericCellValue());
+            case BOOLEAN -> cellValue = String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cellValue = cell.getCellFormula();
+            default -> {
                 return "";
+            }
         }
         return cellValue.trim();
     }
@@ -439,13 +432,10 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         }
         Integer orderNum = null;
         switch (orderCell.getCellType()) {
-            case STRING:
-                orderNum = Integer.parseInt(orderCell.getStringCellValue());
-                break;
-            case NUMERIC:
-                orderNum = (int) orderCell.getNumericCellValue();
-                break;
-            default:
+            case STRING -> orderNum = Integer.parseInt(orderCell.getStringCellValue());
+            case NUMERIC -> orderNum = (int) orderCell.getNumericCellValue();
+            default -> {
+            }
         }
         return orderNum;
     }

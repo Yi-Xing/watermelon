@@ -80,7 +80,7 @@ public class RoleRepositoryImpl implements RoleRepository {
     @Override
     public List<Role> findByCondition(String keyword, Integer state, int pageNum, int pageSize) {
         QueryWrapper<RolePO> queryWrapper = buildQueryWrapper(keyword, state);
-        queryWrapper.orderByDesc("order_num").orderByDesc("updated_time");
+        queryWrapper.orderByAsc("order_num").orderByDesc("updated_time");
         
         Page<RolePO> page = new Page<>(pageNum, pageSize);
         IPage<RolePO> pageResult = roleMapper.selectPage(page, queryWrapper);
