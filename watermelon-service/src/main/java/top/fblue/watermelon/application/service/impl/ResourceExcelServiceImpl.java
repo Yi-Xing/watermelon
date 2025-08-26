@@ -77,6 +77,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
         Set<String> codeSet = new HashSet<>();
 
 
+        // 1. excel 数据格式校验
         for (int i = 0; i < dataList.size(); i++) {
             ResourceExcelVO data = dataList.get(i);
             int rowNumber = i + 2; // Excel行号从2开始（第1行是标题）
@@ -115,7 +116,50 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             codeSet.add(data.getCode());
         }
 
+        // 2. 处理需要删除的资源ID和检查关联关系
+        List<String> deleteCodes = processDeleteResourcesAndCheckRelations(codeSet);
+        if (!deleteCodes.isEmpty()) {
+            errors.add(String.format("以下资源存在关联关系，无法删除: %s", String.join("\n", deleteCodes)));
+        }
         return errors;
+    }
+
+    /**
+     * 处理需要删除的资源ID和检查关联关系
+     *
+     * @param codeSet Excel中的资源代码集合
+     * @return 包含需要删除资源代码的列表
+     */
+    private List<String> processDeleteResourcesAndCheckRelations(Set<String> codeSet) {
+        // 获取数据库中所有资源
+        List<ResourceNode> existingResources = resourceRepository.getAllResources();
+        Map<String, ResourceNode> existingCodeToResource = existingResources.stream()
+                .collect(Collectors.toMap(ResourceNode::getCode, resource -> resource));
+        Map<Long, String> idToCode = existingResources.stream()
+                .collect(Collectors.toMap(ResourceNode::getId, ResourceNode::getCode));
+
+        // 计算需要删除资源ID
+        Set<Long> deleteIds = new HashSet<>();
+        // 处理需要删除的资源（数据库存在，Excel不存在）
+        for (Map.Entry<String, ResourceNode> entry : existingCodeToResource.entrySet()) {
+            if (!codeSet.contains(entry.getKey())) {
+                deleteIds.add(entry.getValue().getId());
+            }
+        }
+
+        List<String> deleteCodes = new ArrayList<>();
+        // 判断要被删除资源id是否存在关联关系
+        List<ResourceRelation> resourceRelationList = resourceRelationRepository.findByResourceIds(new ArrayList<>(deleteIds));
+        for (ResourceRelation resourceRelation : resourceRelationList) {
+            if (deleteIds.contains(resourceRelation.getParentId())) {
+                deleteCodes.add(idToCode.get(resourceRelation.getParentId()));
+            }
+            if (deleteIds.contains(resourceRelation.getChildId())) {
+                deleteCodes.add(idToCode.get(resourceRelation.getChildId()));
+            }
+        }
+
+        return deleteCodes;
     }
 
     @Override

@@ -101,4 +101,24 @@ public class ResourceRelationRepositoryImpl implements ResourceRelationRepositor
     public int deleteByIds(List<Long> ids) {
         return resourceRelationMapper.deleteByIds(ids);
     }
+
+    @Override
+    public List<ResourceRelation> findByResourceIds(List<Long> resourceIds) {
+        if (resourceIds == null || resourceIds.isEmpty()) {
+            return List.of();
+        }
+        
+        // 查询资源作为父级或子级存在的所有关系
+        LambdaQueryWrapper<ResourceRelationPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.and(wrapper -> wrapper
+                .in(ResourceRelationPO::getParentId, resourceIds)
+                .or()
+                .in(ResourceRelationPO::getChildId, resourceIds)
+        );
+        
+        List<ResourceRelationPO> poList = resourceRelationMapper.selectList(queryWrapper);
+        return poList.stream()
+                .map(ResourceRelationPOConverter::toDomain)
+                .collect(Collectors.toList());
+    }
 }

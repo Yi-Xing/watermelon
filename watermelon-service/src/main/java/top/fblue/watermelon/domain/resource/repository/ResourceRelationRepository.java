@@ -61,4 +61,11 @@ public interface ResourceRelationRepository {
      * 批量删除资源关系
      */
     int deleteByIds(List<Long> ids);
+
+    /**
+     * 根据资源ID列表批量查询资源关系
+     * @param resourceIds 资源ID列表
+     * @return 资源关系列表
+     */
+    List<ResourceRelation> findByResourceIds(List<Long> resourceIds);
 }
