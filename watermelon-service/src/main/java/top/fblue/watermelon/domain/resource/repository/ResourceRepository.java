@@ -72,4 +72,13 @@ public interface ResourceRepository {
      * 检查指定资源代码是否存在于指定的资源ID列表中
      */
     boolean existsByIdsAndTypeAndStateCode(List<Long> resourceIds, Integer type, Integer state, String code);
+
+    /**
+     * 根据code前缀、type和resourceIds查询资源列表
+     * @param codePrefix code前缀
+     * @param types 资源类型列表
+     * @param resourceIds 资源ID列表
+     * @return 资源列表
+     */
+    List<ResourceNode> findByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds);
 } 

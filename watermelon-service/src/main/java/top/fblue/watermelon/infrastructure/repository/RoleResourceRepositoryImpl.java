@@ -40,22 +40,28 @@ public class RoleResourceRepositoryImpl implements RoleResourceRepository {
         if (roleIds == null || roleIds.isEmpty()) {
             return new ArrayList<>();
         }
-        return roleResourceNodeMapper.selectResourceIdsByRoleIds(roleIds);
+        QueryWrapper<RoleResourceNodePO> wrapper = new QueryWrapper<>();
+        wrapper.select("DISTINCT resource_node_id")
+                .in("role_id", roleIds);
+
+        List<RoleResourceNodePO> poList = roleResourceNodeMapper.selectList(wrapper);
+
+        return roleResourceNodePOConverter.toResourceNodeIdList(poList);
     }
-    
+
     @Override
     public void deleteBatch(Long roleId, List<Long> resourceIds) {
         if (resourceIds == null || resourceIds.isEmpty()) {
             return;
         }
-        
+
         QueryWrapper<RoleResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", roleId);
         queryWrapper.in("resource_node_id", resourceIds);
-        
+
         roleResourceNodeMapper.delete(queryWrapper);
     }
-    
+
     @Override
     public void insertBatch(Long roleId, List<Long> resourceIds) {
         if (resourceIds == null || resourceIds.isEmpty()) {

@@ -51,7 +51,10 @@ public class CurrentUserVO {
 
     /**
      * 可访问的页面列表
+     */
+    private List<String> pageCodeList;
+    /**
      * 可访问的按钮列表
      */
-    private List<Object> roles;
+    private List<String> buttonCodeList;
 }

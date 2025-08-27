@@ -95,26 +95,26 @@ public class ResourceRepositoryImpl implements ResourceRepository {
                 .map(resourceNodePOConverter::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public List<ResourceNode> findByCondition(String name, String code, Integer state, int pageNum, int pageSize) {
         QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(name, code, state);
         queryWrapper.orderByDesc("updated_time");
-        
+
         Page<ResourceNodePO> page = new Page<>(pageNum, pageSize);
         IPage<ResourceNodePO> pageResult = resourceNodeMapper.selectPage(page, queryWrapper);
-        
+
         return pageResult.getRecords().stream()
                 .map(resourceNodePOConverter::toDomain)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public Long countByCondition(String name, String code, Integer state) {
         QueryWrapper<ResourceNodePO> queryWrapper = buildQueryWrapper(name, code, state);
         return resourceNodeMapper.selectCount(queryWrapper);
     }
-    
+
     /**
      * 构建查询条件
      */
@@ -132,7 +132,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         if (state != null) {
             queryWrapper.eq("state", state);
         }
-        
+
         return queryWrapper;
     }
 
@@ -161,5 +161,22 @@ public class ResourceRepositoryImpl implements ResourceRepository {
                 .eq("code", code);
 
         return resourceNodeMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public List<ResourceNode> findByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds) {
+        if (StringUtil.isEmpty(codePrefix) || types == null || types.isEmpty() || resourceIds == null || resourceIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", resourceIds)
+                .in("type", types)
+                .likeRight("code", codePrefix);// 使用likeRight实现"code%"查询
+
+        List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);
+        return poList.stream()
+                .map(resourceNodePOConverter::toDomain)
+                .collect(Collectors.toList());
     }
 }

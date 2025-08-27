@@ -185,4 +185,14 @@ public class ResourceDomainServiceImpl implements ResourceDomainService {
     public List<ResourceNode> findAll(){
         return resourceRepository.getAllResources();
     }
+
+    @Override
+    public List<ResourceNode> getResourcesByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds) {
+        if (StringUtil.isEmpty(codePrefix) || types == null || types.isEmpty() || resourceIds == null || resourceIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 调用仓储层方法查询资源
+        return resourceRepository.findByCodePrefixAndTypesAndIds(codePrefix, types, resourceIds);
+    }
 }

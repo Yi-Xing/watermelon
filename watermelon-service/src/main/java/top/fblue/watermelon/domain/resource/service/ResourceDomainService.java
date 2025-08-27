@@ -78,4 +78,13 @@ public interface ResourceDomainService {
      * 获取所有资源
      */
     List<ResourceNode> findAll();
+
+    /**
+     * 根据code前缀、type和resourceIds查询资源列表
+     * @param codePrefix code前缀
+     * @param types 资源类型列表
+     * @param resourceIds 资源ID列表
+     * @return 资源列表
+     */
+    List<ResourceNode> getResourcesByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds);
 } 

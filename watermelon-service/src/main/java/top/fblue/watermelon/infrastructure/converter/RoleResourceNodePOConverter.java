@@ -28,4 +28,13 @@ public class RoleResourceNodePOConverter {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 转换为POList
+     */
+    public List<Long> toResourceNodeIdList(List<RoleResourceNodePO> list) {
+        return list.stream()
+                .map(RoleResourceNodePO::getResourceNodeId)
+                .toList();
+    }
 } 

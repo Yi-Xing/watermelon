@@ -10,6 +10,7 @@ import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
 import top.fblue.watermelon.common.context.UserContext;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
+import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.entity.UserToken;
@@ -17,7 +18,9 @@ import top.fblue.watermelon.domain.user.service.TokenDomainService;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.role.service.RoleDomainService;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import lombok.extern.slf4j.Slf4j;
+import top.fblue.watermelon.infrastructure.config.SystemConfig;
 
 import java.util.List;
 
@@ -42,6 +45,9 @@ public class AuthApplicationServiceImpl implements AuthApplicationService {
 
     @Resource
     private ResourceDomainService resourceDomainService;
+
+    @Resource
+    private SystemConfig systemConfig;
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -89,12 +95,28 @@ public class AuthApplicationServiceImpl implements AuthApplicationService {
      */
     @Override
     public CurrentUserVO getCurrentUser() {
-        // 通过UserContext获取当前登录用户
+        // 1. 通过UserContext获取当前登录用户
         UserTokenDTO userToken = UserContext.getCurrentUserInfo();
 
+        // 2. 查询用户信息
         User user = userDomainService.getUserById(userToken.getUserId());
-        // 之后需要返回用户可使用的资源
-        return userConverter.toVO(user, userToken);
+
+        // 3. 获取用户关联的角色ID列表
+        List<Long> roleIds = userDomainService.getUserRoles(user.getId());
+
+        // 4. 获取所有角色的资源权限
+        List<Long> resourceIds = roleDomainService.getRoleResourceIdsByRoleIds(roleIds);
+
+
+        // 5. 获取指定code前缀的页面和按钮资源
+        List<ResourceNode> resourcesList = resourceDomainService.getResourcesByCodePrefixAndTypesAndIds(
+                systemConfig.getCode(),
+                List.of(ResourceTypeEnum.PAGE.getCode(), ResourceTypeEnum.BUTTON.getCode()),
+                resourceIds
+        );
+
+        // 6. 数据组装
+        return userConverter.toVO(user, userToken,resourcesList,systemConfig.getCode());
     }
 
     /**
@@ -123,7 +145,7 @@ public class AuthApplicationServiceImpl implements AuthApplicationService {
         // 3. 获取所有角色的资源权限
         List<Long> resourceIds = roleDomainService.getRoleResourceIdsByRoleIds(roleIds);
 
-        if (resourceIds == null ||resourceIds.isEmpty()) {
+        if (resourceIds == null || resourceIds.isEmpty()) {
             // 角色没有资源权限
             return false;
         }

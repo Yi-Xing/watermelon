@@ -9,7 +9,9 @@ import top.fblue.watermelon.application.vo.UserBaseVO;
 import top.fblue.watermelon.application.vo.RoleInfoVO;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.enums.StateEnum;
+import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
+import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
@@ -90,7 +92,7 @@ public class UserConverter {
                 .remark(dto.getRemark())
                 .build();
     }
-    
+
     public User toUser(UpdateUserDTO dto) {
         if (dto == null) {
             return null;
@@ -123,7 +125,7 @@ public class UserConverter {
                 .name(user.getUsername())
                 .build();
     }
-    
+
     /**
      * Role列表转换为RoleInfoVO列表
      */
@@ -131,12 +133,12 @@ public class UserConverter {
         if (roles == null || roles.isEmpty()) {
             return new ArrayList<>();
         }
-        
+
         return roles.stream()
                 .map(this::convertToRoleInfoVO)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * Role转换为RoleInfoVO
      */
@@ -144,7 +146,7 @@ public class UserConverter {
         if (role == null) {
             return null;
         }
-        
+
         return RoleInfoVO.builder()
                 .id(role.getId())
                 .name(role.getName())
@@ -156,9 +158,23 @@ public class UserConverter {
     /**
      * User转换为UserVO
      */
-    public CurrentUserVO toVO(User user, UserTokenDTO userToken) {
+    public CurrentUserVO toVO(User user, UserTokenDTO userToken, List<ResourceNode> resourcesList, String codePrefix) {
         if (user == null) {
             return null;
+        }
+        // 处理资源列表，分离页面和按钮，并删除code的系统前缀
+        List<String> pageCodeList = new ArrayList<>();
+        List<String> buttonCodeList = new ArrayList<>();
+
+        codePrefix += ":";
+        for (ResourceNode resource : resourcesList) {
+            // 删除 "watermelon:" 前缀
+            String codeWithoutPrefix = resource.getCode().substring(codePrefix.length());
+            if (ResourceTypeEnum.PAGE.getCode().equals(resource.getType())){
+                pageCodeList.add(codeWithoutPrefix);
+            } else if (ResourceTypeEnum.BUTTON.getCode().equals(resource.getType())){
+                buttonCodeList.add(codeWithoutPrefix);
+            }
         }
 
         return CurrentUserVO.builder()
@@ -170,6 +186,8 @@ public class UserConverter {
                 .createdTime(DateTimeUtil.formatDateTime(user.getCreatedTime()))
                 .updatedTime(DateTimeUtil.formatDateTime(user.getUpdatedTime()))
                 .expireTime(DateTimeUtil.formatDateTime(userToken.getExpireTime()))
+                .pageCodeList(pageCodeList)
+                .buttonCodeList(buttonCodeList)
                 .build();
     }
 
