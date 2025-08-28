@@ -87,7 +87,6 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 errors.add(String.format("第%d行: 资源名称不能为空", rowNumber));
             } else if (data.getName().contains("/")) {
                 errors.add(String.format("第%d行: 资源名称不能包含'/'字符", rowNumber));
-
             }
 
             // 校验 code 是否为空 和 是否已存在
