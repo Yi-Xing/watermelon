@@ -170,9 +170,9 @@ public class UserConverter {
         for (ResourceNode resource : resourcesList) {
             // 删除 "watermelon:" 前缀
             String codeWithoutPrefix = resource.getCode().substring(codePrefix.length());
-            if (ResourceTypeEnum.PAGE.getCode().equals(resource.getType())){
+            if (ResourceTypeEnum.PAGE.getCode().equals(resource.getType())) {
                 pageCodeList.add(codeWithoutPrefix);
-            } else if (ResourceTypeEnum.BUTTON.getCode().equals(resource.getType())){
+            } else if (ResourceTypeEnum.BUTTON.getCode().equals(resource.getType())) {
                 buttonCodeList.add(codeWithoutPrefix);
             }
         }

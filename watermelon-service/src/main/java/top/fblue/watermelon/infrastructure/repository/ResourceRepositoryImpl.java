@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.repository.ResourceRepository;
@@ -164,7 +165,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public List<ResourceNode> findByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds) {
+    public List<ResourceNode> findByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds, Integer state) {
         if (StringUtil.isEmpty(codePrefix) || types == null || types.isEmpty() || resourceIds == null || resourceIds.isEmpty()) {
             return new ArrayList<>();
         }
@@ -172,6 +173,7 @@ public class ResourceRepositoryImpl implements ResourceRepository {
         QueryWrapper<ResourceNodePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("id", resourceIds)
                 .in("type", types)
+                .eq("state", state)
                 .likeRight("code", codePrefix);// 使用likeRight实现"code%"查询
 
         List<ResourceNodePO> poList = resourceNodeMapper.selectList(queryWrapper);

@@ -21,6 +21,7 @@ import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import lombok.extern.slf4j.Slf4j;
 import top.fblue.watermelon.infrastructure.config.SystemConfig;
+import top.fblue.watermelon.common.enums.StateEnum;
 
 import java.util.List;
 
@@ -112,11 +113,12 @@ public class AuthApplicationServiceImpl implements AuthApplicationService {
         List<ResourceNode> resourcesList = resourceDomainService.getResourcesByCodePrefixAndTypesAndIds(
                 systemConfig.getCode(),
                 List.of(ResourceTypeEnum.PAGE.getCode(), ResourceTypeEnum.BUTTON.getCode()),
-                resourceIds
+                resourceIds,
+                StateEnum.ENABLE.getCode()
         );
 
         // 6. 数据组装
-        return userConverter.toVO(user, userToken,resourcesList,systemConfig.getCode());
+        return userConverter.toVO(user, userToken, resourcesList, systemConfig.getCode());
     }
 
     /**
