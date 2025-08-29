@@ -37,14 +37,15 @@ public class SqlLogInterceptor implements Interceptor {
         MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
         Object parameter = invocation.getArgs()[1];
         String methodName = invocation.getMethod().getName();
-
         // 获取SQL语句
         BoundSql boundSql = mappedStatement.getBoundSql(parameter);
-        String sql = getSql(boundSql, parameter, mappedStatement.getConfiguration());
 
         try {
             // 执行原始方法
             Object result = invocation.proceed();
+
+            // 因为 updated_time、updated_by 等字段通过 MetaObjectHandler 填充，所以拼接 sql 要在 proceed 之后
+            String sql = getSql(boundSql, parameter, mappedStatement.getConfiguration());
 
             // 计算执行时间
             long duration = System.currentTimeMillis() - startTime;
@@ -56,6 +57,7 @@ public class SqlLogInterceptor implements Interceptor {
             return result;
 
         } catch (Exception e) {
+            String sql = getSql(boundSql, parameter, mappedStatement.getConfiguration());
             // 打印错误信息
             printSqlError(sql, e);
             throw e;
@@ -143,7 +145,8 @@ public class SqlLogInterceptor implements Interceptor {
                 return;
             }
         }
-        log.info("[{}] - SQL: {}", duration, sql);
+        log.info("[{}] - count: {} - SQL: {}",
+                duration, result, sql);
     }
 
     /**
