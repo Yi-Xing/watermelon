@@ -8,10 +8,11 @@ import top.fblue.watermelon.common.context.UserContext;
 import java.time.LocalDateTime;
 
 /**
+ * 自动填充元数据处理器
  * 在插入和更新数据时自动填充指定字段
  */
 @Component
-public class MyMetaObjectHandler implements MetaObjectHandler {
+public class AutoFillMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
@@ -29,8 +30,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     }
 
     private Long getCurrentUserId() {
-        // 从SecurityContext获取当前用户ID mi:RequestContext.getRequestContext().getUserName()
-        // 这里需要根据你的认证方式来实现
-        return UserContext.getCurrentUserId(); // 临时返回1L，实际应该从认证上下文获取
+        return UserContext.getCurrentUserId(); 
     }
 }
