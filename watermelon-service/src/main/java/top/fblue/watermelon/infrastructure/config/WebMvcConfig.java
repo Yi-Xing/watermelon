@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import top.fblue.watermelon.infrastructure.interceptor.TokenAuthInterceptor;
 import top.fblue.watermelon.infrastructure.interceptor.PermissionAuthInterceptor;
+import top.fblue.watermelon.infrastructure.interceptor.TraceInterceptor;
 
 /**
  * Web MVC配置类
@@ -20,17 +21,25 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Resource
     private PermissionAuthInterceptor permissionAuthInterceptor;
 
+    @Resource
+    private TraceInterceptor traceInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 1. Token认证拦截器（第一优先级）
+        // 1. 设置 TraceContext
+        registry.addInterceptor(traceInterceptor)
+                .addPathPatterns("/api/**")
+                .order(1);
+
+        // 2. Token认证拦截器
         registry.addInterceptor(tokenAuthInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/user/login")
-                .order(1);
+                .order(2);
         
-        // 2. 权限验证拦截器（第二优先级）
+        // 3. 权限验证拦截器
         registry.addInterceptor(permissionAuthInterceptor)
                 .addPathPatterns("/api/admin/**")
-                .order(2);
+                .order(3);
     }
 }
