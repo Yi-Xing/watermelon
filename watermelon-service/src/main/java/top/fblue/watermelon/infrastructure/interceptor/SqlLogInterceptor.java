@@ -98,7 +98,7 @@ public class SqlLogInterceptor implements Interceptor {
                 sql = sql.replaceFirst("\\?", formatParameter(value));
             }
         } catch (Exception e) {
-            log.warn("格式化SQL参数时出错: {}", e.getMessage());
+            log.error("格式化SQL参数时出错:sql{},e {}", sql, e.getMessage(), e);
         }
 
         return sql;

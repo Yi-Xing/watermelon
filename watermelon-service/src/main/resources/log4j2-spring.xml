@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <!-- 定义追踪上下文的日志格式 -->
+        <!-- OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+        <!-- 时间 日志级别 traceId 类名.方法名.行号 线程名 日志内容 换行-->
+        <Property name="format">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] %C.%M:%L [%t] - %msg%n</Property>
+        <Property name="filePath">logs</Property>
+        <Property name="errFilePath">logs/error</Property>
+        <Property name="filePattern">-%d{yyyy-MM-dd_HH}_%i.log</Property>
+        <Property name="fileSize">100MB</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${format}"/>
+        </Console>
+
+        <!-- 文件输出 -->
+        <RollingFile name="RollingFile"
+                     fileName="${filePath}/watermelon.log"
+                     filePattern="${filePath}/watermelon${filePattern}">
+            <PatternLayout pattern="${format}"/>
+            <Policies>
+                <!-- 每天滚动，单文件最大100MB -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${fileSize}"/>
+            </Policies>
+            <!-- 最多保留30个滚动文件 -->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="ErrorFile" fileName="${errFilePath}/watermelon-error.log"
+                     filePattern="${errFilePath}/watermelon-error${filePattern}">
+            <!-- ERROR 级别以上的日志通过-->
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${format}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${fileSize}"/>
+            </Policies>
+            <!--  不限制文件索引的最大值 -->
+            <DefaultRolloverStrategy fileIndex="nomax"/>
+        </RollingFile>
+        <Async name="AsyncRollingFile">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <!-- AsyncLogger 需要 jvm 启动参数才能全局启用-->
+        <!--        &lt;!&ndash;  includeLocation 默认 false，是否在日志事件里记录调用位置（类名、方法名、行号）&ndash;&gt;-->
+        <!--        <AsyncLogger name="AsyncRollingFile" level="INFO" includeLocation="true">-->
+        <!--            <AppenderRef ref="RollingFile"/>-->
+        <!--            <AppenderRef ref="ErrorFile"/>-->
+        <!--        </AsyncLogger>-->
+
+
+        <!-- 根记录器配置 -->
+        <Root level="INFO">
+            <!-- 开发环境：控制台 + 文件 + 错误文件 -->
+            <SpringProfile name="dev">
+                <AppenderRef ref="Console"/>
+                <AppenderRef ref="AsyncRollingFile"/>
+            </SpringProfile>
+
+            <!-- 生产环境：文件 + 错误文件（无控制台） -->
+            <SpringProfile name="prod">
+                <AppenderRef ref="AsyncRollingFile"/>
+            </SpringProfile>
+
+            <!-- 默认环境：控制台 + 文件 + 错误文件 -->
+            <SpringProfile name="!dev,!prod">
+                <AppenderRef ref="Console"/>
+                <AppenderRef ref="AsyncRollingFile"/>
+            </SpringProfile>
+        </Root>
+    </Loggers>
+</Configuration>

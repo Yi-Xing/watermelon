@@ -38,7 +38,7 @@ public class TraceInterceptor implements HandlerInterceptor {
                         request.getMethod(), request.getRequestURI(), response.getStatus());
             }
         } catch (Exception logEx) {
-            log.warn("Failed to log request completion", logEx);
+            log.error("Failed to log request completion", logEx);
         } finally {
             // 清除追踪上下文
             TracingUtils.clearTraceContext();
