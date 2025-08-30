@@ -171,7 +171,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                     .doWrite(data);
             return outputStream.toByteArray();
         } catch (Exception e) {
-            log.error("Excel导出失败，数据类型: {}, sheet名称: {}, 错误信息: {}",
+            log.warn("Excel导出失败，数据类型: {}, sheet名称: {}, 错误信息: {}",
                     clazz.getSimpleName(), sheetName, e.getMessage(), e);
             throw new BusinessException("导出Excel文件失败: " + e.getMessage());
         }
@@ -303,7 +303,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             return outputStream.toByteArray();
 
         } catch (Exception e) {
-            log.error("生成动态列Excel失败: {}", e.getMessage(), e);
+            log.warn("生成动态列Excel失败: {}", e.getMessage(), e);
             throw new BusinessException("生成Excel文件失败: " + e.getMessage());
         }
     }
@@ -396,7 +396,7 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
             }
 
         } catch (Exception e) {
-            log.error("读取资源关联Excel文件失败", e);
+            log.warn("读取资源关联Excel文件失败", e);
             throw new BusinessException("读取Excel文件失败: " + e.getMessage());
         }
         if (result.isEmpty()) {

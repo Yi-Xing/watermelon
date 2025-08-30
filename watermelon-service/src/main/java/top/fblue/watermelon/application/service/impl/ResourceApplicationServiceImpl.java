@@ -118,7 +118,7 @@ public class ResourceApplicationServiceImpl implements ResourceApplicationServic
             // 4. 批量导入（带事务）
             return resourceExcelService.batchImportResources(importDTOs);
         } catch (Exception e) {
-            log.error("导入Excel失败", e);
+            log.warn("导入Excel失败", e);
             return ExcelImportResultVO.builder().success(false).errors(List.of("导入Excel失败: " + e.getMessage())).build();
         }
     }

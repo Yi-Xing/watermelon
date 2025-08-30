@@ -188,7 +188,7 @@ public class ResourceRelationApplicationServiceImpl implements ResourceRelationA
         } catch (InterruptedException e) {
             throw new BusinessException("系统繁忙，请稍后重试");
         } catch (Exception e) {
-            log.error("导入资源关联关系失败", e);
+            log.warn("导入资源关联关系失败", e);
             throw new BusinessException("导入失败: " + e.getMessage());
         } finally {
             resourceRelationLock.unlock();

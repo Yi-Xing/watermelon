@@ -87,7 +87,7 @@ public class UserTokenJwtRepositoryImpl implements UserTokenRepository {
                     .build();
 
         } catch (Exception e) {
-            log.error("获取JWT令牌信息失败: {}", e.getMessage());
+            log.warn("获取JWT令牌信息失败: {}", e.getMessage());
             return null;
         }
     }
