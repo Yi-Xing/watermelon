@@ -12,6 +12,10 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "system")
 public class SystemConfig {
     /**
+     * 系统 环境
+     */
+    private String env;
+    /**
      * 系统 code
      */
     private String code;

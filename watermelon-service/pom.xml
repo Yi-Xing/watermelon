@@ -39,12 +39,6 @@
             <artifactId>mybatis-plus-jsqlparser</artifactId>
             <version>3.5.12</version>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.2.20</version>
-        </dependency>
-
 
         <!-- web -->
         <dependency>
