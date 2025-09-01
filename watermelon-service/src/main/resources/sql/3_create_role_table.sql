@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS role(
     `id` INT AUTO_INCREMENT COMMENT '角色ID',
-    `name` VARCHAR(50) NOT NULL COMMENT '角色名称',
+    `name` VARCHAR(20) NOT NULL COMMENT '角色名称',
     `order_num` INT NOT NULL DEFAULT 0 COMMENT '显示顺序',
     `state` TINYINT NOT NULL DEFAULT 1 COMMENT '状态;1 启用 2 禁用',
     `remark` VARCHAR(500) DEFAULT '' COMMENT '备注',
