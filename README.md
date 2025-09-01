@@ -1,7 +1,7 @@
 # Watermelon 用户权限管理系统
 <p align="center">
   <a href="https://github.com/Yi-Xing/watermelon" target="_blank">
-   <img src="https://raw.githubusercontent.com/Yi-Xing/watermelon-vue/main/src/assets/logo.webp" width="200" height="200" alt="Watermelon Logo">
+   <img src="https://raw.githubusercontent.com/Yi-Xing/watermelon/img/logo.webp" width="200" height="200" alt="Watermelon Logo">
   </a>
 </p>
 
@@ -87,26 +87,7 @@ watermelon/
 ## 📊 数据库设计
 
 ### 核心表结构
-
-```sql
--- 用户表
-user (id, account, username, phone, email, password, state, ...)
-
--- 角色表  
-role (id, name, description, state, ...)
-
--- 用户角色关联表
-user_role (user_id, role_id)
-
--- 资源节点表
-resource_node (id, name, code, type, url, parent_id, ...)
-
--- 角色资源关联表
-role_resource_node (role_id, resource_node_id)
-
--- 资源关系表
-resource_relation (id, parent_id, child_id)
-```
+![img.png](img/sql.png)
 
 ## 🛠️ 快速开始
 
@@ -127,6 +108,7 @@ cd watermelon
 2. **数据库初始化**
 ```bash
 # 执行数据库脚本
+# 默认账号：admin@fblue.top 密码：admin123
 watermelon-service/src/main/resources/sql
 ```
 
