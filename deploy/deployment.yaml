@@ -7,6 +7,7 @@ data:
     mysql_url: "xxx:3306"
     mysql_username: "root"
     mysql_password: "xxx"
+    jwt_secret: "xxx"
 ---
 # 指定资源的 API 版本。apps/v1 是用于 Deployment 的标准版本。
 apiVersion: apps/v1
