@@ -13,7 +13,7 @@ public class CreateRoleDTO {
      * 角色名称
      */
     @NotBlank(message = "角色名称不能为空")
-    @Size(min = 3, max = 10, message = "角色名称长度必须在3-10个字符之间")
+    @Size(min = 2, max = 10, message = "角色名称长度必须在2~10个字符之间")
     private String name;
     
     /**

@@ -20,7 +20,7 @@ public class UpdateResourceDTO {
      * 资源名称 - 必填，2~10个字符，不能包含"/"
      */
     @NotBlank(message = "资源名称不能为空")
-    @Size(min = 2, max = 10, message = "资源名称长度必须在2-10个字符之间")
+    @Size(min = 2, max = 10, message = "资源名称长度必须在2~10个字符之间")
     @Pattern(regexp = "^[^/]*$", message = "资源名称不能包含'/'字符")
     private String name;
     

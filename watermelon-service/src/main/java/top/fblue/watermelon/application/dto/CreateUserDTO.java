@@ -16,10 +16,10 @@ import java.util.List;
 public class CreateUserDTO {
     
     /**
-     * 用户名称 - 必填，3~10个字符
+     * 用户名称 - 必填，2~10个字符
      */
     @NotBlank(message = "用户名称不能为空")
-    @Size(min = 3, max = 10, message = "用户名称长度必须在3~10个字符之间")
+    @Size(min = 2, max = 10, message = "用户名称长度必须在2~10个字符之间")
     private String name;
     
     /**
