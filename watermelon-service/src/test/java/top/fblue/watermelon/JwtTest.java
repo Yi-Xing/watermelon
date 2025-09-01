@@ -1,14 +1,23 @@
 package top.fblue.watermelon;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import top.fblue.watermelon.common.utils.EncryptionUtil;
+
+import java.security.MessageDigest;
 import java.util.Base64;
 
 /**
- * 主方法 - 用于生成JWT密钥
- * 运行此方法可以生成安全的JWT密钥
+ * 用于生成JWT密钥
  */
-public class JwtMain {
+@SpringBootTest
+public class JwtTest {
 
-    public static void main(String[] args) {
+    /**
+     * 生成 jwt 秘钥
+     */
+    @Test
+    void generateJwtSecret() {
         System.out.println("=== JWT密钥生成工具 ===");
         System.out.println();
 
