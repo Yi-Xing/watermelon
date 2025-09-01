@@ -1,7 +1,7 @@
 # Watermelon 用户权限管理系统
 <p align="center">
   <a href="https://github.com/Yi-Xing/watermelon" target="_blank">
-   <img src="https://raw.githubusercontent.com/Yi-Xing/watermelon/img/logo.webp" width="200" height="200" alt="Watermelon Logo">
+   <img src="https://raw.githubusercontent.com/Yi-Xing/watermelon/main/img/logo.webp" width="200" height="200" alt="Watermelon Logo">
   </a>
 </p>
 
