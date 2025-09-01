@@ -38,8 +38,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .order(2);
         
         // 3. 权限验证拦截器
-        registry.addInterceptor(permissionAuthInterceptor)
-                .addPathPatterns("/api/admin/**")
-                .order(3);
+//        registry.addInterceptor(permissionAuthInterceptor)
+//                .addPathPatterns("/api/admin/**")
+//                .order(3);
     }
 }
