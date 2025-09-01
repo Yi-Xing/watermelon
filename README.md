@@ -8,8 +8,17 @@
 ## 项目简介
 
 Watermelon 是一个基于 Spring Boot 3.2 的用户权限管理系统，采用领域驱动设计（DDD）架构模式，实现了完整的 RBAC（基于角色的访问控制）权限模型。系统提供用户管理、角色管理、资源管理等核心功能，支持细粒度的权限控制。
-- 前端：https://github.com/Yi-Xing/watermelon-vue
-- 后端：https://github.com/Yi-Xing/watermelon
+
+### 🌐 前端项目
+- **项目地址**: [watermelon-vue](https://github.com/Yi-Xing/watermelon-vue)
+- **系统截图**: [查看系统截图](https://github.com/Yi-Xing/watermelon-vue?tab=readme-ov-file#-%E7%B3%BB%E7%BB%9F%E6%88%AA%E5%9B%BE)
+
+### ⚙️ 后端项目
+- **项目地址**: [watermelon](https://github.com/Yi-Xing/watermelon)
+
+### 📝 问题反馈
+- **问题反馈**: [提交 Issue](https://github.com/Yi-Xing/watermelon/issues)
+
 ## 🏗️ 系统架构
 
 ### 技术栈
@@ -201,5 +210,5 @@ kubectl apply -f deploy/deployment.yaml
 
 如有问题或建议，请通过以下方式联系：
 
-- 问题反馈: https://github.com/Yi-Xing/watermelon/issues
+- **问题反馈**: [提交 Issue](https://github.com/Yi-Xing/watermelon/issues)
 
