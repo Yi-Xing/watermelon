@@ -180,8 +180,9 @@ docker run -d \
   -p 8080:8080 \
   -e profile_name=prod \
   -e mysql_url=your-mysql-host:3306 \
-  -e mysql_username=root \
+  -e mysql_username=root \jwt_secret
   -e mysql_password=your-password \
+  -e jwt_secret=your-secret \
   watermelon:latest
 ```
 
