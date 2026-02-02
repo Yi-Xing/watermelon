@@ -9,15 +9,21 @@
 
 Watermelon 是一个基于 Spring Boot 3.2 的用户权限管理系统，采用领域驱动设计（DDD）架构模式，实现了完整的 RBAC（基于角色的访问控制）权限模型。系统提供用户管理、角色管理、资源管理等核心功能，支持细粒度的权限控制。
 
-### 🌐 前端项目
-- **项目地址**: [watermelon-vue](https://github.com/Yi-Xing/watermelon-vue)
-- **系统截图**: [查看系统截图](https://github.com/Yi-Xing/watermelon-vue?tab=readme-ov-file#-%E7%B3%BB%E7%BB%9F%E6%88%AA%E5%9B%BE)
+## 🔗 相关链接
 
-### ⚙️ 后端项目
-- **项目地址**: [watermelon](https://github.com/Yi-Xing/watermelon)
+<div align="center">
 
-### 📝 问题反馈
-- **问题反馈**: [提交 Issue](https://github.com/Yi-Xing/watermelon/issues)
+### 📦 项目仓库
+
+[![前端项目](https://img.shields.io/badge/🌐_前端项目-watermelon--vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white)](https://github.com/Yi-Xing/watermelon-vue)
+[![后端项目](https://img.shields.io/badge/⚙️_后端项目-watermelon-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://github.com/Yi-Xing/watermelon)
+
+### 📸 文档与支持
+
+[![系统截图](https://img.shields.io/badge/📸_系统截图-查看演示-FF6B6B?style=for-the-badge&logo=image&logoColor=white)](https://github.com/Yi-Xing/watermelon-vue?tab=readme-ov-file#-%E7%B3%BB%E7%BB%9F%E6%88%AA%E5%9B%BE)
+[![问题反馈](https://img.shields.io/badge/💬_问题反馈-提交_Issue-238636?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Yi-Xing/watermelon/issues)
+
+</div>
 
 ## 🏗️ 系统架构
 
@@ -208,7 +214,11 @@ kubectl apply -f deploy/deployment.yaml
 
 ## 📞 联系方式
 
-如有问题或建议，请通过以下方式联系：
+<div align="center">
 
-- **问题反馈**: [提交 Issue](https://github.com/Yi-Xing/watermelon/issues)
+如有问题或建议，欢迎通过 GitHub Issues 反馈交流
+
+[![问题反馈](https://img.shields.io/badge/💬_问题反馈-提交_Issue-238636?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Yi-Xing/watermelon/issues)
+
+</div>
 
