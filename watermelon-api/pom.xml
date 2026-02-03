@@ -9,4 +9,12 @@
         <version>${revision}</version>
     </parent>
     <artifactId>watermelon-api</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>

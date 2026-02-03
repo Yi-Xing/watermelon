@@ -11,6 +11,13 @@
 
 
     <dependencies>
+        <!-- watermelon-api RPC 接口定义 -->
+        <dependency>
+            <groupId>top.fblue</groupId>
+            <artifactId>watermelon-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- 数据库链接 -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -124,6 +131,12 @@
             <groupId>at.favre.lib</groupId>
             <artifactId>bcrypt</artifactId>
             <version>0.10.2</version>
+        </dependency>
+
+        <!-- Dubbo RPC -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
         </dependency>
 
     </dependencies>
