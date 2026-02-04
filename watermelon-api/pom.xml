@@ -16,5 +16,16 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>top.fblue</groupId>
+            <artifactId>water-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <!-- 参数校验 API，供 Dubbo 接口使用 @NotNull、@Valid 等注解 -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>

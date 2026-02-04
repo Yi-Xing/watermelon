@@ -1,4 +1,4 @@
-package com.mi.nr.price.warehouse.response;
+package top.fblue.watermelon.api.response;
 
 
 import lombok.Data;
