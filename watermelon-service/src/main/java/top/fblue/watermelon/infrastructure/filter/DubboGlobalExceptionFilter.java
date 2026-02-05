@@ -22,7 +22,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.PROVIDER;
  * 捕获业务异常、参数校验异常等，统一封装为 ApiResponse 错误返回，不向外抛异常
  */
 @Slf4j
-@Activate(group = PROVIDER, order = -2)
+@Activate(group = PROVIDER)
 public class DubboGlobalExceptionFilter implements Filter {
 
     @Override

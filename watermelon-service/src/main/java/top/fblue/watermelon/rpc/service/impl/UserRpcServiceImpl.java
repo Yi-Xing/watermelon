@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import top.fblue.watermelon.api.response.UserBaseResponse;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
-import top.fblue.watermelon.rpc.converter.UserConverter;
+import top.fblue.watermelon.rpc.converter.UserRpcConverter;
 import top.fblue.watermelon.rpc.service.UserRpcService;
 
 import java.util.List;
@@ -20,17 +20,17 @@ public class UserRpcServiceImpl implements UserRpcService {
     private UserDomainService userDomainService;
 
     @Resource
-    private UserConverter userConverter;
+    private UserRpcConverter userRpcConverter;
 
     @Override
     public UserBaseResponse getUserBase(Long userId) {
         User user = userDomainService.getUserById(userId);
-        return userConverter.toUserBaseResponse(user);
+        return userRpcConverter.toUserBaseResponse(user);
     }
 
     @Override
     public List<UserBaseResponse> getUserBaseList(List<Long> userIdList) {
         List<User> users = userDomainService.getUsersByIds(userIdList);
-        return userConverter.toUserBaseResponseList(users);
+        return userRpcConverter.toUserBaseResponseList(users);
     }
 }

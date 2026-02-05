@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * Dubbo 层用户转换器，负责 User 到 RPC 响应对象（如 UserBaseResponse）的转换
  */
 @Component
-public class UserConverter {
+public class UserRpcConverter {
 
     public UserBaseResponse toUserBaseResponse(User user) {
         if (user == null) {

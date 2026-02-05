@@ -1,5 +1,6 @@
 package top.fblue.watermelon.infrastructure.filter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.Filter;
 import org.apache.dubbo.rpc.Invocation;
@@ -19,7 +20,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.PROVIDER;
  * 校验调用方在 RpcContext 中传递的 rpc-secret 与配置的秘钥是否一致。
  * order = -1，在 DubboExceptionFilter(-2) 之后执行，鉴权异常由 ExceptionFilter 统一捕获。
  */
-@Activate(group = PROVIDER, order = -1)
+@Slf4j
+@Activate(group = PROVIDER)
 public class RpcSecretAuthFilter implements Filter {
 
     @Override
