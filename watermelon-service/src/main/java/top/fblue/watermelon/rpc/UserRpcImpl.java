@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 用户 Dubbo RPC 接口实现
  */
-@DubboService
+@DubboService(version = "1.0.0")
 public class UserRpcImpl implements UserRpc {
 
     @Resource

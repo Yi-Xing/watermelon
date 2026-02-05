@@ -1,2 +1,0 @@
-rpcSecretAuthFilter=top.fblue.watermelon.infrastructure.filter.RpcSecretAuthFilter
-dubboGlobalExceptionFilter=top.fblue.watermelon.infrastructure.filter.DubboGlobalExceptionFilter
