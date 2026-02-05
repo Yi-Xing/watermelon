@@ -26,6 +26,7 @@ public class RpcSecretAuthFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        log.info("RpcSecretAuthFilter start");
         RpcSecretConfig rpcSecretConfig = RpcSecretConfig.getInstance();
         if (rpcSecretConfig == null || !rpcSecretConfig.isAuthEnabled()) {
             return invoker.invoke(invocation);
