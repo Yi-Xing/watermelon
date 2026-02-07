@@ -63,7 +63,6 @@
             <!-- 开发环境：控制台 + 文件 + 错误文件 -->
             <SpringProfile name="dev">
                 <AppenderRef ref="Console"/>
-                <AppenderRef ref="AsyncRollingFile"/>
             </SpringProfile>
 
             <!-- 生产环境：文件 + 错误文件（无控制台） -->
@@ -72,7 +71,8 @@
             </SpringProfile>
 
             <!-- 默认环境：控制台 + 文件 + 错误文件 -->
-            <SpringProfile name="!dev,!prod">
+            <!-- 当既不是 dev 也不是 prod 时生效 -->
+            <SpringProfile name="!dev &amp; !prod">
                 <AppenderRef ref="Console"/>
                 <AppenderRef ref="AsyncRollingFile"/>
             </SpringProfile>
