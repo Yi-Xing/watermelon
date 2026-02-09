@@ -59,6 +59,7 @@
 
 
         <!-- 根记录器配置 -->
+        <!-- 低于 INFO 的日志（TRACE / DEBUG）不会被打印，INFO、WARN、ERROR、FATAL 的日志都会打印。 -->
         <Root level="INFO">
             <!-- 开发环境：控制台 + 文件 + 错误文件 -->
             <SpringProfile name="dev">
