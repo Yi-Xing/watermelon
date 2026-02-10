@@ -4,7 +4,7 @@
         <!-- 定义追踪上下文的日志格式 -->
         <!-- OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
         <!-- 时间 日志级别 traceId 类名.方法名.行号 线程名 日志内容 换行-->
-        <Property name="format">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] %C.%M:%L [%t] - %msg%n</Property>
+        <Property name="format">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}:%X{spanId}] %C.%M:%L [%t] - %msg%n</Property>
         <Property name="filePath">logs</Property>
         <Property name="errFilePath">logs/error</Property>
         <Property name="filePattern">-%d{yyyy-MM-dd_HH}_%i.log</Property>

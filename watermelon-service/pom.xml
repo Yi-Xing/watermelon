@@ -18,6 +18,13 @@
             <version>${revision}</version>
         </dependency>
 
+        <!-- dubbo 框架 -->
+        <dependency>
+            <groupId>top.fblue</groupId>
+            <artifactId>water-dubbo</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- 数据库链接 -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -131,13 +138,6 @@
             <groupId>at.favre.lib</groupId>
             <artifactId>bcrypt</artifactId>
             <version>0.10.2</version>
-        </dependency>
-
-        <!-- Dubbo RPC -->
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-spring-boot-starter</artifactId>
-            <version>${dubbo.version}</version>
         </dependency>
 
     </dependencies>
