@@ -125,8 +125,9 @@ public class AuthApplicationServiceImpl implements AuthApplicationService {
      * 验证token有效性并获取 UserToken
      */
     @Override
-    public UserToken validateToken(String token) {
-        return tokenDomainService.validateToken(token);
+    public UserTokenDTO validateToken(String token) {
+        UserToken userToken = tokenDomainService.validateToken(token);
+        return userConverter.toDto(userToken);
     }
 
     /**

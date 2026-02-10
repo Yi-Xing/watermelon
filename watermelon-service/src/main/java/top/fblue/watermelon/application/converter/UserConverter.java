@@ -15,6 +15,7 @@ import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
+import top.fblue.watermelon.domain.user.entity.UserToken;
 
 import java.util.Map;
 import java.util.List;
@@ -191,4 +192,20 @@ public class UserConverter {
                 .build();
     }
 
+    /**
+     * User转换为UserVO
+     */
+    public UserTokenDTO toDto(UserToken userToken) {
+        if (userToken == null) {
+            return null;
+        }
+        // 构建用户Token DTO
+        return UserTokenDTO
+                .builder()
+                .userId(userToken.getUserId())
+                .token(userToken.getToken())
+                .createdTime(userToken.getCreatedTime())
+                .expireTime(userToken.getExpireTime())
+                .build();
+    }
 }

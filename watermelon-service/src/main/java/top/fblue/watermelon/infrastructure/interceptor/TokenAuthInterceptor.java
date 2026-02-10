@@ -30,7 +30,7 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
         
         // 获取token
-        UserToken userToken;
+        UserTokenDTO userToken;
         String token = "";
         try {
             token = TokenUtil.extractTokenFromRequest(request);
@@ -41,17 +41,9 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
-        // 构建用户Token DTO
-        UserTokenDTO tokenDTO = UserTokenDTO
-                .builder()
-                .userId(userToken.getUserId())
-                .token(userToken.getToken())
-                .createdTime(userToken.getCreatedTime())
-                .expireTime(userToken.getExpireTime())
-                .build();
         
         // 将用户信息存储到请求属性中，供后续拦截器使用
-        request.setAttribute(CURRENT_USER_KEY, tokenDTO);
+        request.setAttribute(CURRENT_USER_KEY, userToken);
 
         log.debug("Token验证成功，用户ID: {}", userToken.getUserId());
         return true;

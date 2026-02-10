@@ -3,6 +3,7 @@ package top.fblue.watermelon.application.service;
 import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.LoginVO;
+import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.domain.user.entity.UserToken;
 
 /**
@@ -33,7 +34,7 @@ public interface AuthApplicationService {
     /**
      * 验证token有效性并获取 UserToken
      */
-    UserToken validateToken(String token);
+    UserTokenDTO validateToken(String token);
 
     /**
      * 判断当前登录用户是否有指定接口资源的code权限
