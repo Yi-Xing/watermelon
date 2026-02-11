@@ -10,7 +10,8 @@ import top.fblue.watermelon.auth.application.service.AuthCommonApplicationServic
 import top.fblue.watermelon.auth.common.dto.UserDTO;
 import top.fblue.watermelon.auth.common.utils.TokenUtil;
 
-import static top.fblue.framework.common.constant.UserConst.CURRENT_USER_KEY;
+import static top.fblue.watermelon.auth.common.constant.UserConst.CURRENT_USER_KEY;
+
 
 /**
  * Token认证拦截器
