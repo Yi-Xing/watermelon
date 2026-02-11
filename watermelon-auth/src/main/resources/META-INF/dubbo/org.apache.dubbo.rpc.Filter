@@ -1,0 +1,2 @@
+dubboUserConsumerFilter=top.fblue.watermelon.auth.infrastructure.filter.DubboUserConsumerFilter
+dubboUserProviderFilter=top.fblue.watermelon.auth.infrastructure.filter.DubboUserProviderFilter
