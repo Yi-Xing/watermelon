@@ -6,10 +6,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import top.fblue.watermelon.application.service.AuthApplicationService;
+import top.fblue.watermelon.application.service.UserAuthApplicationService;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.utils.TokenUtil;
-import top.fblue.watermelon.domain.user.entity.UserToken;
 
 import static top.fblue.watermelon.common.constant.UserConst.CURRENT_USER_KEY;
 
@@ -22,7 +21,7 @@ import static top.fblue.watermelon.common.constant.UserConst.CURRENT_USER_KEY;
 public class TokenAuthInterceptor implements HandlerInterceptor {
 
     @Resource
-    private AuthApplicationService authApplicationService;
+    private UserAuthApplicationService userAuthApplicationService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -35,7 +34,7 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
         try {
             token = TokenUtil.extractTokenFromRequest(request);
             // 验证token
-            userToken = authApplicationService.validateToken(token);
+            userToken = userAuthApplicationService.validateToken(token);
         } catch (Exception e) {
             log.warn("请求token不合法: {}，{}", requestURI, token);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

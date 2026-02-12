@@ -6,7 +6,7 @@ import top.fblue.watermelon.auth.common.dto.UserDTO;
 /**
  * 鉴权服务接口
  */
-public interface AuthCommonApplicationService {
+public interface UserAuthApplicationService {
 
     /**
      * 退出登录

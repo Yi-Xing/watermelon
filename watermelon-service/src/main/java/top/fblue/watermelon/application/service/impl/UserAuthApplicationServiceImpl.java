@@ -4,7 +4,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import top.fblue.watermelon.application.converter.UserConverter;
 import top.fblue.watermelon.application.dto.LoginDTO;
-import top.fblue.watermelon.application.service.AuthApplicationService;
+import top.fblue.watermelon.application.service.UserAuthApplicationService;
 import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.application.vo.UserVO;
@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class AuthApplicationServiceImpl implements AuthApplicationService {
+public class UserAuthApplicationServiceImpl implements UserAuthApplicationService {
 
     @Resource
     private UserDomainService userDomainService;

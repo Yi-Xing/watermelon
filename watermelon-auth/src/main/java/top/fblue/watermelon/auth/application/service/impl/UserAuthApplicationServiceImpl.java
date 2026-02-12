@@ -2,7 +2,7 @@ package top.fblue.watermelon.auth.application.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import top.fblue.watermelon.auth.application.service.AuthCommonApplicationService;
+import top.fblue.watermelon.auth.application.service.UserAuthApplicationService;
 import top.fblue.watermelon.auth.common.dto.UserDTO;
 
 /**
@@ -10,7 +10,7 @@ import top.fblue.watermelon.auth.common.dto.UserDTO;
  */
 @Service
 @Slf4j
-public class AuthCommonApplicationServiceImpl implements AuthCommonApplicationService {
+public class UserAuthApplicationServiceImpl implements UserAuthApplicationService {
 
     @Override
     public void logout(String authHeader) {

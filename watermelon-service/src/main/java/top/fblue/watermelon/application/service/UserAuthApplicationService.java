@@ -4,12 +4,11 @@ import top.fblue.watermelon.application.dto.LoginDTO;
 import top.fblue.watermelon.application.vo.CurrentUserVO;
 import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
-import top.fblue.watermelon.domain.user.entity.UserToken;
 
 /**
- * 登录应用服务接口
+ * 登录鉴权服务接口
  */
-public interface AuthApplicationService {
+public interface UserAuthApplicationService {
     
     /**
      * 用户登录

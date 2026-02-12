@@ -6,9 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import top.fblue.watermelon.application.service.AuthApplicationService;
+import top.fblue.watermelon.application.service.UserAuthApplicationService;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
-import top.fblue.watermelon.infrastructure.config.JwtConfig;
 import top.fblue.watermelon.infrastructure.config.SystemConfig;
 
 import static top.fblue.watermelon.common.constant.UserConst.CURRENT_USER_KEY;
@@ -25,7 +24,7 @@ public class PermissionAuthInterceptor implements HandlerInterceptor {
     private SystemConfig systemConfig;
 
     @Resource
-    private AuthApplicationService authApplicationService;
+    private UserAuthApplicationService userAuthApplicationService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -46,7 +45,7 @@ public class PermissionAuthInterceptor implements HandlerInterceptor {
         log.debug("用户 {} 请求资源: {}", userToken.getUserId(), resourceCode);
 
         // 判断用户是否有请求接口的权限
-        if (!authApplicationService.hasPermission(resourceCode)) {
+        if (!userAuthApplicationService.hasPermission(resourceCode)) {
             log.warn("用户 {} 没有访问 {} {} 的权限", userToken.getUserId(), method, requestURI);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return false;
