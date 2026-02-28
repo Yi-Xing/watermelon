@@ -21,12 +21,24 @@ public class UserDTO {
      * 用户ID
      */
     private Long userId;
+
+    /**
+     * JWT 唯一标识（jti claim），用于黑名单校验
+     */
+    private String jti;
+
+    /**
+     * token 剩余有效时间（秒），由 TokenAuthInterceptor 从 JWT claims 解析填充
+     */
+    private long expiresIn;
+
     /**
      * 用户关联的角色ID
      */
     Set<Long> roles;
+
     /**
-     *  用户权限版本
+     * 用户权限版本
      */
     long permVersion;
 }
