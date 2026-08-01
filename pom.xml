@@ -23,6 +23,7 @@
 
     <modules>
         <module>watermelon-api</module>
+        <module>watermelon-auth</module>
         <module>watermelon-service</module>
     </modules>
 

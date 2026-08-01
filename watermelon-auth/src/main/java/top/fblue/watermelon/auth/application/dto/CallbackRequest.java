@@ -9,11 +9,13 @@ import lombok.Data;
 @Data
 public class CallbackRequest {
 
-    /**
-     * 回调地址（系统A/B 的前端页面地址），需在白名单域名内
-     */
-    @NotBlank(message = "return_url 不能为空")
-    private String returnUrl;
+    /** 发起授权请求的 SSO 客户端标识。 */
+    @NotBlank(message = "clientId 不能为空")
+    private String clientId;
+
+    /** 授权完成后的客户端回调地址。 */
+    @NotBlank(message = "redirectUri 不能为空")
+    private String redirectUri;
 
     /**
      * 登录时生成的随机数（需与 cookie 中的 auth_state 一致）

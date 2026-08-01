@@ -22,7 +22,7 @@
 
         <dependency>
             <groupId>top.fblue</groupId>
-            <artifactId>water-dubbo</artifactId>
+            <artifactId>water-auth</artifactId>
             <version>${revision}</version>
         </dependency>
 

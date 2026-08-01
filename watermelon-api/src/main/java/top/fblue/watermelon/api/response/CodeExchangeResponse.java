@@ -17,6 +17,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CodeExchangeResponse implements Serializable {
 
+    /** Java 序列化版本号。 */
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,13 +31,9 @@ public class CodeExchangeResponse implements Serializable {
      */
     private String username;
 
-    /**
-     * JWT 唯一标识（jti）
-     */
-    private String jti;
+    /** 全局登录会话 ID。 */
+    private String sid;
 
-    /**
-     * token 剩余有效时间（秒）
-     */
-    private long expiresIn;
+    /** 全局会话绝对过期时间，epoch seconds。 */
+    private long sessionExpireAt;
 }

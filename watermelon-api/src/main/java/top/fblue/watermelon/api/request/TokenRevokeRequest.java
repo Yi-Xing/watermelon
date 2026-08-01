@@ -9,7 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 其他系统吊销 jti 的 RPC 请求
+ * 其他系统吊销全局 sid 的 RPC 请求
  */
 @Data
 @Builder
@@ -17,21 +17,19 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class TokenRevokeRequest implements Serializable {
 
+    /** Java 序列化版本号。 */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * JWT 唯一标识
-     */
-    private String jti;
+    /** 退出事件幂等 ID。 */
+    private String eventId;
 
-    /**
-     * token 剩余有效时间（秒），用于设置黑名单 TTL
-     */
-    private long expiresIn;
+    /** 需要撤销的全局登录会话。 */
+    private String sid;
 
-    /**
-     * 设备 code
-     */
-    private String deviceCode;
+    /** 全局会话绝对过期时间，epoch seconds。 */
+    private long sessionExpireAt;
+
+    /** 退出原因。 */
+    private String reason;
 }

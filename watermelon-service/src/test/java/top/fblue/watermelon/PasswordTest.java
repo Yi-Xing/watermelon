@@ -1,7 +1,6 @@
 package top.fblue.watermelon;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import top.fblue.watermelon.common.utils.EncryptionUtil;
 
 import java.security.MessageDigest;
@@ -9,7 +8,6 @@ import java.security.MessageDigest;
 /**
  * 用于项目初始化密码
  */
-@SpringBootTest
 public class PasswordTest {
 
     /**
@@ -23,6 +21,12 @@ public class PasswordTest {
         System.out.println("password:"+EncryptionUtil.encode(passwordMD5,2L));
     }
 
+    /**
+     * 计算初始化密码的 MD5 十六进制摘要。
+     *
+     * @param password 原始密码
+     * @return 小写十六进制 MD5 摘要
+     */
     private static String md5(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");

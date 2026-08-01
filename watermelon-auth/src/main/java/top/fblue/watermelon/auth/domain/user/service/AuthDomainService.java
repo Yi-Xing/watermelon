@@ -1,54 +1,86 @@
 package top.fblue.watermelon.auth.domain.user.service;
 
 import top.fblue.watermelon.auth.domain.user.entity.AuthCodeInfo;
+import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 import top.fblue.watermelon.auth.domain.user.entity.User;
 
+import java.util.Set;
+
 /**
- * Auth 领域服务
+ * SSO 会话与一次性授权码领域服务。
  */
 public interface AuthDomainService {
 
     /**
-     * 生成授权码，存入 Redis
+     * 为用户创建全局 SSO 会话。
      *
-     * @param userId    用户ID
-     * @param jti       JWT 唯一标识
-     * @param expiresIn token 剩余有效时间（秒）
-     * @return 生成的授权码
+     * @param userId 用户 ID
+     * @param deviceCode 登录设备标识
+     * @return 新建的全局会话
      */
-    String generateCode(Long userId, String jti, long expiresIn);
+    SsoSessionInfo createSession(Long userId, String deviceCode);
 
     /**
-     * 消费授权码：从 Redis 取出并删除，同时记录 jti -> callerSystem 映射
+     * 获取并校验仍然有效且未撤销的全局会话。
      *
-     * @param code         授权码
-     * @param callerSystem 调用方系统标识
-     * @return 授权码关联的信息，code 不存在或已过期则返回 null
+     * @param sid 全局会话标识
+     * @return 有效的全局会话
      */
-    AuthCodeInfo consumeCode(String code, String callerSystem);
+    SsoSessionInfo requireActiveSession(String sid);
 
     /**
-     * 根据用户ID查询用户信息
+     * 查询全局会话，不执行有效期及撤销状态校验。
      *
-     * @param userId 用户ID
-     * @return 用户信息
+     * @param sid 全局会话标识
+     * @return 会话信息；不存在时返回 {@code null}
+     */
+    SsoSessionInfo getSession(String sid);
+
+    /**
+     * 为指定用户、会话和客户端签发一次性授权码。
+     *
+     * @param userId 用户 ID
+     * @param sid 全局会话标识
+     * @param clientId SSO 客户端标识
+     * @param redirectUri 已校验的客户端回调地址
+     * @param sessionExpireAt 全局会话过期时间，Unix 秒级时间戳
+     * @return 一次性授权码
+     */
+    String generateCode(Long userId, String sid, String clientId, String redirectUri, long sessionExpireAt);
+
+    /**
+     * 原子消费一次性授权码，并校验客户端及回调地址。
+     *
+     * @param code 一次性授权码
+     * @param clientId SSO 客户端标识
+     * @param redirectUri 客户端回调地址
+     * @return 授权码关联信息
+     */
+    AuthCodeInfo consumeCode(String code, String clientId, String redirectUri);
+
+    /**
+     * 加载授权流程所需的用户信息。
+     *
+     * @param userId 用户 ID
+     * @return 用户信息；用户不存在时返回 {@code null}
      */
     User getUserById(Long userId);
 
     /**
-     * 检查 jti 是否已被吊销（在黑名单中）
+     * 获取已绑定指定全局会话的客户端。
      *
-     * @param jti JWT 唯一标识
-     * @return true 表示已吊销
+     * @param sid 全局会话标识
+     * @return 已绑定客户端集合
      */
-    boolean isJtiRevoked(String jti);
+    Set<String> getSessionClients(String sid);
 
     /**
-     * 退出登录：将 jti 加入黑名单，并通知所有关联系统
+     * 撤销全局会话并返回需要接收退出通知的客户端。
      *
-     * @param jti        JWT 唯一标识
-     * @param deviceCode 设备 code
-     * @param expiresIn  token 剩余有效时间（秒），用作黑名单 TTL
+     * @param sid 全局会话标识
+     * @param eventId 退出事件幂等标识
+     * @param reason 退出原因
+     * @return 已绑定客户端集合；会话不存在时返回空集合
      */
-    void revokeToken(String jti, String deviceCode, long expiresIn);
+    Set<String> revokeSession(String sid, String eventId, String reason);
 }

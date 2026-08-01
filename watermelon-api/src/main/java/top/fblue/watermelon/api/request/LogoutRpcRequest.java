@@ -17,21 +17,19 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class LogoutRpcRequest implements Serializable {
 
+    /** Java 序列化版本号。 */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * JWT 唯一标识
-     */
+    /** 全局登录会话 ID。 */
+    private String sid;
+
+    /** 发起退出的 Client。 */
+    private String clientId;
+
+    /** 发起退出的本地 Token ID，仅用于审计。 */
     private String jti;
 
-    /**
-     * token 剩余有效时间（秒），用于设置黑名单 TTL
-     */
-    private long expiresIn;
-
-    /**
-     * 设备 code（作为黑名单 value 存储）
-     */
-    private String deviceCode;
+    /** 退出原因。 */
+    private String reason;
 }

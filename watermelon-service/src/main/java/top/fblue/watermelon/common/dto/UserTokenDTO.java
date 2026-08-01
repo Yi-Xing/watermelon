@@ -21,6 +21,12 @@ public class UserTokenDTO {
      */
     private Long userId;
 
+    /** 全局 SSO 会话标识。 */
+    private String sid;
+
+    /** 当前 JWT 的唯一标识。 */
+    private String jti;
+
     /**
      * Token值
      */

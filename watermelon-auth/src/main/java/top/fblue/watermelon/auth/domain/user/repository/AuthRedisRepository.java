@@ -1,6 +1,7 @@
 package top.fblue.watermelon.auth.domain.user.repository;
 
 import top.fblue.watermelon.auth.domain.user.entity.AuthCodeInfo;
+import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 
 import java.util.Set;
 
@@ -9,37 +10,33 @@ import java.util.Set;
  */
 public interface AuthRedisRepository {
 
-    // ==================== jti 黑名单 ====================
+    /**
+     * 保存全局 SSO 会话并设置有效期。
+     *
+     * @param session 全局会话信息
+     * @param ttlSeconds Redis 有效期，单位秒
+     */
+    void saveSession(SsoSessionInfo session, long ttlSeconds);
 
     /**
-     * 检查 jti 是否在黑名单中（已吊销）
+     * 根据 SID 查询全局 SSO 会话。
      *
-     * @param jti JWT 唯一标识
-     * @return true 表示已吊销
+     * @param sid 全局会话标识
+     * @return 会话信息；不存在时返回 {@code null}
      */
-    boolean isJtiRevoked(String jti);
-
-    /**
-     * 将 jti 加入黑名单
-     *
-     * @param jti        JWT 唯一标识
-     * @param deviceCode 设备 code（作为 value 存储）
-     * @param ttlSeconds 过期时间（秒）
-     */
-    void revokeJti(String jti, String deviceCode, long ttlSeconds);
+    SsoSessionInfo findSession(String sid);
 
     // ==================== code 授权码 ====================
 
     /**
-     * 存储授权码映射：code -> {userId, jti, expiresIn}
+     * 存储授权码映射：code -> {userId, sid, clientId, redirectUri, sessionExpireAt}。
      *
-     * @param code       授权码
-     * @param userId     用户ID
-     * @param jti        JWT 唯一标识
-     * @param expiresIn  JWT 剩余有效时间（秒）
-     * @param ttlSeconds code 的过期时间（秒）
+     * @param code 一次性授权码
+     * @param codeInfo 授权码关联信息
+     * @param ttlSeconds Redis 有效期，单位秒
+     * @return 是否成功写入；授权码已存在时返回 {@code false}
      */
-    void saveCode(String code, Long userId, String jti, long expiresIn, long ttlSeconds);
+    boolean saveCode(String code, AuthCodeInfo codeInfo, long ttlSeconds);
 
     /**
      * 根据 code 获取授权信息，并原子性删除（使用一次后即失效）
@@ -49,22 +46,20 @@ public interface AuthRedisRepository {
      */
     AuthCodeInfo getAndDeleteCode(String code);
 
-    // ==================== jti -> 已登录系统 ====================
+    /**
+     * 记录已使用指定全局会话登录的客户端。
+     *
+     * @param sid 全局会话标识
+     * @param clientId SSO 客户端标识
+     * @param ttlSeconds 客户端集合有效期，单位秒
+     */
+    void addSidClient(String sid, String clientId, long ttlSeconds);
 
     /**
-     * 记录该 jti 对应的系统（用于退出登录时通知各系统）
+     * 获取指定全局会话已登录的所有客户端。
      *
-     * @param jti        JWT 唯一标识
-     * @param systemCode 系统标识
-     * @param ttlSeconds 过期时间（秒，与 JWT 保持一致）
+     * @param sid 全局会话标识
+     * @return 已绑定客户端集合
      */
-    void addJtiSystem(String jti, String systemCode, long ttlSeconds);
-
-    /**
-     * 获取 jti 关联的所有系统标识
-     *
-     * @param jti JWT 唯一标识
-     * @return 系统标识集合
-     */
-    Set<String> getJtiSystems(String jti);
+    Set<String> getSidClients(String sid);
 }

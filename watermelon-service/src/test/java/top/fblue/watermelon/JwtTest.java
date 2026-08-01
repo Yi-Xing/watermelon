@@ -1,16 +1,13 @@
 package top.fblue.watermelon;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import top.fblue.watermelon.common.utils.EncryptionUtil;
 
-import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
  * 用于生成JWT密钥
  */
-@SpringBootTest
 public class JwtTest {
 
     /**
@@ -58,7 +55,7 @@ public class JwtTest {
      * 生成指定长度的随机密钥
      */
     private static byte[] generateRandomKey(int length) {
-        java.security.SecureRandom random = new java.security.SecureRandom();
+        SecureRandom random = new SecureRandom();
         byte[] key = new byte[length];
         random.nextBytes(key);
         return key;

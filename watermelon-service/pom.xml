@@ -18,6 +18,12 @@
             <version>${revision}</version>
         </dependency>
 
+        <dependency>
+            <groupId>top.fblue</groupId>
+            <artifactId>watermelon-auth</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- dubbo 框架 -->
         <dependency>
             <groupId>top.fblue</groupId>

@@ -4,7 +4,6 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import top.fblue.watermelon.infrastructure.interceptor.TokenAuthInterceptor;
 import top.fblue.watermelon.infrastructure.interceptor.PermissionAuthInterceptor;
 import top.fblue.watermelon.infrastructure.interceptor.TraceInterceptor;
 
@@ -14,16 +13,20 @@ import top.fblue.watermelon.infrastructure.interceptor.TraceInterceptor;
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    
-    @Resource
-    private TokenAuthInterceptor tokenAuthInterceptor;
-    
+
+    /** 接口资源权限校验拦截器。 */
     @Resource
     private PermissionAuthInterceptor permissionAuthInterceptor;
 
+    /** 请求链路追踪上下文拦截器。 */
     @Resource
     private TraceInterceptor traceInterceptor;
 
+    /**
+     * 注册链路追踪和接口权限拦截器，并明确它们与 SSO 拦截器的执行顺序。
+     *
+     * @param registry Spring MVC 拦截器注册器
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 1. 设置 TraceContext
@@ -31,15 +34,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .order(1);
 
-        // 2. Token认证拦截器
-        registry.addInterceptor(tokenAuthInterceptor)
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/user/login")
-                .order(2);
-        
+        // 2. SSO Token 认证由 water-auth 自动配置，order=10。
         // 3. 权限验证拦截器
         registry.addInterceptor(permissionAuthInterceptor)
                 .addPathPatterns("/api/admin/**")
-                .order(3);
+                .order(20);
     }
 }

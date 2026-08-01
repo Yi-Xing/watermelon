@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 授权码存储信息（code -> userId、jti、expiresIn 的映射）
+ * 授权码存储信息。
  */
 @Data
 @NoArgsConstructor
@@ -13,17 +13,27 @@ import lombok.NoArgsConstructor;
 public class AuthCodeInfo {
 
     /**
-     * 用户ID
+     * 授权码所属用户 ID。
      */
     private Long userId;
 
     /**
-     * JWT 唯一标识
+     * 授权码关联的全局 SSO 会话标识。
      */
-    private String jti;
+    private String sid;
 
     /**
-     * token 剩余有效时间（秒）
+     * 申请授权码的 SSO 客户端标识。
      */
-    private long expiresIn;
+    private String clientId;
+
+    /**
+     * 申请授权码时已校验并规范化的客户端回调地址。
+     */
+    private String redirectUri;
+
+    /**
+     * 关联全局会话的过期时间，Unix 秒级时间戳。
+     */
+    private long sessionExpireAt;
 }

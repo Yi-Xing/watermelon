@@ -10,6 +10,7 @@ import top.fblue.watermelon.application.vo.LoginVO;
 import top.fblue.watermelon.common.response.ApiResponse;
 
 import jakarta.validation.Valid;
+import top.fblue.auth.annotation.SsoPublic;
 
 /**
  * 登录相关
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 @Validated
 public class LoginController {
 
+    /** 用户登录及身份查询应用服务。 */
     @Resource
     private UserAuthApplicationService userAuthApplicationService;
 
@@ -26,6 +28,7 @@ public class LoginController {
      * 用户登录
      */
     @PostMapping("/login")
+    @SsoPublic
     public ApiResponse<LoginVO> login(@Valid @RequestBody LoginDTO loginDTO) {
         LoginVO loginVO = userAuthApplicationService.login(loginDTO);
         return ApiResponse.success(loginVO, "登录成功");

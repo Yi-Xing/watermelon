@@ -17,6 +17,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CodeExchangeRequest implements Serializable {
 
+    /** Java 序列化版本号。 */
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -25,9 +26,9 @@ public class CodeExchangeRequest implements Serializable {
      */
     private String code;
 
-    /**
-     * 调用方系统标识（用于记录 jti -> 系统 的映射，便于退出登录时通知）
-     * 例如：system-a
-     */
-    private String callerSystem;
+    /** 调用方 SSO Client 标识，例如 banana。 */
+    private String clientId;
+
+    /** 必须与签发 code 时绑定的回调地址完全一致。 */
+    private String redirectUri;
 }

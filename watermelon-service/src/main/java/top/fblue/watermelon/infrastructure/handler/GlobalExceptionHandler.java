@@ -17,6 +17,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -127,7 +128,7 @@ public class GlobalExceptionHandler {
     /**
      * 构建字段验证错误响应
      */
-    private ApiResponse<Object> buildValidationErrorResponse(java.util.List<FieldError> fieldErrors) {
+    private ApiResponse<Object> buildValidationErrorResponse(List<FieldError> fieldErrors) {
         // 提取所有验证错误信息
         String errorMessage = fieldErrors.stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
@@ -145,4 +146,4 @@ public class GlobalExceptionHandler {
 
         return response;
     }
-} 
+}
