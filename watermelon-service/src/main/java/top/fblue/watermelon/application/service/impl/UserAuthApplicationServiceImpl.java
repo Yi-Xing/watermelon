@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import top.fblue.auth.context.SsoPrincipal;
 import top.fblue.auth.exception.SsoAuthException;
 import top.fblue.auth.jwt.JwtTokenService;
-import top.fblue.auth.repository.TokenRevocationRepository;
 import top.fblue.common.enums.ApiCodeEnum;
 import top.fblue.watermelon.api.request.LogoutRpcRequest;
 import top.fblue.watermelon.application.converter.UserConverter;
@@ -21,6 +20,8 @@ import top.fblue.watermelon.common.utils.TokenUtil;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 import top.fblue.watermelon.auth.application.service.SsoAuthorizationApplicationService;
+import top.fblue.watermelon.auth.domain.user.service.AuthDomainService;
+import top.fblue.watermelon.auth.infrastructure.config.AuthProperties;
 import top.fblue.watermelon.domain.user.service.UserDomainService;
 import top.fblue.watermelon.domain.role.service.RoleDomainService;
 import top.fblue.watermelon.domain.resource.service.ResourceDomainService;
@@ -51,17 +52,21 @@ public class UserAuthApplicationServiceImpl implements UserAuthApplicationServic
     @Resource
     private UserConverter userConverter;
 
-    /** SSO JWT 创建及校验服务。 */
+    /** SSO JWT 创建服务。 */
     @Resource
     private JwtTokenService jwtTokenService;
 
-    /** 会话和令牌撤销状态仓储。 */
+    /** SSO 会话及访问令牌领域服务。 */
     @Resource
-    private TokenRevocationRepository tokenRevocationRepository;
+    private AuthDomainService authDomainService;
 
     /** 用户中心 SSO 会话及授权应用服务。 */
     @Resource
     private SsoAuthorizationApplicationService ssoAuthorizationApplicationService;
+
+    /** 用户中心自身的 SSO Client 配置。 */
+    @Resource
+    private AuthProperties authProperties;
 
     /** 角色领域服务。 */
     @Resource
@@ -107,7 +112,7 @@ public class UserAuthApplicationServiceImpl implements UserAuthApplicationServic
         SsoPrincipal principal = validatePrincipal(token);
         ssoAuthorizationApplicationService.revokeSession(LogoutRpcRequest.builder()
                 .sid(principal.getSid())
-                .clientId("watermelon")
+                .clientId(authProperties.getServerClientId())
                 .jti(principal.getJti())
                 .reason(USER_LOGOUT_REASON)
                 .build());
@@ -195,13 +200,7 @@ public class UserAuthApplicationServiceImpl implements UserAuthApplicationServic
      * @return 校验通过的 SSO 用户身份
      */
     private SsoPrincipal validatePrincipal(String token) {
-        SsoPrincipal principal = jwtTokenService.parseAndValidate(token);
-        if (tokenRevocationRepository.isSidRevoked(principal.getSid())
-                || tokenRevocationRepository.isJtiRevoked(principal.getJti())) {
-            throw new SsoAuthException(ApiCodeEnum.UNAUTHORIZED,
-                    "登录会话已退出");
-        }
-        return principal;
+        return authDomainService.validateAccessToken(token);
     }
 
     /**

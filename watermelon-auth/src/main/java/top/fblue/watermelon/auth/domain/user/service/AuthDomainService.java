@@ -1,5 +1,6 @@
 package top.fblue.watermelon.auth.domain.user.service;
 
+import top.fblue.auth.context.SsoPrincipal;
 import top.fblue.watermelon.auth.domain.user.entity.AuthCodeInfo;
 import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 import top.fblue.watermelon.auth.domain.user.entity.User;
@@ -35,6 +36,14 @@ public interface AuthDomainService {
      * @return 会话信息；不存在时返回 {@code null}
      */
     SsoSessionInfo getSession(String sid);
+
+    /**
+     * 解析并校验访问令牌，同时确认 SID 和 JTI 未被撤销。
+     *
+     * @param token 待校验的 JWT 访问令牌
+     * @return 校验通过的 SSO 用户身份
+     */
+    SsoPrincipal validateAccessToken(String token);
 
     /**
      * 为指定用户、会话和客户端签发一次性授权码。
@@ -75,12 +84,11 @@ public interface AuthDomainService {
     Set<String> getSessionClients(String sid);
 
     /**
-     * 撤销全局会话并返回需要接收退出通知的客户端。
+     * 撤销全局会话，并通知已绑定的客户端撤销本地会话。
      *
      * @param sid 全局会话标识
      * @param eventId 退出事件幂等标识
      * @param reason 退出原因
-     * @return 已绑定客户端集合；会话不存在时返回空集合
      */
-    Set<String> revokeSession(String sid, String eventId, String reason);
+    void revokeSession(String sid, String eventId, String reason);
 }

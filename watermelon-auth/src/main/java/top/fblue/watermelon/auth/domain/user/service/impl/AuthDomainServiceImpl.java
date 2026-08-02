@@ -3,14 +3,18 @@ package top.fblue.watermelon.auth.domain.user.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import top.fblue.auth.context.SsoPrincipal;
 import top.fblue.auth.exception.SsoAuthException;
+import top.fblue.auth.jwt.JwtTokenService;
 import top.fblue.auth.repository.TokenRevocationRepository;
 import top.fblue.common.enums.ApiCodeEnum;
+import top.fblue.watermelon.api.request.TokenRevokeRequest;
 import top.fblue.watermelon.auth.domain.user.entity.AuthCodeInfo;
 import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 import top.fblue.watermelon.auth.domain.user.entity.User;
+import top.fblue.watermelon.auth.domain.user.repository.AuthRepository;
 import top.fblue.watermelon.auth.domain.user.repository.AuthRedisRepository;
-import top.fblue.watermelon.auth.domain.user.repository.SsoUserLoader;
+import top.fblue.watermelon.auth.domain.user.repository.SsoUserQueryRepository;
 import top.fblue.watermelon.auth.domain.user.service.AuthDomainService;
 import top.fblue.watermelon.auth.infrastructure.config.AuthProperties;
 
@@ -33,8 +37,12 @@ public class AuthDomainServiceImpl implements AuthDomainService {
     private final AuthRedisRepository authRedisRepository;
     /** 全局会话及本地令牌撤销状态仓储。 */
     private final TokenRevocationRepository revocationRepository;
-    /** 用户信息加载端口。 */
-    private final SsoUserLoader ssoUserLoader;
+    /** SSO JWT 创建及校验服务。 */
+    private final JwtTokenService jwtTokenService;
+    /** SSO 用户查询仓储。 */
+    private final SsoUserQueryRepository ssoUserQueryRepository;
+    /** SSO 客户端会话撤销通知仓储。 */
+    private final AuthRepository authRepository;
     /** SSO 会话和授权码有效期配置。 */
     private final AuthProperties authProperties;
     /** 一次性授权码使用的密码学安全随机数生成器。 */
@@ -90,6 +98,19 @@ public class AuthDomainServiceImpl implements AuthDomainService {
      * {@inheritDoc}
      */
     @Override
+    public SsoPrincipal validateAccessToken(String token) {
+        SsoPrincipal principal = jwtTokenService.parseAndValidate(token);
+        if (revocationRepository.isSidRevoked(principal.getSid())
+                || revocationRepository.isJtiRevoked(principal.getJti())) {
+            throw unauthorized("登录会话已退出");
+        }
+        return principal;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String generateCode(Long userId, String sid, String clientId,
                                String redirectUri, long sessionExpireAt) {
         SsoSessionInfo session = requireActiveSession(sid);
@@ -103,6 +124,7 @@ public class AuthDomainServiceImpl implements AuthDomainService {
             throw unauthorized("登录会话已过期");
         }
         AuthCodeInfo codeInfo = new AuthCodeInfo(userId, sid, clientId, redirectUri, sessionExpireAt);
+        // 循环 3 次是为了处理授权码极小概率的碰撞
         for (int i = 0; i < 3; i++) {
             String code = randomToken();
             if (authRedisRepository.saveCode(code, codeInfo, ttl)) {
@@ -137,7 +159,7 @@ public class AuthDomainServiceImpl implements AuthDomainService {
      */
     @Override
     public User getUserById(Long userId) {
-        return ssoUserLoader.loadUser(userId);
+        return ssoUserQueryRepository.findById(userId);
     }
 
     /**
@@ -156,16 +178,24 @@ public class AuthDomainServiceImpl implements AuthDomainService {
      * {@inheritDoc}
      */
     @Override
-    public Set<String> revokeSession(String sid, String eventId, String reason) {
+    public void revokeSession(String sid, String eventId, String reason) {
         SsoSessionInfo session = authRedisRepository.findSession(sid);
         if (session == null) {
-            return Collections.emptySet();
+            return;
         }
         long ttl = session.getExpireAtEpochSeconds() - Instant.now().getEpochSecond();
         if (ttl > 0) {
             revocationRepository.revokeSid(sid, eventId == null ? reason : eventId, ttl);
         }
-        return getSessionClients(sid);
+        TokenRevokeRequest revokeRequest = TokenRevokeRequest.builder()
+                .eventId(eventId)
+                .sid(sid)
+                .sessionExpireAt(session.getExpireAtEpochSeconds())
+                .reason(reason)
+                .build();
+        for (String clientId : getSessionClients(sid)) {
+            authRepository.notifySystemRevokeSession(clientId, revokeRequest);
+        }
     }
 
     /**

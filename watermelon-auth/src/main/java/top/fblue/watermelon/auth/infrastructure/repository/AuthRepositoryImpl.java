@@ -43,6 +43,7 @@ public class AuthRepositoryImpl implements AuthRepository {
             log.info("已通知 SSO Client {} 撤销 sidPrefix={}", clientId, sidPrefix(request.getSid()));
         } catch (Exception e) {
             // 按当前实施范围，仅同步通知并记录错误；可靠重试队列后续实现。
+            // todo 之后可以新增重试机制
             log.error("通知 SSO Client {} 撤销 sidPrefix={} 失败",
                     clientId, sidPrefix(request.getSid()), e);
         }

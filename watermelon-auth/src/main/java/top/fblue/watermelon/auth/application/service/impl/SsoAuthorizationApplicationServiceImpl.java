@@ -10,7 +10,6 @@ import top.fblue.auth.exception.SsoAuthException;
 import top.fblue.common.enums.ApiCodeEnum;
 import top.fblue.watermelon.api.request.CodeExchangeRequest;
 import top.fblue.watermelon.api.request.LogoutRpcRequest;
-import top.fblue.watermelon.api.request.TokenRevokeRequest;
 import top.fblue.watermelon.api.response.CodeExchangeResponse;
 import top.fblue.watermelon.auth.application.dto.CallbackRequest;
 import top.fblue.watermelon.auth.application.dto.CallbackResponse;
@@ -18,13 +17,11 @@ import top.fblue.watermelon.auth.application.service.SsoAuthorizationApplication
 import top.fblue.watermelon.auth.domain.user.entity.AuthCodeInfo;
 import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 import top.fblue.watermelon.auth.domain.user.entity.User;
-import top.fblue.watermelon.auth.domain.user.repository.AuthRepository;
 import top.fblue.watermelon.auth.domain.user.service.AuthDomainService;
 import top.fblue.watermelon.auth.infrastructure.config.AuthProperties;
 
 import java.net.URI;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 import static top.fblue.auth.common.SsoConstants.USER_LOGOUT_REASON;
@@ -39,8 +36,6 @@ public class SsoAuthorizationApplicationServiceImpl implements SsoAuthorizationA
 
     /** 认证领域服务，负责会话及一次性授权码的生命周期管理。 */
     private final AuthDomainService authDomainService;
-    /** 认证基础设施仓储，负责向接入系统发送会话撤销通知。 */
-    private final AuthRepository authRepository;
     /** 用户中心认证及 SSO 客户端配置。 */
     private final AuthProperties authProperties;
 
@@ -124,16 +119,7 @@ public class SsoAuthorizationApplicationServiceImpl implements SsoAuthorizationA
         }
         String eventId = UUID.randomUUID().toString();
         String reason = defaultReason(request.getReason());
-        Set<String> clients = authDomainService.revokeSession(request.getSid(), eventId, reason);
-        TokenRevokeRequest revokeRequest = TokenRevokeRequest.builder()
-                .eventId(eventId)
-                .sid(request.getSid())
-                .sessionExpireAt(session.getExpireAtEpochSeconds())
-                .reason(reason)
-                .build();
-        for (String clientId : clients) {
-            authRepository.notifySystemRevokeSession(clientId, revokeRequest);
-        }
+        authDomainService.revokeSession(request.getSid(), eventId, reason);
     }
 
     /**
