@@ -38,10 +38,11 @@
             </exclusions>
         </dependency>
 
-        <!-- Redis -->
+        <!-- Redis 基础能力 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>top.fblue</groupId>
+            <artifactId>water-redis</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- 配置处理器 -->
