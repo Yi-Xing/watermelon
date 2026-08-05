@@ -24,3 +24,7 @@ Watermelon 是用户与权限服务：
 - 认证、权限和令牌逻辑不得绕过现有拦截器、上下文、repository 或权限码体系。
 - 不提交密钥、口令、令牌、Cookie、真实连接串、私有服务地址或个人信息；配置示例只使用明显占位符。
 - 若同时修改了前端，按其 `AGENTS.md` 执行前端验证。
+
+## Git 提交
+
+- 生成 Git commit message 时必须使用中文说明，不得使用纯英文；如采用 Conventional Commits，可保留 `feat:`、`fix:` 等类型前缀，但正文必须为中文。
