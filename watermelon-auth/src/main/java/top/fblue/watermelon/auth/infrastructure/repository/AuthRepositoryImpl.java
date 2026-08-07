@@ -32,11 +32,14 @@ public class AuthRepositoryImpl implements AuthRepository {
      */
     @Override
     public void notifySystemRevokeSession(String clientId, TokenRevokeRequest request) {
+        // 1. 查询并校验目标客户端的 Dubbo 通知配置
         AuthProperties.Client client = authProperties.getClients().get(clientId);
         if (client == null || !StringUtils.hasText(client.getDubboUrl())) {
             log.warn("SSO Client {} 未配置 Dubbo URL，跳过 sid 撤销通知", clientId);
             return;
         }
+
+        // 2. 复用或创建 Dubbo 引用，发送本地会话撤销通知
         try {
             clients.computeIfAbsent(clientId, ignored -> buildSystemRpc(client.getDubboUrl()))
                     .proxy().revokeSession(request);
@@ -54,7 +57,14 @@ public class AuthRepositoryImpl implements AuthRepository {
      */
     @PreDestroy
     void destroyReferences() {
-        clients.values().forEach(client -> client.reference().destroy());
+        clients.values().forEach(client -> {
+            try {
+                client.reference().destroy();
+            } catch (IllegalStateException exception) {
+                // Dubbo 的关闭钩子可能早于 Spring Bean 销毁执行，此时引用已随框架释放。
+                log.debug("Dubbo 框架已关闭，无需重复销毁会话撤销通知引用", exception);
+            }
+        });
         clients.clear();
     }
 

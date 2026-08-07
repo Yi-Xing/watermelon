@@ -16,6 +16,14 @@ public interface UserRoleRepository {
      * 根据用户ID查询角色ID列表
      */
     List<Long> findRoleIdsByUserId(Long userId);
+
+    /**
+     * 根据角色 ID 查询关联用户 ID 列表。
+     *
+     * @param roleId 角色 ID
+     * @return 关联用户 ID 列表
+     */
+    List<Long> findUserIdsByRoleId(Long roleId);
     
     /**
      * 批量删除用户角色关系

@@ -12,6 +12,7 @@ import top.fblue.watermelon.api.request.TokenRevokeRequest;
 import top.fblue.watermelon.auth.domain.user.entity.AuthCodeInfo;
 import top.fblue.watermelon.auth.domain.user.entity.SsoSessionInfo;
 import top.fblue.watermelon.auth.domain.user.entity.User;
+import top.fblue.watermelon.auth.domain.user.factory.AuthDomainFactory;
 import top.fblue.watermelon.auth.domain.user.repository.AuthRepository;
 import top.fblue.watermelon.auth.domain.user.repository.AuthRedisRepository;
 import top.fblue.watermelon.auth.domain.user.repository.SsoUserQueryRepository;
@@ -35,16 +36,25 @@ public class AuthDomainServiceImpl implements AuthDomainService {
 
     /** SSO 会话、授权码及会话客户端关系仓储。 */
     private final AuthRedisRepository authRedisRepository;
+
     /** 全局会话及本地令牌撤销状态仓储。 */
     private final TokenRevocationRepository revocationRepository;
+
     /** SSO JWT 创建及校验服务。 */
     private final JwtTokenService jwtTokenService;
+
     /** SSO 用户查询仓储。 */
     private final SsoUserQueryRepository ssoUserQueryRepository;
+
     /** SSO 客户端会话撤销通知仓储。 */
     private final AuthRepository authRepository;
+
     /** SSO 会话和授权码有效期配置。 */
     private final AuthProperties authProperties;
+
+    /** SSO 认证领域对象工厂。 */
+    private final AuthDomainFactory authDomainFactory;
+
     /** 一次性授权码使用的密码学安全随机数生成器。 */
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -53,20 +63,21 @@ public class AuthDomainServiceImpl implements AuthDomainService {
      */
     @Override
     public SsoSessionInfo createSession(Long userId, String deviceCode) {
+        // 1. 校验会话归属用户和会话有效期配置
         if (userId == null) {
             throw badRequest("userId 不能为空");
         }
         if (authProperties.getSessionTtlSeconds() <= 0) {
             throw new IllegalStateException("auth.session-ttl-seconds 必须大于 0");
         }
+
+        // 2. 计算会话过期时间并创建领域对象
         long now = Instant.now().getEpochSecond();
         long expireAt = now + authProperties.getSessionTtlSeconds();
-        SsoSessionInfo session = SsoSessionInfo.builder()
-                .sid(UUID.randomUUID().toString())
-                .userId(userId)
-                .deviceCode(deviceCode)
-                .expireAtEpochSeconds(expireAt)
-                .build();
+        SsoSessionInfo session = authDomainFactory.createSession(
+                UUID.randomUUID().toString(), userId, deviceCode, expireAt);
+
+        // 3. 持久化全局会话并返回
         authRedisRepository.saveSession(session, authProperties.getSessionTtlSeconds());
         return session;
     }
@@ -113,18 +124,24 @@ public class AuthDomainServiceImpl implements AuthDomainService {
     @Override
     public String generateCode(Long userId, String sid, String clientId,
                                String redirectUri, long sessionExpireAt) {
+        // 1. 查询并校验授权码关联的全局会话
         SsoSessionInfo session = requireActiveSession(sid);
         if (!Objects.equals(session.getUserId(), userId)
                 || session.getExpireAtEpochSeconds() != sessionExpireAt) {
             throw forbidden("登录会话与当前用户不匹配");
         }
+
+        // 2. 计算不超过全局会话剩余时长的一次性授权码有效期
         long ttl = Math.min(authProperties.getCodeTtlSeconds(),
                 sessionExpireAt - Instant.now().getEpochSecond());
         if (ttl <= 0) {
             throw unauthorized("登录会话已过期");
         }
+
+        // 3. 创建授权码关联信息
         AuthCodeInfo codeInfo = new AuthCodeInfo(userId, sid, clientId, redirectUri, sessionExpireAt);
-        // 循环 3 次是为了处理授权码极小概率的碰撞
+
+        // 4. 生成并原子保存唯一授权码，重试用于处理极小概率碰撞
         for (int i = 0; i < 3; i++) {
             String code = randomToken();
             if (authRedisRepository.saveCode(code, codeInfo, ttl)) {
@@ -139,17 +156,24 @@ public class AuthDomainServiceImpl implements AuthDomainService {
      */
     @Override
     public AuthCodeInfo consumeCode(String code, String clientId, String redirectUri) {
+        // 1. 原子读取并删除一次性授权码
         AuthCodeInfo codeInfo = authRedisRepository.getAndDeleteCode(code);
+
+        // 2. 校验授权码绑定的客户端和回调地址
         if (codeInfo == null
                 || !Objects.equals(codeInfo.getClientId(), clientId)
                 || !Objects.equals(codeInfo.getRedirectUri(), redirectUri)) {
             throw badRequest("invalid_grant");
         }
+
+        // 3. 校验授权码关联的全局会话及剩余有效期
         requireActiveSession(codeInfo.getSid());
         long ttl = codeInfo.getSessionExpireAt() - Instant.now().getEpochSecond();
         if (ttl <= 0) {
             throw badRequest("invalid_grant");
         }
+
+        // 4. 记录客户端与全局会话的绑定关系，用于后续全局注销通知
         authRedisRepository.addSidClient(codeInfo.getSid(), clientId, ttl);
         return codeInfo;
     }
@@ -179,20 +203,23 @@ public class AuthDomainServiceImpl implements AuthDomainService {
      */
     @Override
     public void revokeSession(String sid, String eventId, String reason) {
+        // 1. 查询全局会话；会话不存在时按幂等成功处理
         SsoSessionInfo session = authRedisRepository.findSession(sid);
         if (session == null) {
             return;
         }
+
+        // 2. 在会话剩余有效期内写入用户中心撤销记录
         long ttl = session.getExpireAtEpochSeconds() - Instant.now().getEpochSecond();
         if (ttl > 0) {
             revocationRepository.revokeSid(sid, eventId == null ? reason : eventId, ttl);
         }
-        TokenRevokeRequest revokeRequest = TokenRevokeRequest.builder()
-                .eventId(eventId)
-                .sid(sid)
-                .sessionExpireAt(session.getExpireAtEpochSeconds())
-                .reason(reason)
-                .build();
+
+        // 3. 创建会话撤销通知
+        TokenRevokeRequest revokeRequest = authDomainFactory.createTokenRevokeRequest(
+                eventId, sid, session.getExpireAtEpochSeconds(), reason);
+
+        // 4. 通知所有已绑定业务系统撤销本地会话
         for (String clientId : getSessionClients(sid)) {
             authRepository.notifySystemRevokeSession(clientId, revokeRequest);
         }

@@ -23,6 +23,7 @@ import top.fblue.watermelon.application.dto.ResourceImportDTO;
 import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.enums.StateEnum;
 import top.fblue.watermelon.common.exception.BusinessException;
+import top.fblue.watermelon.auth.domain.permission.service.PermissionChangeDomainService;
 import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.resource.entity.ResourceRelation;
 import top.fblue.watermelon.domain.resource.repository.ResourceRelationRepository;
@@ -35,7 +36,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 资源Excel处理服务实现 - 负责Excel的读写操作和数据校验
+ * 资源 Excel 处理服务实现，负责 Excel 读写、数据校验及整表批量同步。
+ *
+ * <p>分层例外：本服务属于隔离文件处理细节的 Application 技术服务。为了在单一事务中完成
+ * Excel 整表与数据库资源的差异计算以及批量新增、更新、删除，它直接调用资源 Repository，
+ * 未经过普通 Domain Service 调用链。该例外仅限当前 Excel 批处理流程，不得推广到普通业务；
+ * 后续新增可复用业务规则时，应将规则和持久化编排下沉至 Domain Service。</p>
  */
 @Slf4j
 @Service
@@ -44,10 +50,15 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
     private ResourceConverter resourceConverter;
     @Resource
     private ResourceRelationConverter resourceRelationConverter;
+    /** 分层例外：用于 Excel 整表差异计算和同事务批量写入，原因详见类注释。 */
     @Resource
     private ResourceRepository resourceRepository;
+    /** 分层例外：用于导入前校验待删除资源的关联关系，原因详见类注释。 */
     @Resource
     private ResourceRelationRepository resourceRelationRepository;
+    /** 权限变更领域服务，用于在导入事务中写入发件箱记录。 */
+    @Resource
+    private PermissionChangeDomainService permissionChangeDomainService;
 
     @Override
     public List<ResourceExcelVO> readResourceExcel(MultipartFile file) {
@@ -233,6 +244,11 @@ public class ResourceExcelServiceImpl implements ResourceExcelService {
                 throw new BusinessException(String.format("资源删除失败，失败 %d 个", deleteIds.size() - deleteCount));
             }
             deletedRows = deleteIds.size();
+        }
+
+        // 5. 资源更新或删除会影响已有授权，在同一事务中记录系统级权限变更
+        if (updatedRows > 0 || deletedRows > 0) {
+            permissionChangeDomainService.recordSystemPermissionChange();
         }
 
         return ExcelImportResultVO.builder()

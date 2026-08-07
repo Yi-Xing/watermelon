@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.fblue.watermelon.application.converter.UserConverter;
+import top.fblue.watermelon.auth.domain.permission.service.PermissionChangeDomainService;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.dto.ResetPasswordDTO;
@@ -34,6 +35,9 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     private RoleDomainService roleDomainService;
     @Resource
     private UserConverter userConverter;
+    /** 权限变更领域服务，用于在当前事务中写入发件箱记录。 */
+    @Resource
+    private PermissionChangeDomainService permissionChangeDomainService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -86,6 +90,10 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         // 4. 更新用户角色关联关系
         userDomainService.updateUserRole(updateUserDTO.getId(), updateUserDTO.getRoleIds());
 
+        // 5. 在当前事务中记录用户级权限变更
+        permissionChangeDomainService.recordUserPermissionChange(updateUserDTO.getId());
+
+        // 6. 返回更新结果
         return userUpdated;
     }
 
@@ -99,7 +107,16 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteUser(Long id) {
-        return userDomainService.deleteUser(id);
+        // 1. 通过领域服务删除用户
+        boolean deleted = userDomainService.deleteUser(id);
+
+        // 2. 删除成功后在当前事务中记录用户级权限变更
+        if (deleted) {
+            permissionChangeDomainService.recordUserPermissionChange(id);
+        }
+
+        // 3. 返回删除结果
+        return deleted;
     }
 
     @Override

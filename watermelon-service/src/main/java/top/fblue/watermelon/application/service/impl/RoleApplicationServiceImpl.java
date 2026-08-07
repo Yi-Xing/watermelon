@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.fblue.watermelon.application.converter.RoleConverter;
+import top.fblue.watermelon.auth.domain.permission.service.PermissionChangeDomainService;
 import top.fblue.watermelon.application.dto.CreateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleDTO;
 import top.fblue.watermelon.application.dto.UpdateRoleResourceDTO;
@@ -39,6 +40,10 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
 
     @Resource
     private ResourceDomainService resourceDomainService;
+
+    /** 权限变更领域服务，用于在当前事务中写入发件箱记录。 */
+    @Resource
+    private PermissionChangeDomainService permissionChangeDomainService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -113,8 +118,19 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
         // 1. 转换DTO为Domain实体
         Role role = roleConverter.toRole(updateRoleDTO);
 
-        // 2. 通过领域服务更新角色
-        return roleDomainService.updateRole(role);
+        // 2. 查询关联该角色的用户
+        List<Long> affectedUserIds = userDomainService.getUserIdsByRoleId(updateRoleDTO.getId());
+
+        // 3. 通过领域服务更新角色
+        boolean updated = roleDomainService.updateRole(role);
+
+        // 4. 更新成功后在当前事务中记录关联用户权限变更
+        if (updated) {
+            permissionChangeDomainService.recordUserPermissionChanges(affectedUserIds);
+        }
+
+        // 5. 返回更新结果
+        return updated;
     }
 
     @Override
@@ -123,16 +139,39 @@ public class RoleApplicationServiceImpl implements RoleApplicationService {
         // 1. 校验资源是否存在
         resourceDomainService.validateResourceIds(updateRoleResourceDTO.getResourceIds());
 
-        // 2. 更新角色资源关系
-        return roleDomainService.updateRoleResource(
+        // 2. 查询关联该角色的用户
+        List<Long> affectedUserIds = userDomainService.getUserIdsByRoleId(updateRoleResourceDTO.getId());
+
+        // 3. 更新角色资源关系
+        boolean updated = roleDomainService.updateRoleResource(
                 updateRoleResourceDTO.getId(),
                 updateRoleResourceDTO.getResourceIds()
         );
+
+        // 4. 更新成功后在当前事务中记录关联用户权限变更
+        if (updated) {
+            permissionChangeDomainService.recordUserPermissionChanges(affectedUserIds);
+        }
+
+        // 5. 返回更新结果
+        return updated;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteRole(Long id) {
-        return roleDomainService.deleteRole(id);
+        // 1. 删除角色前查询关联用户，避免关系删除后无法确定影响范围
+        List<Long> affectedUserIds = userDomainService.getUserIdsByRoleId(id);
+
+        // 2. 通过领域服务删除角色
+        boolean deleted = roleDomainService.deleteRole(id);
+
+        // 3. 删除成功后在当前事务中记录关联用户权限变更
+        if (deleted) {
+            permissionChangeDomainService.recordUserPermissionChanges(affectedUserIds);
+        }
+
+        // 4. 返回删除结果
+        return deleted;
     }
 }

@@ -94,6 +94,11 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
 
     @Override
+    public List<Long> getUserIdsByRoleId(Long roleId) {
+        return userRoleRepository.findUserIdsByRoleId(roleId);
+    }
+
+    @Override
     public void updateUserRole(Long userId, List<Long> roleIds) {
         // 1. 检查用户是否存在
         getUserById(userId);

@@ -35,8 +35,4 @@ public interface UserAuthApplicationService {
      */
     UserTokenDTO validateToken(String token);
 
-    /**
-     * 判断当前登录用户是否有指定接口资源的code权限
-     */
-    boolean hasPermission(String resourceCode);
-} 
+}

@@ -82,4 +82,5 @@ public interface ResourceRepository {
      * @return 资源列表
      */
     List<ResourceNode> findByCodePrefixAndTypesAndIds(String codePrefix, List<Integer> types, List<Long> resourceIds, Integer state);
-} 
+
+}

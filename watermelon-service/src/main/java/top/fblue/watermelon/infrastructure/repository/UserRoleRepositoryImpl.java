@@ -34,6 +34,11 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
     }
 
     @Override
+    public List<Long> findUserIdsByRoleId(Long roleId) {
+        return userRoleMapper.selectUserIdsByRoleId(roleId);
+    }
+
+    @Override
     public void deleteBatch(Long userId, List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) {
             return;
@@ -56,4 +61,4 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
 
         userRoleMapper.insert(poList);
     }
-} 
+}

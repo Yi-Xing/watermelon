@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import top.fblue.watermelon.auth.domain.user.entity.User;
 import top.fblue.watermelon.auth.domain.user.repository.SsoUserQueryRepository;
+import top.fblue.watermelon.infrastructure.converter.SsoUserPOConverter;
 import top.fblue.watermelon.infrastructure.mapper.UserMapper;
 import top.fblue.watermelon.infrastructure.po.UserPO;
 
@@ -20,18 +21,21 @@ public class SsoUserQueryRepositoryImpl implements SsoUserQueryRepository {
     /** 用户数据访问 Mapper，仅查询 SSO 所需字段。 */
     private final UserMapper userMapper;
 
+    /** 用户持久化对象与 SSO 用户对象转换器。 */
+    private final SsoUserPOConverter userConverter;
+
     /**
      * 查询 SSO 所需的最小用户信息；用户不存在时返回 {@code null}。
+     *
+     * @param userId 用户 ID
+     * @return SSO 流程所需的最小用户信息；用户不存在时返回 {@code null}
      */
     @Override
     public User findById(Long userId) {
+        // 1. 查询 SSO 流程所需的最小用户字段
         UserPO userPO = userMapper.selectSsoUserById(userId);
-        if (userPO == null) {
-            return null;
-        }
-        return User.builder()
-                .id(userPO.getId())
-                .username(userPO.getName())
-                .build();
+
+        // 2. 转换为认证领域用户并返回
+        return userConverter.toSsoUser(userPO);
     }
 }

@@ -60,7 +60,11 @@ public class AuthProperties {
         /** 用户中心发送 Back-Channel sid 撤销通知时使用的 Dubbo 直连地址。 */
         private String dubboUrl;
 
-        /** 启用的 Client 必须同时配置回调白名单和退出通知地址。 */
+        /**
+         * 校验启用的 Client 是否同时配置回调白名单和退出通知地址。
+         *
+         * @return 配置是否完整
+         */
         @AssertTrue(message = "启用的 SSO Client 必须配置 redirectUris 和 dubboUrl")
         public boolean isEnabledConfigurationValid() {
             return !enabled || (redirectUris != null

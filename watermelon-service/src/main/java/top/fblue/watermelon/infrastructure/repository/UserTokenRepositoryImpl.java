@@ -1,9 +1,9 @@
 package top.fblue.watermelon.infrastructure.repository;
 
-import org.springframework.stereotype.Repository;
 import top.fblue.watermelon.domain.user.entity.UserToken;
 import top.fblue.watermelon.domain.user.repository.UserTokenRepository;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -20,10 +20,22 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
      */
     private static final int TOKEN_EXPIRE_DAY = 7;
 
+    /** Water 提供的应用统一时钟。 */
+    private final Clock clock;
+
     /**
      * Token存储：token -> UserToken
      */
     private final Map<String, UserToken> TOKEN_STORE = new ConcurrentHashMap<>();
+
+    /**
+     * 创建基于内存的 Token 仓储。
+     *
+     * @param clock 应用统一时钟
+     */
+    public UserTokenRepositoryImpl(Clock clock) {
+        this.clock = clock;
+    }
 
     /**
      * 创建Token
@@ -33,15 +45,16 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
         // 生成唯一token
         String token = UUID.randomUUID().toString();
 
-        // 计算过期时间
-        LocalDateTime expireTime = LocalDateTime.now().plusDays(TOKEN_EXPIRE_DAY);
+        // 计算创建时间和过期时间
+        LocalDateTime createdTime = LocalDateTime.now(clock);
+        LocalDateTime expireTime = createdTime.plusDays(TOKEN_EXPIRE_DAY);
 
         // 创建UserToken实体
         UserToken userToken = UserToken.builder()
                 .userId(userId)
                 .token(token)
                 .expireTime(expireTime)
-                .createdTime(LocalDateTime.now())
+                .createdTime(createdTime)
                 .build();
 
         // 存储token
@@ -67,7 +80,7 @@ public class UserTokenRepositoryImpl implements UserTokenRepository {
 
     @Override
     public void deleteExpiredTokens() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
 
         // 遍历所有token，删除过期的
         TOKEN_STORE.entrySet().removeIf(entry -> {

@@ -59,6 +59,14 @@ public interface UserDomainService {
      * 获取用户关联的角色信息
      */
     List<Long> getUserRoles(Long userId);
+
+    /**
+     * 获取关联指定角色的用户 ID 列表。
+     *
+     * @param roleId 角色 ID
+     * @return 关联用户 ID 列表
+     */
+    List<Long> getUserIdsByRoleId(Long roleId);
     
     /**
      * 更新用户角色关系

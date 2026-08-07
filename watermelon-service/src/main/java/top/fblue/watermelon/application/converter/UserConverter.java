@@ -1,6 +1,8 @@
 package top.fblue.watermelon.application.converter;
 
 import org.springframework.stereotype.Component;
+import top.fblue.watermelon.auth.domain.permission.entity.PermissionResourceTypeEnum;
+import top.fblue.watermelon.auth.domain.permission.entity.PermissionSnapshot;
 import top.fblue.watermelon.application.dto.CreateUserDTO;
 import top.fblue.watermelon.application.dto.UpdateUserDTO;
 import top.fblue.watermelon.application.vo.CurrentUserVO;
@@ -9,9 +11,7 @@ import top.fblue.watermelon.application.vo.UserBaseVO;
 import top.fblue.watermelon.application.vo.RoleInfoVO;
 import top.fblue.watermelon.common.dto.UserTokenDTO;
 import top.fblue.watermelon.common.enums.StateEnum;
-import top.fblue.watermelon.common.enums.ResourceTypeEnum;
 import top.fblue.watermelon.common.utils.StringUtil;
-import top.fblue.watermelon.domain.resource.entity.ResourceNode;
 import top.fblue.watermelon.domain.user.entity.User;
 import top.fblue.watermelon.domain.role.entity.Role;
 import top.fblue.watermelon.common.utils.DateTimeUtil;
@@ -30,7 +30,10 @@ import java.util.stream.Collectors;
 public class UserConverter {
 
     /**
-     * User转换为UserVO
+     * 将用户领域实体转换为用户视图。
+     *
+     * @param user 用户领域实体
+     * @return 用户视图；用户为空时返回 {@code null}
      */
     public UserVO toVO(User user) {
         if (user == null) {
@@ -157,27 +160,29 @@ public class UserConverter {
     }
 
     /**
-     * User转换为UserVO
+     * 将用户、令牌和权限快照转换为当前用户前端视图。
+     *
+     * <p>只输出页面和按钮权限，接口权限仅供后端鉴权使用。</p>
+     *
+     * @param user 用户领域实体
+     * @param userToken 当前登录令牌信息
+     * @param permissionSnapshot 当前系统权限快照
+     * @return 当前用户前端视图；用户为空时返回 {@code null}
      */
-    public CurrentUserVO toVO(User user, UserTokenDTO userToken, List<ResourceNode> resourcesList, String codePrefix) {
+    public CurrentUserVO toVO(User user,
+                              UserTokenDTO userToken,
+                              PermissionSnapshot permissionSnapshot) {
         if (user == null) {
             return null;
         }
-        // 处理资源列表，分离页面和按钮，并删除code的系统前缀
-        List<String> pageCodeList = new ArrayList<>();
-        List<String> buttonCodeList = new ArrayList<>();
 
-        codePrefix += ":";
-        for (ResourceNode resource : resourcesList) {
-            // 删除 "watermelon:" 前缀
-            String codeWithoutPrefix = resource.getCode().substring(codePrefix.length());
-            if (ResourceTypeEnum.PAGE.getCode().equals(resource.getType())) {
-                pageCodeList.add(codeWithoutPrefix);
-            } else if (ResourceTypeEnum.BUTTON.getCode().equals(resource.getType())) {
-                buttonCodeList.add(codeWithoutPrefix);
-            }
-        }
+        // 1. 删除页面和按钮权限编码中的系统前缀
+        List<String> pageCodeList = removeSystemPrefix(
+                permissionSnapshot.codesOfType(PermissionResourceTypeEnum.PAGE), permissionSnapshot.systemCode());
+        List<String> buttonCodeList = removeSystemPrefix(
+                permissionSnapshot.codesOfType(PermissionResourceTypeEnum.BUTTON), permissionSnapshot.systemCode());
 
+        // 2. 组装当前用户前端视图；接口权限不进入前端响应
         return CurrentUserVO.builder()
                 .id(user.getId())
                 .name(user.getUsername())
@@ -190,6 +195,23 @@ public class UserConverter {
                 .pageCodeList(pageCodeList)
                 .buttonCodeList(buttonCodeList)
                 .build();
+    }
+
+    /**
+     * 删除权限编码中的系统前缀。
+     *
+     * @param resourceCodes 完整资源编码列表
+     * @param systemCode 系统编码
+     * @return 供当前系统前端使用的资源编码列表
+     */
+    private List<String> removeSystemPrefix(List<String> resourceCodes, String systemCode) {
+        if (resourceCodes == null || resourceCodes.isEmpty()) {
+            return List.of();
+        }
+        String prefix = systemCode + ":";
+        return resourceCodes.stream()
+                .map(code -> code.startsWith(prefix) ? code.substring(prefix.length()) : code)
+                .toList();
     }
 
     /**

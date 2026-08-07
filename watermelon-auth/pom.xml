@@ -45,6 +45,18 @@
             <version>${revision}</version>
         </dependency>
 
+        <!-- 权限变更事务发件箱 Mapper API；数据源和 MyBatis Starter 由宿主 service 提供 -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.19</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-annotation</artifactId>
+            <version>3.5.12</version>
+        </dependency>
+
         <!-- 配置处理器 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -82,6 +94,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- 测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

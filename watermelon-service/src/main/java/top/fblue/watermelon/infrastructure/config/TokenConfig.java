@@ -8,6 +8,8 @@ import top.fblue.watermelon.domain.user.repository.UserTokenRepository;
 import top.fblue.watermelon.infrastructure.repository.UserTokenJwtRepositoryImpl;
 import top.fblue.watermelon.infrastructure.repository.UserTokenRepositoryImpl;
 
+import java.time.Clock;
+
 /**
  * Token配置类
  * 用于配置Token存储的实现方式
@@ -23,11 +25,11 @@ public class TokenConfig {
      */
     @Bean
     @Primary
-    public UserTokenRepository userTokenRepository() {
-        if (jwtConfig.getEnable()){
+    public UserTokenRepository userTokenRepository(Clock clock) {
+        if (jwtConfig.getEnable()) {
             return new UserTokenJwtRepositoryImpl();
-        }else {
-            return new UserTokenRepositoryImpl();
+        } else {
+            return new UserTokenRepositoryImpl(clock);
         }
     }
 }
